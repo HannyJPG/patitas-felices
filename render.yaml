@@ -8,9 +8,9 @@ services:
       - key: DB_ENGINE
         value: supabase
       - key: SUPABASE_URL
-        sync: false
+        value: https://etwlgvktddbyofemempc.supabase.co
       - key: SUPABASE_KEY
-        sync: false
+        value: sb_publishable__lybCa5oWb5oN4eH0OfscA_-ifEhcyt
       - key: JWT_SECRET
         generateValue: true
       - key: CLINICA_WHATSAPP

@@ -16,6 +16,15 @@ import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 import httpx
 
+# Cargar automáticamente variables de entorno desde .env si existe
+_env_file = Path(__file__).resolve().parent.parent.parent / ".env"
+if _env_file.is_file():
+    for _line in _env_file.read_text(encoding="utf-8").splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith("#") and "=" in _line:
+            _k, _v = _line.split("=", 1)
+            os.environ.setdefault(_k.strip(), _v.strip())
+
 
 # =============================================================================
 # 0. UTILIDADES CRIPTOGRÁFICAS DE CONTRASEÑAS (PBKDF2-HMAC-SHA256)
@@ -327,14 +336,21 @@ class SQLiteDatabaseAdapter(IDatabaseAdapter):
 
             cur.execute("SELECT COUNT(*) AS total FROM usuarios")
             if cur.fetchone()["total"] == 0:
-                cur.executemany(
-                    "INSERT INTO usuarios (nombre, email, password_hash, rol, estado, telefono) VALUES (?, ?, ?, ?, ?, ?)",
+                usuarios_iniciales = (
                     [
                         ("Dra. Melany Díaz (Admin)", "admin@patitasfelices.pe", hashear_password("admin123"), "admin", "activo", "990853697"),
                         ("Dr. Carlos Mendoza (Doctor)", "doctor@patitasfelices.pe", hashear_password("doctor123"), "doctor", "activo", "987654321"),
                         ("Lucía Fernández (Cliente)", "cliente@patitasfelices.pe", hashear_password("cliente123"), "cliente", "activo", "912345678"),
                         ("Usuario Suspendido (Prueba Proxy)", "inactivo@patitasfelices.pe", hashear_password("inactivo123"), "cliente", "inactivo", "900000000"),
-                    ],
+                    ]
+                    if self.db_path == ":memory:"
+                    else [
+                        ("Dra. Melany Díaz (Admin)", "admin@patitasfelices.pe", hashear_password("admin123"), "admin", "activo", "990853697"),
+                    ]
+                )
+                cur.executemany(
+                    "INSERT INTO usuarios (nombre, email, password_hash, rol, estado, telefono) VALUES (?, ?, ?, ?, ?, ?)",
+                    usuarios_iniciales,
                 )
                 cur.executemany(
                     "INSERT INTO Dueno (dni, correo, nombres, apellidos, telefono) VALUES (?, ?, ?, ?, ?)",

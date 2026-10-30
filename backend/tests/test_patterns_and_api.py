@@ -740,3 +740,30 @@ def test_catalogo_productos_y_crm_finanzas_estructurados(client: TestClient) -> 
     assert len(crm["ultimas_ventas"]) >= 1
 
 
+def test_usuarios_eliminados_no_inician_sesion_en_bd_sincronizada() -> None:
+    """Verifica que en la base de datos sincronizada (Supabase / SQLite en disco) los usuarios eliminados no puedan iniciar sesión."""
+    db_real = SQLiteDatabaseAdapter()
+    app = crear_app(db_adapter=db_real)
+    client_real = TestClient(app)
+
+    # Admin existente sí puede iniciar sesión
+    res_admin = client_real.post(
+        "/api/auth/login",
+        json={"email": "admin@patitasfelices.pe", "password": "admin123"},
+    )
+    assert res_admin.status_code == 200
+
+    # Doctor y Cliente eliminados de Supabase deben recibir 401 Unauthorized
+    for email_eliminado, pass_eliminado in (
+        ("doctor@patitasfelices.pe", "doctor123"),
+        ("cliente@patitasfelices.pe", "cliente123"),
+        ("inactivo@patitasfelices.pe", "inactivo123"),
+    ):
+        res = client_real.post(
+            "/api/auth/login",
+            json={"email": email_eliminado, "password": pass_eliminado},
+        )
+        assert res.status_code == 401
+
+
+
