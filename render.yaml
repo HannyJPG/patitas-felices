@@ -6,7 +6,11 @@ services:
     autoDeploy: true
     envVars:
       - key: DB_ENGINE
-        value: sqlite
+        value: supabase
+      - key: SUPABASE_URL
+        value: https://etwlgvktddbyofemempc.supabase.co
+      - key: SUPABASE_KEY
+        value: sb_publishable__lybCa5oWb5oN4eH0OfscA_-ifEhcyt
       - key: JWT_SECRET
         value: patitas-felices-clave-secreta-2026
       - key: CLINICA_WHATSAPP
