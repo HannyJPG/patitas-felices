@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSubmit = document.getElementById("btn-modal-submit");
     const spinnerSubmit = document.getElementById("spinner-modal-login");
     const textoSubmit = document.getElementById("texto-modal-submit");
-    const demoBotones = document.querySelectorAll("#modal-botones-demo [data-demo-email]");
 
     // Referencias de Registro
     const formRegistro = document.getElementById("form-modal-registro");
@@ -208,18 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
             panelRecordarAyuda.classList.toggle("d-none");
         });
     }
-
-    // Botones demo para rellenar credenciales con 1 clic
-    demoBotones.forEach(boton => {
-        boton.addEventListener("click", () => {
-            const email = boton.getAttribute("data-demo-email");
-            const pass = boton.getAttribute("data-demo-pass");
-            if (inputEmail && email) inputEmail.value = email;
-            if (inputPassword && pass) inputPassword.value = pass;
-            if (alertError) alertError.classList.add("d-none");
-            if (inputPassword) inputPassword.focus();
-        });
-    });
 
     // Envío del formulario de autenticación
     if (formLogin) {
