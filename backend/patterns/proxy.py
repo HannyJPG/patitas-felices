@@ -202,6 +202,10 @@ class RealClinicController(ISecureController):
                     "es_demostracion": True,
                 },
             ]
+            ventas_mostradas = ventas if ventas else ventas_referencia_demo
+            ingresos_mostrados = round(sum(float(v["total"]) for v in ventas_mostradas), 2)
+            total_tx = len(ventas_mostradas)
+            ticket_promedio = round(ingresos_mostrados / total_tx, 2) if total_tx > 0 else 0.0
             return {
                 "resumen": {
                     "total_usuarios": len(usuarios),
@@ -213,6 +217,15 @@ class RealClinicController(ISecureController):
                     "ingresos_totales": ingresos_totales,
                     "stock_total_unidades": sum(int(p["stock"]) for p in productos),
                 },
+                "balance_financiero": {
+                    "ingresos_totales": ingresos_mostrados,
+                    "ingresos_reales": ingresos_totales,
+                    "total_transacciones": total_tx,
+                    "ventas_reales": len(ventas),
+                    "ticket_promedio": ticket_promedio,
+                    "modo_demostracion": len(ventas) == 0,
+                },
+                "ultimas_ventas": ventas_mostradas,
                 "usuarios": usuarios,
                 "mascotas": mascotas,
                 "ventas": ventas,

@@ -33,6 +33,10 @@ class SubsistemaInventario:
     def __init__(self, db_adapter: IDatabaseAdapter) -> None:
         self.db = db_adapter
 
+    def listar_productos_activos(self) -> List[Dict[str, Any]]:
+        """Retorna el catálogo de productos e insumos activos con stock en tiempo real."""
+        return self.db.listar_productos(solo_activos=True)
+
     def validar_y_preparar_items(self, items_solicitados: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         if not items_solicitados:
             raise ErrorProcesoVenta("El carrito de compras está vacío.")
@@ -254,6 +258,10 @@ class TiendaFacade:
         self.crm = SubsistemaCRMTransacciones(db_adapter)
         self.pdf_generator = SubsistemaGeneradorPDF()
         self.whatsapp = whatsapp_adapter or WhatsAppAdapter()
+
+    def obtener_catalogo_activo(self) -> List[Dict[str, Any]]:
+        """Consulta el catálogo activo de farmacia y tienda a través del subsistema de inventario."""
+        return self.inventario.listar_productos_activos()
 
     def procesar_venta(
         self,

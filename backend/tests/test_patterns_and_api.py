@@ -712,3 +712,31 @@ def test_supabase_adapter_fallback_sin_variables_no_da_error_500() -> None:
     assert res_login.status_code == 200
     assert res_login.json()["usuario"]["rol"] == "admin"
 
+
+def test_catalogo_productos_y_crm_finanzas_estructurados(client: TestClient) -> None:
+    """Verifica que /api/productos no lance HTTP 500 y que /api/admin/crm incluya balance_financiero y ultimas_ventas."""
+    # 1. Catálogo de Farmacia e Insumos (/api/productos)
+    res_prod = client.get("/api/productos")
+    assert res_prod.status_code == 200
+    datos_prod = res_prod.json()
+    assert datos_prod["total"] >= 6
+    assert len(datos_prod["productos"]) == datos_prod["total"]
+    assert all(p.get("activo", 1) == 1 for p in datos_prod["productos"])
+
+    # 2. CRM y Finanzas (/api/admin/crm)
+    res_login = client.post(
+        "/api/auth/login",
+        json={"email": "admin@patitasfelices.pe", "password": "admin123"},
+    )
+    token_admin = res_login.json()["token"]
+    res_crm = client.get("/api/admin/crm", headers={"Authorization": f"Bearer {token_admin}"})
+    assert res_crm.status_code == 200
+    crm = res_crm.json()
+    assert "balance_financiero" in crm
+    assert "ultimas_ventas" in crm
+    assert crm["balance_financiero"]["total_transacciones"] >= 1
+    assert crm["balance_financiero"]["ingresos_totales"] > 0
+    assert crm["balance_financiero"]["ticket_promedio"] > 0
+    assert len(crm["ultimas_ventas"]) >= 1
+
+

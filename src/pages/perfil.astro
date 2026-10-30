@@ -433,9 +433,14 @@ import Layout from "../layouts/Layout.astro";
              8. PANEL: CRM Y FINANZAS (Admin)
              =================================================================== -->
         <article id="panel-crm" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
-          <div class="border-bottom pb-2 mb-3">
-            <h2 class="h5 fw-bold mb-0 text-dark">Métricas Financieras y CRM</h2>
-            <small class="text-muted">Control de ventas totales y facturación de la clínica.</small>
+          <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Métricas Financieras y CRM</h2>
+              <small class="text-muted">Control de ventas totales, pacientes, citas y facturación de la clínica.</small>
+            </div>
+            <a href="/admin-app" class="btn btn-outline-primary btn-sm">
+              Abrir Reportes y Excel (/admin-app) ↗
+            </a>
           </div>
           <div id="contenedor-crm-admin">
             <p class="small text-muted mb-0">Cargando métricas...</p>

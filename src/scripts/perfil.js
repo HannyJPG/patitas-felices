@@ -869,28 +869,58 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
 
         try {
             const data = await peticionApi("/api/admin/crm");
-            const balance = data.balance_financiero || {};
-            const ultimas = Array.isArray(data.ultimas_ventas) ? data.ultimas_ventas : [];
+            const resumen = data.resumen || {};
+            const ventasReales = Array.isArray(data.ventas) ? data.ventas : [];
+            const ventasDemo = Array.isArray(data.ventas_referencia_demo) ? data.ventas_referencia_demo : [];
+            const ultimas = Array.isArray(data.ultimas_ventas) && data.ultimas_ventas.length > 0
+                ? data.ultimas_ventas
+                : (ventasReales.length > 0 ? ventasReales : ventasDemo);
+
+            const ingresosCalc = ultimas.reduce((acc, v) => acc + parseFloat(v.total || 0), 0);
+            const balance = data.balance_financiero || {
+                ingresos_totales: resumen.ingresos_totales || ingresosCalc,
+                total_transacciones: resumen.total_ventas || ultimas.length,
+                ticket_promedio: ultimas.length > 0 ? (ingresosCalc / ultimas.length) : 0,
+                modo_demostracion: ventasReales.length === 0 && ventasDemo.length > 0,
+            };
 
             const metricsWrap = document.createElement("div");
             metricsWrap.className = "row g-3 mb-4";
             metricsWrap.innerHTML = `
-                <div class="col-12 col-sm-4">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted d-block">Ingresos Totales</small>
-                        <h3 class="h4 fw-bold text-dark mb-0">S/ ${(balance.ingresos_totales || 0).toFixed(2)}</h3>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <small class="text-muted d-block">Ingresos Totales ${balance.modo_demostracion ? '<span class="badge bg-secondary-subtle text-secondary border ms-1">Ref.</span>' : ''}</small>
+                        <h3 class="h4 fw-bold text-dark mb-0">S/ ${parseFloat(balance.ingresos_totales || 0).toFixed(2)}</h3>
                     </div>
                 </div>
-                <div class="col-12 col-sm-4">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted d-block">Ventas Realizadas</small>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <small class="text-muted d-block">Ventas Registradas</small>
                         <h3 class="h4 fw-bold text-dark mb-0">${balance.total_transacciones || 0}</h3>
                     </div>
                 </div>
-                <div class="col-12 col-sm-4">
-                    <div class="p-3 border rounded bg-light">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="p-3 border rounded bg-light h-100">
                         <small class="text-muted d-block">Ticket Promedio</small>
-                        <h3 class="h4 fw-bold text-dark mb-0">S/ ${(balance.ticket_promedio || 0).toFixed(2)}</h3>
+                        <h3 class="h4 fw-bold text-dark mb-0">S/ ${parseFloat(balance.ticket_promedio || 0).toFixed(2)}</h3>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="p-3 border rounded bg-white h-100">
+                        <small class="text-muted d-block">Pacientes y Mascotas</small>
+                        <h3 class="h5 fw-bold text-dark mb-0">${resumen.total_pacientes ?? 0} registrados</h3>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="p-3 border rounded bg-white h-100">
+                        <small class="text-muted d-block">Citas Clínicas</small>
+                        <h3 class="h5 fw-bold text-dark mb-0">${resumen.total_citas ?? 0} <span class="small fw-normal text-muted">(${resumen.citas_pendientes ?? 0} pend.)</span></h3>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="p-3 border rounded bg-white h-100">
+                        <small class="text-muted d-block">Stock Farmacia</small>
+                        <h3 class="h5 fw-bold text-dark mb-0">${resumen.stock_total_unidades ?? 0} unid.</h3>
                     </div>
                 </div>
             `;
@@ -899,20 +929,22 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
 
             const h4 = document.createElement("h4");
             h4.className = "h6 fw-bold mb-2 text-dark";
-            h4.textContent = "Últimas transacciones comerciales";
+            h4.textContent = "Últimas transacciones comerciales y boletas";
             contenedorCrmAdmin.append(h4);
 
             const tableWrap = document.createElement("div");
-            tableWrap.className = "table-responsive";
+            tableWrap.className = "table-responsive mb-4";
             tableWrap.innerHTML = `
                 <table class="table table-hover align-middle small mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>N° Boleta</th>
                             <th>Cliente</th>
+                            <th>Concepto / Detalle</th>
                             <th>Documento</th>
-                            <th>Total</th>
                             <th>Medio de Pago</th>
+                            <th>Total</th>
+                            <th>Comprobante</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-crm-ventas"></tbody>
@@ -921,16 +953,74 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
             const tbody = tableWrap.querySelector("#tbody-crm-ventas");
             for (const v of ultimas) {
                 const tr = document.createElement("tr");
+                const detalleTexto = v.concepto
+                    || (Array.isArray(v.detalles) && v.detalles.length
+                        ? v.detalles.map(d => `${d.cantidad}x ${d.producto_nombre}`).join(", ")
+                        : "Venta de farmacia / tienda");
+                const esDemo = Boolean(v.es_demostracion);
                 tr.innerHTML = `
                     <td><strong>${v.numero_boleta}</strong></td>
                     <td>${v.cliente_nombre}</td>
-                    <td>${v.cliente_documento}</td>
-                    <td><strong>S/ ${parseFloat(v.total).toFixed(2)}</strong></td>
-                    <td><span class="badge bg-light text-dark border">${v.metodo_pago}</span></td>
+                    <td class="text-secondary">${detalleTexto}</td>
+                    <td><code>${v.cliente_documento || "-"}</code></td>
+                    <td><span class="badge bg-light text-dark border">${v.metodo_pago || "Yape / Tarjeta"}</span></td>
+                    <td><strong>S/ ${parseFloat(v.total || 0).toFixed(2)}</strong></td>
+                    <td>
+                        ${esDemo
+                            ? `<span class="badge bg-secondary-subtle text-secondary border">Referencia</span>`
+                            : `<a href="/api/tienda/boleta/${v.id}/pdf" target="_blank" class="btn btn-outline-success btn-sm py-0 px-2" style="font-size: 0.72rem;">PDF</a>`
+                        }
+                    </td>
                 `;
                 tbody.append(tr);
             }
             contenedorCrmAdmin.append(tableWrap);
+
+            // Resumen rápido de citas clínicas en el CRM
+            const citasCrm = Array.isArray(data.citas) ? data.citas.slice(0, 6) : [];
+            if (citasCrm.length > 0) {
+                const h4Citas = document.createElement("h4");
+                h4Citas.className = "h6 fw-bold mb-2 text-dark";
+                h4Citas.textContent = "Seguimiento CRM de citas médicas recientes";
+                contenedorCrmAdmin.append(h4Citas);
+
+                const citasWrap = document.createElement("div");
+                citasWrap.className = "table-responsive";
+                citasWrap.innerHTML = `
+                    <table class="table table-hover align-middle small mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Propietario</th>
+                                <th>Servicio</th>
+                                <th>Fecha y Hora</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-crm-citas"></tbody>
+                    </table>
+                `;
+                const tbodyCitas = citasWrap.querySelector("#tbody-crm-citas");
+                for (const c of citasCrm) {
+                    const badgeEstado = c.estado === "atendida"
+                        ? "bg-success"
+                        : c.estado === "confirmada"
+                            ? "bg-primary"
+                            : c.estado === "cancelada"
+                                ? "bg-danger"
+                                : "bg-warning text-dark";
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td><strong>${c.mascota_nombre}</strong></td>
+                        <td>${c.propietario} <small class="text-muted">(${c.telefono || "-"})</small></td>
+                        <td>${c.servicio}</td>
+                        <td>${c.fecha} · ${c.hora}</td>
+                        <td><span class="badge ${badgeEstado}">${(c.estado || "pendiente").toUpperCase()}</span></td>
+                    `;
+                    tbodyCitas.append(tr);
+                }
+                contenedorCrmAdmin.append(citasWrap);
+            }
         } catch (err) {
             contenedorCrmAdmin.innerHTML = `<p class="small text-danger mb-0">Error: ${err.message}</p>`;
         }
@@ -1039,7 +1129,7 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
         alertaAltaPersonal?.classList.add("d-none");
 
         const nombre = document.getElementById("personal-input-nombre").value.trim();
-        const email = document.getElementById("personal-input-email").value.trim().lower();
+        const email = document.getElementById("personal-input-email").value.trim().toLowerCase();
         const rol = document.getElementById("personal-input-rol").value;
         const cmvp = document.getElementById("personal-input-cmvp").value.trim();
         const especialidad = document.getElementById("personal-input-especialidad").value.trim();

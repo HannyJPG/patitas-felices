@@ -3,45 +3,7 @@
    Comparte autenticación y servicios con el backend existente sin duplicar usuarios.
    ========================================================================== */
 
-const STORAGE_KEY_SESION = "patitas_sesion_rbac_v2";
-const API_BASE_URL =
-    typeof window !== "undefined" && !["4321", "4322"].includes(window.location.port) && window.location.origin.startsWith("http")
-        ? window.location.origin
-        : "http://127.0.0.1:8000";
-
-function obtenerSesion() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY_SESION);
-        return raw ? JSON.parse(raw) : null;
-    } catch {
-        return null;
-    }
-}
-
-function guardarSesion(datos) {
-    try {
-        localStorage.setItem(STORAGE_KEY_SESION, JSON.stringify(datos));
-    } catch {
-        /* Ignorar */
-    }
-}
-
-async function peticionApi(ruta, opciones = {}) {
-    const sesion = obtenerSesion();
-    const cabeceras = {
-        "Content-Type": "application/json",
-        ...(opciones.headers || {})
-    };
-    if (sesion?.token && !cabeceras.Authorization) {
-        cabeceras.Authorization = `Bearer ${sesion.token}`;
-    }
-    const res = await fetch(`${API_BASE_URL}${ruta}`, { ...opciones, headers: cabeceras });
-    const cuerpo = await res.json().catch(() => null);
-    if (!res.ok) {
-        throw new Error(cuerpo?.detail || `Error HTTP ${res.status}`);
-    }
-    return cuerpo;
-}
+import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-client.js";
 
 (() => {
     const estadoConexion = document.getElementById("admin-estado-conexion");
@@ -623,7 +585,7 @@ async function peticionApi(ruta, opciones = {}) {
     async function asegurarSesionAdmin() {
         const sesion = obtenerSesion();
         if (sesion?.token && sesion?.usuario?.rol && sesion.usuario.rol !== "admin") {
-            const rutaRol = sesion.usuario.rol === "doctor" ? "/doctor" : "/cliente";
+            const rutaRol = "/perfil";
             estadoConexion.textContent = `Acceso reservado para administración. Redirigiendo a tu espacio (${rutaRol})...`;
             setTimeout(() => {
                 window.location.href = rutaRol;
