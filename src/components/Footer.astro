@@ -5,31 +5,29 @@ const anio = new Intl.DateTimeFormat("es-PE", { timeZone: "America/Lima", year: 
 ---
 <footer class="site-footer">
   <div class="container">
-    <div class="footer-compact-wrap d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 py-3">
+    <div class="footer-compact-wrap py-4 text-center">
       
-      <!-- Marca y contacto directo -->
-      <div class="footer-brand-compact d-flex align-items-center gap-2">
-        <span class="footer-brand-name">Patitas Felices</span>
-        <span class="text-white-50">·</span>
-        <a class="footer-phone-compact" href={enlaceWhatsApp()} target="_blank" rel="noopener noreferrer" aria-label="Contacto WhatsApp de la clínica">
-          <span>{clinica.telefonoVisible}</span>
+      <!-- Marca y Frase que cautiva al cliente -->
+      <div class="footer-brand-block mb-3">
+        <h3 class="footer-brand-name mb-1">Patitas Felices</h3>
+        <p class="footer-slogan text-white-50 mb-0">
+          «Cuidamos su salud y bienestar con la ternura y dedicación que tu familia merece.»
+        </p>
+      </div>
+      <!-- Botón ¡Contáctanos aquí! por encima de los derechos reservados -->
+      <div class="footer-contact-above mb-3">
+        <a class="btn btn-footer-contact" href={enlaceWhatsApp()} target="_blank" rel="noopener noreferrer" aria-label="Contáctanos por WhatsApp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="me-1" aria-hidden="true">
+            <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/>
+          </svg>
+          <span>¡Contáctanos aquí!</span>
           <span aria-hidden="true">↗</span>
         </a>
       </div>
 
-      <!-- Navegación limpia y directa -->
-      <nav class="footer-nav-compact d-flex flex-wrap align-items-center justify-content-center gap-3" aria-label="Navegación del pie de página">
-        <a href="/">Inicio</a>
-        <a href="/#servicios">Servicios</a>
-        <a href="/#sedes">Sedes</a>
-        <a href="/tienda">Tienda</a>
-        <a href="#modalAgendarCita" data-abrir-modal-cita>Agendar cita</a>
-        <a href="/perfil">Mi Perfil</a>
-      </nav>
-
-      <!-- Copyright discreto -->
-      <div class="footer-copy-compact text-center text-md-end text-white-50 small">
-        &copy; {anio} Patitas Felices. Todos los derechos reservados.
+      <!-- Derechos reservados -->
+      <div class="footer-copy-compact text-white-50 small border-top pt-3">
+        &copy; {anio} Clínica Veterinaria Patitas Felices S.A.C. Todos los derechos reservados.
       </div>
 
     </div>

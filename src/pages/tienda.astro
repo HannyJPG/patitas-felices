@@ -87,13 +87,13 @@ const catalogoInicial = [
         </div>
 
         <!-- Rejilla de productos con sus imágenes individuales -->
-        <div id="grid-productos" class="row g-3">
+        <div id="grid-productos" class="row row-cols-2 row-cols-md-2 g-2 g-md-3">
           {catalogoInicial.map(prod => (
-            <div class="col-12 col-md-6" data-producto-card={prod.id}>
+            <div class="col product-grid-col" data-producto-card={prod.id}>
               <article class="product-card h-100 d-flex flex-column">
                 
                 <!-- Caja de imagen con marco simple -->
-                <div class="product-image-box position-relative overflow-hidden mb-3">
+                <div class="product-image-box position-relative overflow-hidden mb-2 mb-md-3">
                   <img 
                     src={prod.imagen} 
                     alt={prod.nombre} 
@@ -108,14 +108,14 @@ const catalogoInicial = [
 
                 <!-- Detalle del producto -->
                 <div class="product-info-body d-flex flex-column flex-grow-1">
-                  <span class="product-code small text-muted mb-1">{prod.codigo}</span>
-                  <h3 class="product-title h6 fw-bold mb-1">{prod.nombre}</h3>
-                  <p class="product-desc small text-muted mb-3 flex-grow-1">{prod.descripcion}</p>
+                  <span class="product-code small text-muted mb-1 d-none d-sm-block">{prod.codigo}</span>
+                  <h3 class="product-title fw-bold mb-1">{prod.nombre}</h3>
+                  <p class="product-desc small text-muted mb-2 flex-grow-1 d-none d-md-block">{prod.descripcion}</p>
 
                   <!-- Pie: Precio y Botón de añadir -->
-                  <div class="product-footer d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                  <div class="product-footer d-flex flex-wrap justify-content-between align-items-center pt-2 border-top mt-auto gap-1">
                     <div>
-                      <small class="text-muted d-block" style="font-size: 0.72rem;">PRECIO</small>
+                      <small class="text-muted d-none d-sm-block" style="font-size: 0.7rem;">PRECIO</small>
                       <strong class="product-price">S/ {prod.precio.toFixed(2)}</strong>
                     </div>
                     <button

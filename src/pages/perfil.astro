@@ -5,23 +5,22 @@ import Layout from "../layouts/Layout.astro";
   <main class="container section-spacing" id="contenido" tabindex="-1">
     
     <!-- Banner superior del Usuario -->
-    <section class="profile-banner mb-4 p-4 rounded border shadow-sm bg-white" aria-labelledby="perfil-usuario-nombre">
+    <section class="perfil-banner-card mb-4 p-3 p-md-4 rounded border shadow-sm" aria-labelledby="perfil-usuario-nombre">
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div class="d-flex align-items-center gap-3">
           <div 
             id="perfil-avatar" 
-            class="d-flex align-items-center justify-content-center text-white fw-bold rounded-circle shadow-sm"
-            style="width: 56px; height: 56px; font-size: 1.35rem; background-color: #E89B5B;"
+            class="perfil-avatar-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
           >
             PF
           </div>
-          <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-              <h1 id="perfil-usuario-nombre" class="h4 mb-0 fw-bold text-dark">Mi Perfil</h1>
-              <span id="perfil-usuario-rol" class="badge bg-light text-secondary border small">Cargando rol...</span>
-              <span id="perfil-usuario-estado" class="badge bg-success-subtle text-success border border-success-subtle small">Activo</span>
+          <div class="perfil-user-meta">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <h1 id="perfil-usuario-nombre" class="h4 mb-0 fw-bold perfil-title-text">Mi Perfil</h1>
+              <span id="perfil-usuario-rol" class="badge perfil-badge-role">Cargando rol...</span>
+              <span id="perfil-usuario-estado" class="badge perfil-badge-status">Activo</span>
             </div>
-            <p id="perfil-usuario-detalle" class="small text-muted mb-0">Cargando información de cuenta...</p>
+            <p id="perfil-usuario-detalle" class="small perfil-sub-text mb-0">Cargando información de cuenta...</p>
           </div>
         </div>
 
