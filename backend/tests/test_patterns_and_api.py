@@ -695,3 +695,20 @@ def test_seguridad_password_hashing_pbkdf2(db_memoria: SQLiteDatabaseAdapter) ->
     assert usuario_admin is not None
     assert str(usuario_admin["password_hash"]).startswith("pbkdf2_sha256$")
     assert usuario_admin["password_hash"] != "admin123"
+
+
+def test_supabase_adapter_fallback_sin_variables_no_da_error_500() -> None:
+    """Verifica que si DB_ENGINE=supabase pero faltan variables en la nube, hace fallback sin lanzar HTTP 500."""
+    from backend.patterns import SupabasePostgresAdapter
+
+    adaptador_sin_env = SupabasePostgresAdapter(supabase_url="", supabase_key="")
+    app = crear_app(db_adapter=adaptador_sin_env)
+    client = TestClient(app, raise_server_exceptions=False)
+
+    res_login = client.post(
+        "/api/auth/login",
+        json={"email": "admin@patitasfelices.pe", "password": "admin123"},
+    )
+    assert res_login.status_code == 200
+    assert res_login.json()["usuario"]["rol"] == "admin"
+

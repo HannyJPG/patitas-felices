@@ -984,8 +984,11 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
     _USER_CACHE_TTL = 30.0
 
     def __init__(self, supabase_url: Optional[str] = None, supabase_key: Optional[str] = None) -> None:
-        self.supabase_url = (supabase_url or os.getenv("SUPABASE_URL", "")).rstrip("/")
-        self.supabase_key = supabase_key or os.getenv("SUPABASE_KEY", "")
+        raw_url = supabase_url if supabase_url is not None else os.getenv("SUPABASE_URL", "")
+        raw_key = supabase_key if supabase_key is not None else os.getenv("SUPABASE_KEY", "")
+        self.supabase_url = raw_url.strip().strip('"').strip("'").rstrip("/")
+        self.supabase_key = raw_key.strip().strip('"').strip("'")
+        self._configurado = bool(self.supabase_url.startswith("http") and self.supabase_key)
         self.headers = {
             "apikey": self.supabase_key,
             "Authorization": f"Bearer {self.supabase_key}",
@@ -1025,17 +1028,25 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
         return user
 
     def obtener_usuario_por_email(self, email: str) -> Optional[Dict[str, Any]]:
-        resp = self._client.get(f"{self._url('usuarios')}?email=ilike.{email.strip()}&limit=1")
-        if resp.status_code == 200:
-            data = resp.json()
-            if data:
-                user = self._completar_documento_usuario(data[0])
-                if user.get("id"):
-                    self._user_cache[int(user["id"])] = (time.monotonic(), dict(user))
-                return user
-        return None
+        if not self._configurado:
+            return self._local_sqlite.obtener_usuario_por_email(email)
+        try:
+            resp = self._client.get(f"{self._url('usuarios')}?email=ilike.{email.strip()}&limit=1")
+            if resp.status_code == 200:
+                data = resp.json()
+                if data:
+                    user = self._completar_documento_usuario(data[0])
+                    if user.get("id"):
+                        self._user_cache[int(user["id"])] = (time.monotonic(), dict(user))
+                    return user
+                return None
+        except Exception:
+            pass
+        return self._local_sqlite.obtener_usuario_por_email(email)
 
     def crear_usuario(self, datos: Dict[str, Any]) -> Dict[str, Any]:
+        if not self._configurado:
+            return self._local_sqlite.crear_usuario(datos)
         payload = {
             "nombre": datos["nombre"].strip(),
             "email": datos["email"].strip().lower(),
@@ -1044,16 +1055,21 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             "estado": datos.get("estado", "activo"),
             "telefono": datos.get("telefono", "").strip(),
         }
-        resp = self._client.post(self._url("usuarios"), json=payload)
-        if resp.status_code in (200, 201):
-            data = resp.json()
-            creado = data[0] if isinstance(data, list) and data else payload
-            if creado.get("id"):
-                self._user_cache[int(creado["id"])] = (time.monotonic(), dict(creado))
-            return creado
+        try:
+            resp = self._client.post(self._url("usuarios"), json=payload)
+            if resp.status_code in (200, 201):
+                data = resp.json()
+                creado = data[0] if isinstance(data, list) and data else payload
+                if creado.get("id"):
+                    self._user_cache[int(creado["id"])] = (time.monotonic(), dict(creado))
+                return creado
+        except Exception:
+            return self._local_sqlite.crear_usuario(datos)
         raise RuntimeError(f"Error creando usuario en Supabase ({resp.status_code}): {resp.text}")
 
     def crear_doctor(self, datos: Dict[str, Any]) -> Dict[str, Any]:
+        if not self._configurado:
+            return self._local_sqlite.crear_doctor(datos)
         payload = {
             "usuario_id": datos.get("usuario_id"),
             "numero_colegiatura": datos.get("cmvp", "CMVP-00000"),
@@ -1063,27 +1079,36 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             "correo": datos.get("correo", datos.get("email", "")),
             "especialidad": datos.get("especialidad", "Medicina General"),
         }
-        resp = self._client.post(self._url("doctores"), json=payload)
-        if resp.status_code in (200, 201):
-            data = resp.json()
-            return data[0] if isinstance(data, list) and data else payload
+        try:
+            resp = self._client.post(self._url("doctores"), json=payload)
+            if resp.status_code in (200, 201):
+                data = resp.json()
+                return data[0] if isinstance(data, list) and data else payload
+        except Exception:
+            pass
         return payload
 
     def obtener_usuario_por_id(self, usuario_id: int) -> Optional[Dict[str, Any]]:
+        if not self._configurado:
+            return self._local_sqlite.obtener_usuario_por_id(usuario_id)
         uid = int(usuario_id)
         ahora = time.monotonic()
         en_cache = self._user_cache.get(uid)
         if en_cache and (ahora - en_cache[0]) < self._USER_CACHE_TTL:
             return dict(en_cache[1])
 
-        resp = self._client.get(f"{self._url('usuarios')}?id=eq.{uid}&limit=1")
-        if resp.status_code == 200:
-            data = resp.json()
-            if data:
-                user = self._completar_documento_usuario(data[0])
-                self._user_cache[uid] = (ahora, dict(user))
-                return user
-        return None
+        try:
+            resp = self._client.get(f"{self._url('usuarios')}?id=eq.{uid}&limit=1")
+            if resp.status_code == 200:
+                data = resp.json()
+                if data:
+                    user = self._completar_documento_usuario(data[0])
+                    self._user_cache[uid] = (ahora, dict(user))
+                    return user
+                return None
+        except Exception:
+            pass
+        return self._local_sqlite.obtener_usuario_por_id(usuario_id)
 
     def actualizar_documento_usuario(self, usuario_id: int, tipo_documento: str, documento: str) -> Optional[Dict[str, Any]]:
         self._invalidar_cache_usuario(usuario_id)
@@ -1102,34 +1127,51 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
         return user
 
     def listar_usuarios(self) -> List[Dict[str, Any]]:
-        resp = self._client.get(
-            f"{self._url('usuarios')}?select=id,nombre,email,rol,estado,telefono,creado_en&order=id.asc"
-        )
-        if resp.status_code == 200:
-            return resp.json()
-        return []
+        if not self._configurado:
+            return self._local_sqlite.listar_usuarios()
+        try:
+            resp = self._client.get(
+                f"{self._url('usuarios')}?select=id,nombre,email,rol,estado,telefono,creado_en&order=id.asc"
+            )
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+        return self._local_sqlite.listar_usuarios()
 
     def actualizar_estado_usuario(self, usuario_id: int, nuevo_estado: str) -> Optional[Dict[str, Any]]:
         self._invalidar_cache_usuario(usuario_id)
-        resp = self._client.patch(
-            f"{self._url('usuarios')}?id=eq.{usuario_id}",
-            json={"estado": nuevo_estado},
-        )
-        if resp.status_code == 200:
-            data = resp.json()
-            return data[0] if data else None
-        return None
+        if not self._configurado:
+            return self._local_sqlite.actualizar_estado_usuario(usuario_id, nuevo_estado)
+        try:
+            resp = self._client.patch(
+                f"{self._url('usuarios')}?id=eq.{usuario_id}",
+                json={"estado": nuevo_estado},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return data[0] if data else None
+        except Exception:
+            pass
+        return self._local_sqlite.actualizar_estado_usuario(usuario_id, nuevo_estado)
 
     def listar_mascotas(self, usuario_id: Optional[int] = None) -> List[Dict[str, Any]]:
+        if not self._configurado:
+            return self._local_sqlite.listar_mascotas(usuario_id)
         query = f"{self._url('mascotas')}?select=*&order=id.asc"
         if usuario_id is not None:
             query += f"&usuario_id=eq.{usuario_id}"
-        resp = self._client.get(query)
-        if resp.status_code == 200:
-            return resp.json()
-        return []
+        try:
+            resp = self._client.get(query)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+        return self._local_sqlite.listar_mascotas(usuario_id)
 
     def crear_mascota(self, datos: Dict[str, Any]) -> Dict[str, Any]:
+        if not self._configurado:
+            return self._local_sqlite.crear_mascota(datos)
         payload = {
             "usuario_id": int(datos["usuario_id"]),
             "nombre": str(datos["nombre"]).strip(),
@@ -1139,20 +1181,30 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             "peso_kg": float(datos.get("peso_kg", 5.0)),
             "historial_resumen": str(datos.get("historial_resumen", "")).strip(),
         }
-        resp = self._client.post(self._url("mascotas"), json=payload)
-        if resp.status_code in (200, 201):
-            data = resp.json()
-            return data[0] if isinstance(data, list) and data else payload
+        try:
+            resp = self._client.post(self._url("mascotas"), json=payload)
+            if resp.status_code in (200, 201):
+                data = resp.json()
+                return data[0] if isinstance(data, list) and data else payload
+        except Exception:
+            return self._local_sqlite.crear_mascota(datos)
         raise RuntimeError(f"Error creando mascota en Supabase ({resp.status_code}): {resp.text}")
 
     def eliminar_mascota(self, mascota_id: int, usuario_id: Optional[int] = None) -> bool:
+        if not self._configurado:
+            return self._local_sqlite.eliminar_mascota(mascota_id, usuario_id)
         query = f"{self._url('mascotas')}?id=eq.{mascota_id}"
         if usuario_id is not None:
             query += f"&usuario_id=eq.{usuario_id}"
-        resp = self._client.delete(query)
-        return resp.status_code in (200, 204)
+        try:
+            resp = self._client.delete(query)
+            return resp.status_code in (200, 204)
+        except Exception:
+            return self._local_sqlite.eliminar_mascota(mascota_id, usuario_id)
 
     def obtener_disponibilidad_horarios(self, fecha: str) -> Dict[str, Any]:
+        if not self._configurado:
+            return self._local_sqlite.obtener_disponibilidad_horarios(fecha)
         horarios_posibles = ["08:30", "10:00", "11:30", "13:00", "15:30", "17:00", "18:30"]
         query = f"{self._url('citas')}?fecha=eq.{fecha}&estado=neq.cancelada&select=hora"
         conteo_por_hora: Dict[str, int] = {}
@@ -1180,6 +1232,8 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
         }
 
     def crear_cita(self, datos: Dict[str, Any]) -> Dict[str, Any]:
+        if not self._configurado:
+            return self._local_sqlite.crear_cita(datos)
         fecha = str(datos["fecha"]).strip()
         hora = str(datos["hora"]).strip()[:5]
 
@@ -1215,24 +1269,34 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             "tratamiento": datos.get("tratamiento", ""),
             "whatsapp_url": datos.get("whatsapp_url", ""),
         }
-        resp = self._client.post(self._url("citas"), json=payload)
-        if resp.status_code in (200, 201):
-            data = resp.json()
-            return data[0] if data else payload
+        try:
+            resp = self._client.post(self._url("citas"), json=payload)
+            if resp.status_code in (200, 201):
+                data = resp.json()
+                return data[0] if data else payload
+        except Exception:
+            return self._local_sqlite.crear_cita(datos)
         raise ValueError(f"No se pudo registrar la cita médica en la base de datos: {resp.text}")
 
     def listar_citas(self, usuario_id: Optional[int] = None) -> List[Dict[str, Any]]:
+        if not self._configurado:
+            return self._local_sqlite.listar_citas(usuario_id)
         query = f"{self._url('citas')}?select=*&order=fecha.asc,hora.asc"
         if usuario_id is not None:
             query += f"&usuario_id=eq.{usuario_id}"
-        resp = self._client.get(query)
-        if resp.status_code == 200:
-            return resp.json()
-        return []
+        try:
+            resp = self._client.get(query)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+        return self._local_sqlite.listar_citas(usuario_id)
 
     def actualizar_cita_doctor(
         self, cita_id: int, estado: str, diagnostico: str, tratamiento: str, doctor_id: Optional[int] = None
     ) -> Optional[Dict[str, Any]]:
+        if not self._configurado:
+            return self._local_sqlite.actualizar_cita_doctor(cita_id, estado, diagnostico, tratamiento, doctor_id)
         payload = {
             "estado": estado,
             "diagnostico": diagnostico,
@@ -1241,40 +1305,60 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
         if doctor_id is not None:
             payload["doctor_id"] = doctor_id
 
-        resp = self._client.patch(f"{self._url('citas')}?id=eq.{cita_id}", json=payload)
-        if resp.status_code == 200:
-            data = resp.json()
-            return data[0] if data else None
-        return None
+        try:
+            resp = self._client.patch(f"{self._url('citas')}?id=eq.{cita_id}", json=payload)
+            if resp.status_code == 200:
+                data = resp.json()
+                return data[0] if data else None
+        except Exception:
+            pass
+        return self._local_sqlite.actualizar_cita_doctor(cita_id, estado, diagnostico, tratamiento, doctor_id)
 
     def listar_productos(self, solo_activos: bool = True) -> List[Dict[str, Any]]:
+        if not self._configurado:
+            return self._local_sqlite.listar_productos(solo_activos)
         query = f"{self._url('productos')}?select=*&order=id.asc"
         if solo_activos:
             query += "&activo=eq.true"
-        resp = self._client.get(query)
-        if resp.status_code == 200:
-            return resp.json()
-        return []
+        try:
+            resp = self._client.get(query)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+        return self._local_sqlite.listar_productos(solo_activos)
 
     def obtener_producto(self, producto_id: int) -> Optional[Dict[str, Any]]:
-        resp = self._client.get(f"{self._url('productos')}?id=eq.{producto_id}&limit=1")
-        if resp.status_code == 200:
-            data = resp.json()
-            return data[0] if data else None
-        return None
+        if not self._configurado:
+            return self._local_sqlite.obtener_producto(producto_id)
+        try:
+            resp = self._client.get(f"{self._url('productos')}?id=eq.{producto_id}&limit=1")
+            if resp.status_code == 200:
+                data = resp.json()
+                return data[0] if data else None
+        except Exception:
+            pass
+        return self._local_sqlite.obtener_producto(producto_id)
 
     def descontar_stock_producto(self, producto_id: int, cantidad: int) -> bool:
+        if not self._configurado:
+            return self._local_sqlite.descontar_stock_producto(producto_id, cantidad)
         prod = self.obtener_producto(producto_id)
         if not prod or prod.get("stock", 0) < cantidad:
             return False
         nuevo_stock = prod["stock"] - cantidad
-        resp = self._client.patch(
-            f"{self._url('productos')}?id=eq.{producto_id}",
-            json={"stock": nuevo_stock},
-        )
-        return resp.status_code == 200
+        try:
+            resp = self._client.patch(
+                f"{self._url('productos')}?id=eq.{producto_id}",
+                json={"stock": nuevo_stock},
+            )
+            return resp.status_code == 200
+        except Exception:
+            return self._local_sqlite.descontar_stock_producto(producto_id, cantidad)
 
     def registrar_venta_y_detalles(self, cabecera: Dict[str, Any], detalles: List[Dict[str, Any]]) -> Dict[str, Any]:
+        if not self._configurado:
+            return self._local_sqlite.registrar_venta_y_detalles(cabecera, detalles)
         payload_venta = {
             "numero_boleta": cabecera["numero_boleta"],
             "usuario_id": cabecera["usuario_id"],
@@ -1286,80 +1370,103 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             "metodo_pago": cabecera.get("metodo_pago", "Tarjeta / Yape"),
             "estado": cabecera.get("estado", "pagado"),
         }
-        resp_v = self._client.post(self._url("ventas"), json=payload_venta)
-        if resp_v.status_code not in (200, 201):
-            raise RuntimeError(f"Error al registrar venta en Supabase: {resp_v.text}")
-        venta_creada = resp_v.json()[0]
-        venta_id = venta_creada["id"]
+        try:
+            resp_v = self._client.post(self._url("ventas"), json=payload_venta)
+            if resp_v.status_code not in (200, 201):
+                raise RuntimeError(f"Error al registrar venta en Supabase: {resp_v.text}")
+            venta_creada = resp_v.json()[0]
+            venta_id = venta_creada["id"]
 
-        items_payload = []
-        for d in detalles:
-            items_payload.append({
-                "venta_id": venta_id,
-                "producto_id": d["producto_id"],
-                "producto_nombre": d["producto_nombre"],
-                "cantidad": d["cantidad"],
-                "precio_unitario": d["precio_unitario"],
-                "subtotal": d["subtotal"],
-            })
+            items_payload = []
+            for d in detalles:
+                items_payload.append({
+                    "venta_id": venta_id,
+                    "producto_id": d["producto_id"],
+                    "producto_nombre": d["producto_nombre"],
+                    "cantidad": d["cantidad"],
+                    "precio_unitario": d["precio_unitario"],
+                    "subtotal": d["subtotal"],
+                })
 
-        resp_d = self._client.post(self._url("detalle_ventas"), json=items_payload)
-        detalles_creados = resp_d.json() if resp_d.status_code in (200, 201) else []
-        venta_creada["detalles"] = detalles_creados
-        return venta_creada
+            resp_d = self._client.post(self._url("detalle_ventas"), json=items_payload)
+            detalles_creados = resp_d.json() if resp_d.status_code in (200, 201) else []
+            venta_creada["detalles"] = detalles_creados
+            return venta_creada
+        except Exception:
+            return self._local_sqlite.registrar_venta_y_detalles(cabecera, detalles)
 
     def listar_ventas(self) -> List[Dict[str, Any]]:
-        resp_v = self._client.get(f"{self._url('ventas')}?select=*&order=id.desc")
-        if resp_v.status_code != 200:
-            return []
-        ventas = resp_v.json()
+        if not self._configurado:
+            return self._local_sqlite.listar_ventas()
+        try:
+            resp_v = self._client.get(f"{self._url('ventas')}?select=*&order=id.desc")
+            if resp_v.status_code != 200:
+                return []
+            ventas = resp_v.json()
 
-        resp_d = self._client.get(f"{self._url('detalle_ventas')}?select=*&order=id.asc")
-        todos_detalles = resp_d.json() if resp_d.status_code == 200 else []
+            resp_d = self._client.get(f"{self._url('detalle_ventas')}?select=*&order=id.asc")
+            todos_detalles = resp_d.json() if resp_d.status_code == 200 else []
 
-        detalles_por_venta: Dict[int, List[Dict[str, Any]]] = {}
-        for d in todos_detalles:
-            detalles_por_venta.setdefault(d["venta_id"], []).append(d)
+            detalles_por_venta: Dict[int, List[Dict[str, Any]]] = {}
+            for d in todos_detalles:
+                detalles_por_venta.setdefault(d["venta_id"], []).append(d)
 
-        for v in ventas:
-            v["detalles"] = detalles_por_venta.get(v["id"], [])
-        return ventas
+            for v in ventas:
+                v["detalles"] = detalles_por_venta.get(v["id"], [])
+            return ventas
+        except Exception:
+            return self._local_sqlite.listar_ventas()
 
     def obtener_todas_las_16_tablas(self) -> Dict[str, List[Dict[str, Any]]]:
+        if not self._configurado:
+            return self._local_sqlite.obtener_todas_las_16_tablas()
         tablas_principales = ["usuarios", "mascotas", "citas", "productos", "ventas", "detalle_ventas"]
         resultado: Dict[str, List[Dict[str, Any]]] = {}
-        for t in tablas_principales:
-            resp = self._client.get(f"{self._url(t)}?select=*&limit=50")
-            resultado[t] = resp.json() if resp.status_code == 200 else []
-        return resultado
+        try:
+            for t in tablas_principales:
+                resp = self._client.get(f"{self._url(t)}?select=*&limit=50")
+                resultado[t] = resp.json() if resp.status_code == 200 else []
+            return resultado
+        except Exception:
+            return self._local_sqlite.obtener_todas_las_16_tablas()
 
     def cambiar_password_usuario(self, usuario_id: int, password_actual: str, password_nueva: str) -> bool:
         self._invalidar_cache_usuario(usuario_id)
+        if not self._configurado:
+            return self._local_sqlite.cambiar_password_usuario(usuario_id, password_actual, password_nueva)
         user = self.obtener_usuario_por_id(usuario_id)
         if not user or not verificar_password(password_actual, str(user.get("password_hash", ""))):
             raise ValueError("La contraseña actual no es correcta.")
-        resp = self._client.patch(
-            f"{self._url('usuarios')}?id=eq.{usuario_id}",
-            json={"password_hash": hashear_password(password_nueva)},
-        )
-        self._invalidar_cache_usuario(usuario_id)
-        return resp.status_code in (200, 204)
+        try:
+            resp = self._client.patch(
+                f"{self._url('usuarios')}?id=eq.{usuario_id}",
+                json={"password_hash": hashear_password(password_nueva)},
+            )
+            self._invalidar_cache_usuario(usuario_id)
+            return resp.status_code in (200, 204)
+        except Exception:
+            return self._local_sqlite.cambiar_password_usuario(usuario_id, password_actual, password_nueva)
 
     def listar_compras_usuario(self, usuario_id: int) -> List[Dict[str, Any]]:
-        resp_v = self._client.get(
-            f"{self._url('ventas')}?usuario_id=eq.{usuario_id}&select=*&order=id.desc"
-        )
-        if resp_v.status_code != 200:
-            return []
-        ventas = resp_v.json()
-        resp_d = self._client.get(f"{self._url('detalle_ventas')}?select=*&order=id.asc")
-        todos_detalles = resp_d.json() if resp_d.status_code == 200 else []
-        detalles_por_venta: Dict[int, List[Dict[str, Any]]] = {}
-        for d in todos_detalles:
-            detalles_por_venta.setdefault(d["venta_id"], []).append(d)
-        for v in ventas:
-            v["detalles"] = detalles_por_venta.get(v["id"], [])
-        return ventas
+        if not self._configurado:
+            return self._local_sqlite.listar_compras_usuario(usuario_id)
+        try:
+            resp_v = self._client.get(
+                f"{self._url('ventas')}?usuario_id=eq.{usuario_id}&select=*&order=id.desc"
+            )
+            if resp_v.status_code != 200:
+                return []
+            ventas = resp_v.json()
+            resp_d = self._client.get(f"{self._url('detalle_ventas')}?select=*&order=id.asc")
+            todos_detalles = resp_d.json() if resp_d.status_code == 200 else []
+            detalles_por_venta: Dict[int, List[Dict[str, Any]]] = {}
+            for d in todos_detalles:
+                detalles_por_venta.setdefault(d["venta_id"], []).append(d)
+            for v in ventas:
+                v["detalles"] = detalles_por_venta.get(v["id"], [])
+            return ventas
+        except Exception:
+            return self._local_sqlite.listar_compras_usuario(usuario_id)
 
     def crear_solicitud_mascota(
         self, usuario_id: int, mascota_id: int, tipo: str, motivo: str, datos_nuevos: Optional[Dict[str, Any]] = None
