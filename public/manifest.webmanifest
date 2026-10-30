@@ -10,9 +10,9 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/img/logotipoveterinaria.jpg",
-      "sizes": "512x512",
-      "type": "image/jpeg",
+      "src": "/img/icono-opcion2-emblema-circular.png",
+      "sizes": "256x256",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

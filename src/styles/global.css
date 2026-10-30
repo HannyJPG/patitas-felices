@@ -1646,7 +1646,9 @@ img { max-width: 100%; }
 }
 
 /* ==========================================================================
-   HUELLITAS ANIMADAS DE FONDO (Perro y Gato caminando en background)
+   HUELLITAS ANIMADAS DE FONDO (Perro y Gato caminando paso a paso)
+   Secuencia realista: dan cada paso, queda la huella visible en el suelo,
+   luego de un tiempo el rastro se borra y comienza otro patrón diferente.
    ========================================================================== */
 .paw-tracks-background {
     position: fixed;
@@ -1658,54 +1660,99 @@ img { max-width: 100%; }
     z-index: -1;
     overflow: hidden;
 }
+.paw-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
 .paw-print {
     position: absolute;
-    width: 30px;
-    height: 30px;
     background-repeat: no-repeat;
     background-size: contain;
     opacity: 0;
-    animation: pawStepWalk 8s ease-in-out infinite;
+    will-change: opacity, transform;
 }
 
-/* Huellita de Perro */
+/* Huellita de Perro (almohadilla grande y dedos caninos) */
 .paw-dog {
+    width: 34px;
+    height: 34px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230B2545'%3E%3Cpath d='M12 14c-2 0-3.5 1.5-3.5 3.5 0 1.5 1 2.5 2.5 2.5h2c1.5 0 2.5-1 2.5-2.5 0-2-1.5-3.5-3.5-3.5zM6.5 11c-1 0-1.8.8-1.8 1.8s.8 1.8 1.8 1.8 1.8-.8 1.8-1.8S7.5 11 6.5 11zm11 0c-1 0-1.8.8-1.8 1.8s.8 1.8 1.8 1.8 1.8-.8 1.8-1.8-.8-1.8-1.8-1.8zM9 6.5C8.2 6.5 7.5 7.2 7.5 8s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5S9.8 6.5 9 6.5zm6 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5S15.8 6.5 15 6.5z'/%3E%3C/svg%3E");
 }
 
-/* Huellita de Gato */
+/* Huellita de Gato (almohadilla redondeada trifoliada y deditos tiernos) */
 .paw-cat {
+    width: 28px;
+    height: 28px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E89B5B'%3E%3Cpath d='M12 13c-2.2 0-3.8 1.2-3.8 2.8 0 1.2.9 2.2 2.2 2.2h3.2c1.3 0 2.2-1 2.2-2.2C15.8 14.2 14.2 13 12 13zM6 10c-.8 0-1.5.7-1.5 1.5S5.2 13 6 13s1.5-.7 1.5-1.5S6.8 10 6 10zm12 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5S18.8 10 18 10zm-8.5-3.5c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5zm5 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5z'/%3E%3C/svg%3E");
 }
 
-/* Recorrido 1: Diagonal hacia la derecha */
-.p1 { top: 82%; left: 8%; transform: rotate(35deg); animation-delay: 0s; }
-.p2 { top: 72%; left: 16%; transform: rotate(30deg); animation-delay: 0.9s; }
-.p3 { top: 61%; left: 23%; transform: rotate(40deg); animation-delay: 1.8s; }
-.p4 { top: 50%; left: 32%; transform: rotate(35deg); animation-delay: 2.7s; }
+/* --------------------------------------------------------------------------
+   PATRÓN 1: Perro caminando en diagonal (abajo-izq hacia centro-der)
+   Paso 1 al 8 aparecen uno a uno, el rastro completo se queda y se borra a los 7s
+   -------------------------------------------------------------------------- */
+.t1-s1 { left: 7vw;  top: 85vh; transform: rotate(38deg);  animation: stepT1_1 24s infinite; }
+.t1-s2 { left: 13vw; top: 78vh; transform: rotate(44deg);  animation: stepT1_2 24s infinite; }
+.t1-s3 { left: 18vw; top: 69vh; transform: rotate(38deg);  animation: stepT1_3 24s infinite; }
+.t1-s4 { left: 24vw; top: 62vh; transform: rotate(44deg);  animation: stepT1_4 24s infinite; }
+.t1-s5 { left: 29vw; top: 53vh; transform: rotate(38deg);  animation: stepT1_5 24s infinite; }
+.t1-s6 { left: 35vw; top: 46vh; transform: rotate(44deg);  animation: stepT1_6 24s infinite; }
+.t1-s7 { left: 40vw; top: 37vh; transform: rotate(38deg);  animation: stepT1_7 24s infinite; }
+.t1-s8 { left: 46vw; top: 30vh; transform: rotate(44deg);  animation: stepT1_8 24s infinite; }
 
-/* Recorrido 2: Cruzando hacia la derecha superior */
-.p5 { top: 40%; left: 62%; transform: rotate(-25deg); animation-delay: 3.6s; }
-.p6 { top: 30%; left: 71%; transform: rotate(-20deg); animation-delay: 4.5s; }
-.p7 { top: 19%; left: 80%; transform: rotate(-30deg); animation-delay: 5.4s; }
-.p8 { top: 9%;  left: 88%; transform: rotate(-25deg); animation-delay: 6.3s; }
+@keyframes stepT1_1 { 0%, 0.8% { opacity: 0; transform: scale(0.6); } 1.5% { opacity: 0.12; transform: scale(1.08); } 2.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT1_2 { 0%, 2.8% { opacity: 0; transform: scale(0.6); } 3.5% { opacity: 0.12; transform: scale(1.08); } 4.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT1_3 { 0%, 4.8% { opacity: 0; transform: scale(0.6); } 5.5% { opacity: 0.12; transform: scale(1.08); } 6.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT1_4 { 0%, 6.8% { opacity: 0; transform: scale(0.6); } 7.5% { opacity: 0.12; transform: scale(1.08); } 8.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT1_5 { 0%, 8.8% { opacity: 0; transform: scale(0.6); } 9.5% { opacity: 0.12; transform: scale(1.08); } 10.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT1_6 { 0%, 10.8% { opacity: 0; transform: scale(0.6); } 11.5% { opacity: 0.12; transform: scale(1.08); } 12.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT1_7 { 0%, 12.8% { opacity: 0; transform: scale(0.6); } 13.5% { opacity: 0.12; transform: scale(1.08); } 14.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT1_8 { 0%, 14.8% { opacity: 0; transform: scale(0.6); } 15.5% { opacity: 0.12; transform: scale(1.08); } 16.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
 
-@keyframes pawStepWalk {
-    0%, 100% {
-        opacity: 0;
-        transform: scale(0.7);
-    }
-    10% {
-        opacity: 0.08;
-        transform: scale(1.05);
-    }
-    45% {
-        opacity: 0.08;
-        transform: scale(1);
-    }
-    60% {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-}
+/* --------------------------------------------------------------------------
+   PATRÓN 2: Gato cruzando en curva suave (derecha a izquierda)
+   Comienza a los 8.5s (35%), cada pisada queda marcada, el rastro se borra a los 15s
+   -------------------------------------------------------------------------- */
+.t2-s1 { left: 91vw; top: 22vh; transform: rotate(-95deg);  animation: stepT2_1 24s infinite; }
+.t2-s2 { left: 83vw; top: 26vh; transform: rotate(-105deg); animation: stepT2_2 24s infinite; }
+.t2-s3 { left: 75vw; top: 23vh; transform: rotate(-95deg);  animation: stepT2_3 24s infinite; }
+.t2-s4 { left: 67vw; top: 27vh; transform: rotate(-105deg); animation: stepT2_4 24s infinite; }
+.t2-s5 { left: 59vw; top: 24vh; transform: rotate(-95deg);  animation: stepT2_5 24s infinite; }
+.t2-s6 { left: 51vw; top: 28vh; transform: rotate(-105deg); animation: stepT2_6 24s infinite; }
+.t2-s7 { left: 43vw; top: 25vh; transform: rotate(-95deg);  animation: stepT2_7 24s infinite; }
+.t2-s8 { left: 35vw; top: 29vh; transform: rotate(-105deg); animation: stepT2_8 24s infinite; }
+
+@keyframes stepT2_1 { 0%, 34.2% { opacity: 0; transform: scale(0.6); } 35.0% { opacity: 0.14; transform: scale(1.08); } 36.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT2_2 { 0%, 36.2% { opacity: 0; transform: scale(0.6); } 37.0% { opacity: 0.14; transform: scale(1.08); } 38.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT2_3 { 0%, 38.2% { opacity: 0; transform: scale(0.6); } 39.0% { opacity: 0.14; transform: scale(1.08); } 40.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT2_4 { 0%, 40.2% { opacity: 0; transform: scale(0.6); } 41.0% { opacity: 0.14; transform: scale(1.08); } 42.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT2_5 { 0%, 42.2% { opacity: 0; transform: scale(0.6); } 43.0% { opacity: 0.14; transform: scale(1.08); } 44.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT2_6 { 0%, 44.2% { opacity: 0; transform: scale(0.6); } 45.0% { opacity: 0.14; transform: scale(1.08); } 46.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT2_7 { 0%, 46.2% { opacity: 0; transform: scale(0.6); } 47.0% { opacity: 0.14; transform: scale(1.08); } 48.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT2_8 { 0%, 48.2% { opacity: 0; transform: scale(0.6); } 49.0% { opacity: 0.14; transform: scale(1.08); } 50.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
+
+/* --------------------------------------------------------------------------
+   PATRÓN 3: Mascota juguetona bajando (arriba-izq hacia abajo-der)
+   Comienza a los 16.5s (69%), cada pisada queda marcada, el rastro se borra a los 23.5s
+   -------------------------------------------------------------------------- */
+.t3-s1 { left: 15vw; top: 12vh; transform: rotate(135deg); animation: stepT3_1 24s infinite; }
+.t3-s2 { left: 22vw; top: 19vh; transform: rotate(145deg); animation: stepT3_2 24s infinite; }
+.t3-s3 { left: 28vw; top: 27vh; transform: rotate(135deg); animation: stepT3_3 24s infinite; }
+.t3-s4 { left: 35vw; top: 35vh; transform: rotate(145deg); animation: stepT3_4 24s infinite; }
+.t3-s5 { left: 42vw; top: 43vh; transform: rotate(135deg); animation: stepT3_5 24s infinite; }
+.t3-s6 { left: 49vw; top: 51vh; transform: rotate(145deg); animation: stepT3_6 24s infinite; }
+.t3-s7 { left: 56vw; top: 59vh; transform: rotate(135deg); animation: stepT3_7 24s infinite; }
+.t3-s8 { left: 63vw; top: 67vh; transform: rotate(145deg); animation: stepT3_8 24s infinite; }
+
+@keyframes stepT3_1 { 0%, 68.2% { opacity: 0; transform: scale(0.6); } 69.0% { opacity: 0.13; transform: scale(1.08); } 70.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT3_2 { 0%, 70.2% { opacity: 0; transform: scale(0.6); } 71.0% { opacity: 0.13; transform: scale(1.08); } 72.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT3_3 { 0%, 72.2% { opacity: 0; transform: scale(0.6); } 73.0% { opacity: 0.13; transform: scale(1.08); } 74.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT3_4 { 0%, 74.2% { opacity: 0; transform: scale(0.6); } 75.0% { opacity: 0.13; transform: scale(1.08); } 76.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT3_5 { 0%, 76.2% { opacity: 0; transform: scale(0.6); } 77.0% { opacity: 0.13; transform: scale(1.08); } 78.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT3_6 { 0%, 78.2% { opacity: 0; transform: scale(0.6); } 79.0% { opacity: 0.13; transform: scale(1.08); } 80.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT3_7 { 0%, 80.2% { opacity: 0; transform: scale(0.6); } 81.0% { opacity: 0.13; transform: scale(1.08); } 82.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+@keyframes stepT3_8 { 0%, 82.2% { opacity: 0; transform: scale(0.6); } 83.0% { opacity: 0.13; transform: scale(1.08); } 84.0%, 93% { opacity: 0.13; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.9); } }
+
 

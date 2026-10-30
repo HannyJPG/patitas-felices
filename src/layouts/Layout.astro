@@ -15,23 +15,52 @@ const { title, inicio = false } = Astro.props;
     <meta name="theme-color" content="#0B2545" />
     <meta name="description" content="Clínica veterinaria Patitas Felices: conoce nuestros servicios y solicita una cita de 30 minutos para tu mascota por WhatsApp." />
     <title>{title}</title>
-    <link rel="icon" href="/img/icono-opcion1-mascota.png" type="image/png" />
+    <link rel="icon" href="/img/icono-opcion2-emblema-circular.png" type="image/png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <!-- Huellitas animadas suaves de fondo en toda la web -->
+    <!-- Huellitas animadas de fondo: Caminan paso a paso, dejan su rastro y luego se borran para cambiar de patrón -->
     <div class="paw-tracks-background" aria-hidden="true">
-      <span class="paw-print paw-dog p1"></span>
-      <span class="paw-print paw-cat p2"></span>
-      <span class="paw-print paw-dog p3"></span>
-      <span class="paw-print paw-cat p4"></span>
-      <span class="paw-print paw-dog p5"></span>
-      <span class="paw-print paw-cat p6"></span>
-      <span class="paw-print paw-dog p7"></span>
-      <span class="paw-print paw-cat p8"></span>
+      
+      <!-- Patrón 1: Perro caminando en diagonal ascendente (abajo-izq a centro-der) -->
+      <div class="paw-trail trail-dog-diagonal">
+        <span class="paw-print paw-dog t1-s1"></span>
+        <span class="paw-print paw-dog t1-s2"></span>
+        <span class="paw-print paw-dog t1-s3"></span>
+        <span class="paw-print paw-dog t1-s4"></span>
+        <span class="paw-print paw-dog t1-s5"></span>
+        <span class="paw-print paw-dog t1-s6"></span>
+        <span class="paw-print paw-dog t1-s7"></span>
+        <span class="paw-print paw-dog t1-s8"></span>
+      </div>
+
+      <!-- Patrón 2: Gato cruzando en curva suave (derecha a izquierda) -->
+      <div class="paw-trail trail-cat-horizontal">
+        <span class="paw-print paw-cat t2-s1"></span>
+        <span class="paw-print paw-cat t2-s2"></span>
+        <span class="paw-print paw-cat t2-s3"></span>
+        <span class="paw-print paw-cat t2-s4"></span>
+        <span class="paw-print paw-cat t2-s5"></span>
+        <span class="paw-print paw-cat t2-s6"></span>
+        <span class="paw-print paw-cat t2-s7"></span>
+        <span class="paw-print paw-cat t2-s8"></span>
+      </div>
+
+      <!-- Patrón 3: Mascota juguetona bajando (arriba-izq a abajo-der) -->
+      <div class="paw-trail trail-playful-curve">
+        <span class="paw-print paw-dog t3-s1"></span>
+        <span class="paw-print paw-cat t3-s2"></span>
+        <span class="paw-print paw-dog t3-s3"></span>
+        <span class="paw-print paw-cat t3-s4"></span>
+        <span class="paw-print paw-dog t3-s5"></span>
+        <span class="paw-print paw-cat t3-s6"></span>
+        <span class="paw-print paw-dog t3-s7"></span>
+        <span class="paw-print paw-cat t3-s8"></span>
+      </div>
+
     </div>
 
     <a href="#contenido" class="skip-link">Saltar al contenido</a>
