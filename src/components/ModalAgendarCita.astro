@@ -1,0 +1,179 @@
+---
+// ModalAgendarCita.astro - Modal global para agendar citas médicas veterinarias
+---
+<div class="modal fade modal-patitas" id="modalAgendarCita" tabindex="-1" aria-labelledby="modalCitaTitulo" aria-hidden="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content modal-patitas-content border shadow-sm">
+      
+      <!-- Cabecera del modal -->
+      <div class="modal-header border-bottom pb-2">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="modal-chip-tag">Patitas Felices</span>
+            <span class="modal-chip-sub">Atención Médica Veterinaria</span>
+          </div>
+          <h2 class="modal-title h5 fw-bold mb-0" id="modalCitaTitulo">Agendar Cita</h2>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar ventana" id="btn-cerrar-modal-cita"></button>
+      </div>
+
+      <div class="modal-body px-4 py-3">
+        <p class="small text-muted mb-3">
+          Completa los datos para separar tu turno con uno de nuestros 3 médicos veterinarios de guardia. Rango máximo permitido: 7 días calendario.
+        </p>
+
+        <!-- Alertas dinámicas -->
+        <div id="modal-cita-alerta-error" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+        <div id="modal-cita-alerta-success" class="alert alert-success py-2 px-3 small d-none" role="alert"></div>
+
+        <form id="form-modal-cita" novalidate>
+          <!-- Fila 1: Datos de Usuario Bloqueados (Nombre y DNI/RUC) -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="modal-cita-propietario" class="form-label small fw-semibold">Propietario / Titular</label>
+              <input 
+                type="text" 
+                class="form-control bg-light" 
+                id="modal-cita-propietario" 
+                name="propietario" 
+                readonly 
+                aria-describedby="ayuda-propietario"
+              />
+              <div id="ayuda-propietario" class="form-text small">Dato verificado de tu cuenta (no modificable).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="modal-cita-documento" class="form-label small fw-semibold">Documento de Identidad (DNI / RUC)</label>
+              <input 
+                type="text" 
+                class="form-control bg-light" 
+                id="modal-cita-documento" 
+                name="documento" 
+                readonly 
+                aria-describedby="ayuda-documento"
+              />
+              <div id="ayuda-documento" class="form-text small">Identificador único registrado en el sistema.</div>
+            </div>
+          </div>
+
+          <!-- Fila 2: Mascota y Servicio -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label for="modal-cita-mascota" class="form-label small fw-semibold mb-0">Mascota</label>
+                <a href="/perfil#mascotas" class="small text-decoration-none" style="color: #c97530;" id="link-ir-mascotas">Registrar nueva</a>
+              </div>
+              <select class="form-select" id="modal-cita-mascota" name="mascota_id" required>
+                <option value="">Cargando tus mascotas...</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="modal-cita-servicio" class="form-label small fw-semibold">Servicio requerido</label>
+              <select class="form-select" id="modal-cita-servicio" name="servicio" required>
+                <option value="consulta-general">Consulta general</option>
+                <option value="vacunacion">Vacunación preventiva</option>
+                <option value="desparasitacion">Desparasitación interna / externa</option>
+                <option value="control">Control de salud y seguimiento</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Fila 3: Fecha (Máx 7 días) y Hora (7 turnos fijos con control de 3 doctores) -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="modal-cita-fecha" class="form-label small fw-semibold">Fecha de atención</label>
+              <input 
+                type="date" 
+                class="form-control" 
+                id="modal-cita-fecha" 
+                name="fecha" 
+                required 
+                aria-describedby="ayuda-fecha"
+              />
+              <div id="ayuda-fecha" class="form-text small">Permitido entre hoy y un máximo de 7 días.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="modal-cita-hora" class="form-label small fw-semibold">Horario disponible</label>
+              <select class="form-select" id="modal-cita-hora" name="hora" required>
+                <option value="08:30">08:30 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:30">11:30 AM</option>
+                <option value="13:00">01:00 PM</option>
+                <option value="15:30">03:30 PM</option>
+                <option value="17:00">05:00 PM</option>
+                <option value="18:30">06:30 PM</option>
+              </select>
+              <div id="ayuda-cupos" class="form-text small">Capacidad: 3 doctores simultáneos por turno.</div>
+            </div>
+          </div>
+
+          <!-- Fila 4: Teléfono y Motivo -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label for="modal-cita-telefono" class="form-label small fw-semibold">Teléfono de contacto</label>
+              <input 
+                type="tel" 
+                class="form-control" 
+                id="modal-cita-telefono" 
+                name="telefono" 
+                placeholder="999888777" 
+                maxlength="15" 
+                required 
+              />
+            </div>
+            <div class="col-md-8">
+              <label for="modal-cita-motivo" class="form-label small fw-semibold">Motivo de la consulta / Síntomas</label>
+              <textarea 
+                class="form-control" 
+                id="modal-cita-motivo" 
+                name="motivo" 
+                rows="2" 
+                placeholder="Indica el motivo principal o síntomas observados en tu mascota (mínimo 10 caracteres)..." 
+                minlength="10" 
+                required
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top">
+            <button 
+              type="button" 
+              class="btn btn-outline-success d-inline-flex align-items-center gap-1" 
+              id="btn-cita-whatsapp"
+            >
+              Consultar por WhatsApp
+            </button>
+
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-patitas-primary px-4 fw-semibold" 
+                id="btn-confirmar-cita"
+              >
+                Confirmar y Agendar Cita
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .btn-patitas-primary {
+    background-color: #E89B5B;
+    border-color: #d88949;
+    color: #1a1a1a;
+  }
+  .btn-patitas-primary:hover {
+    background-color: #d88949;
+    color: #000;
+  }
+</style>

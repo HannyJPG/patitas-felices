@@ -1,0 +1,36 @@
+---
+import { clinica } from "../data/clinica.js";
+import { enlaceWhatsApp } from "../scripts/whatsapp.js";
+---
+<section id="contacto" class="section-spacing contact-section" aria-labelledby="contacto-titulo">
+  <div class="container">
+    <div class="contact-panel p-4 p-md-5 rounded border">
+      <div class="contact-info-col">
+        <p class="eyebrow mb-1">Contacto</p>
+        <h2 id="contacto-titulo" class="mt-1 mb-2">Comunícate con la clínica</h2>
+        <p class="text-muted mb-3">
+          Puedes solicitar tu cita desde la web o escribirnos directamente a WhatsApp para consultar horarios y atención.
+        </p>
+        <div class="d-flex flex-wrap gap-2 pt-1 mb-3">
+          <span class="badge-contacto-pill">Horario: Lun a Sáb 8:00 AM – 8:00 PM</span>
+          <span class="badge-contacto-pill">Sedes en Lima</span>
+          <span class="badge-contacto-pill">Turnos de 30 min</span>
+        </div>
+      </div>
+      
+      <div class="contact-actions d-flex flex-column gap-2 justify-content-center">
+        <button type="button" data-abrir-modal-cita class="btn btn-primary w-100">
+          <span>Solicitar cita</span>
+          <span aria-hidden="true">→</span>
+        </button>
+        <a class="btn btn-outline-primary w-100 d-inline-flex align-items-center justify-content-center gap-1" href={enlaceWhatsApp()} target="_blank" rel="noopener noreferrer">
+          <span>WhatsApp {clinica.nombre}</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+        <p class="small-note text-center mb-0 mt-1">
+          Coordinación directa por WhatsApp.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

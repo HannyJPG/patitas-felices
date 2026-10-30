@@ -1,0 +1,284 @@
+---
+// Testimonios.astro - Carrusel de 7 tarjetas con 4 visibles y avance cada 5s
+const testimonios = [
+  {
+    id: 1,
+    autor: "Carlos Méndez",
+    mascota: "Rocky",
+    especie: "Golden Retriever",
+    servicio: "Consulta y Vacunación",
+    estrellas: 5,
+    avatarColor: "var(--color-peach)",
+    texto: "Buena atención y paciencia con Rocky en su consulta de vacunas. La doctora explicó bien el calendario de refuerzos."
+  },
+  {
+    id: 2,
+    autor: "Valeria Gómez",
+    mascota: "Michi",
+    especie: "Siamés",
+    servicio: "Control y Desparasitación",
+    estrellas: 5,
+    avatarColor: "var(--color-aqua)",
+    texto: "Trato tranquilo con Michi, que suele ponerse nervioso en las revisiones. Nos orientaron bien sobre el cuidado de su peso."
+  },
+  {
+    id: 3,
+    autor: "Lucía Fernández",
+    mascota: "Luna",
+    especie: "Poodle Toy",
+    servicio: "Chequeo Anual",
+    estrellas: 5,
+    avatarColor: "var(--color-gold)",
+    texto: "Agendé la cita por la página y la confirmación por WhatsApp llegó puntual. Revisión completa y sin demoras."
+  },
+  {
+    id: 4,
+    autor: "Ricardo Ramos",
+    mascota: "Toby",
+    especie: "Labrador",
+    servicio: "Seguimiento Clínico",
+    estrellas: 5,
+    avatarColor: "var(--color-peach)",
+    texto: "Instalaciones ordenadas y limpias. La evolución de Toby con el tratamiento recetado fue buena y rápida."
+  },
+  {
+    id: 5,
+    autor: "Camila Torres",
+    mascota: "Simón",
+    especie: "Gato común",
+    servicio: "Vacunación",
+    estrellas: 5,
+    avatarColor: "var(--color-aqua)",
+    texto: "Atención organizada con el carnet de vacunas y buenos consejos para la alimentación de Simón."
+  },
+  {
+    id: 6,
+    autor: "Diego Salazar",
+    mascota: "Bruno",
+    especie: "Bulldog Francés",
+    servicio: "Dermatología",
+    estrellas: 5,
+    avatarColor: "var(--color-gold)",
+    texto: "Nos ayudaron a encontrar el tratamiento para el problema de piel de Bruno. Buen seguimiento del caso."
+  },
+  {
+    id: 7,
+    autor: "Elena Morales",
+    mascota: "Cleo",
+    especie: "Cocker Spaniel",
+    servicio: "Limpieza Dental",
+    estrellas: 5,
+    avatarColor: "var(--color-peach)",
+    texto: "Puntuales en el turno de atención y buen trato del personal durante la revisión dental de Cleo."
+  }
+];
+---
+<section id="testimonios" class="section-spacing testimonials-section" aria-labelledby="testimonios-titulo">
+  <div class="container">
+    
+    <!-- Encabezado del apartado -->
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-3">
+      <div>
+        <p class="eyebrow mb-1">Opiniones</p>
+        <h2 id="testimonios-titulo" class="mt-1 mb-1">Comentarios de clientes</h2>
+        <p class="text-muted mb-0">Experiencias de familias que atienden a sus mascotas en la clínica.</p>
+      </div>
+
+      <!-- Controles manuales y botón de pausa -->
+      <div class="testimonial-controls d-flex align-items-center gap-2">
+        <button 
+          type="button" 
+          class="btn btn-outline-primary btn-sm testimonial-nav-btn" 
+          id="btn-testimonios-prev" 
+          aria-label="Ver opinión anterior"
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="btn btn-outline-primary btn-sm testimonial-pause-btn" 
+          id="btn-testimonios-pausa" 
+          aria-label="Pausar o reanudar rotación automática"
+        >
+          <span id="texto-testimonios-pausa">Pausar</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="btn btn-outline-primary btn-sm testimonial-nav-btn" 
+          id="btn-testimonios-next" 
+          aria-label="Ver opinión siguiente"
+        >
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor del carrusel de 4 tarjetas visibles -->
+    <div class="testimonial-slider-wrapper position-relative" id="slider-testimonios-contenedor">
+      <div class="testimonial-slider-track" id="slider-testimonios-pista" role="region" aria-label="Carrusel de testimonios" aria-live="polite">
+        {testimonios.map((t, idx) => (
+          <article class="testimonial-card-item" data-card-idx={idx}>
+            <div class="testimonial-card-inner h-100 d-flex flex-column justify-content-between border rounded p-3">
+              
+              <!-- Cabecera de la tarjeta: Calificación y Servicio -->
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="small fw-semibold text-warning" aria-label="5 de 5 estrellas">
+                    ★★★★★
+                  </span>
+                  <span class="testimonial-service-tag">{t.servicio}</span>
+                </div>
+                
+                <!-- Cita del testimonio -->
+                <p class="testimonial-quote-text mb-3 small">
+                  “{t.texto}”
+                </p>
+              </div>
+
+              <!-- Autor y Mascota -->
+              <div class="testimonial-author-box pt-2 border-top d-flex align-items-center gap-2">
+                <div class="testimonial-avatar" style={`background-color: ${t.avatarColor};`}>
+                  {t.autor.charAt(0)}
+                </div>
+                <div class="min-w-0">
+                  <strong class="d-block text-dark small text-truncate">{t.autor}</strong>
+                  <span class="testimonial-pet-badge small">{t.mascota} ({t.especie})</span>
+                </div>
+              </div>
+
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <!-- Indicador de tarjetas y tiempo de rotación -->
+    <div class="d-flex justify-content-between align-items-center mt-3 text-muted small px-1">
+      <span id="indicador-testimonios">Opiniones de clientes</span>
+      <span class="text-muted">Rotación cada 5s</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- Script interactivo: 7 tarjetas, 4 visibles en desktop, movimiento cada 5 segundos -->
+<script>
+  (() => {
+    const contenedor = document.getElementById("slider-testimonios-contenedor");
+    const pista = document.getElementById("slider-testimonios-pista");
+    const btnPrev = document.getElementById("btn-testimonios-prev");
+    const btnNext = document.getElementById("btn-testimonios-next");
+    const btnPausa = document.getElementById("btn-testimonios-pausa");
+    const textoPausa = document.getElementById("texto-testimonios-pausa");
+    const indicador = document.getElementById("indicador-testimonios");
+
+    if (!pista || !contenedor) return;
+
+    const totalTarjetas = 7;
+    let indiceActual = 0;
+    let pausado = false;
+    let temporizador = null;
+
+    function obtenerTarjetasVisibles() {
+      const ancho = window.innerWidth;
+      if (ancho >= 992) return 4;
+      if (ancho >= 768) return 2;
+      return 1;
+    }
+
+    function actualizarPosicion() {
+      const visibles = obtenerTarjetasVisibles();
+      const tarjetas = pista.querySelectorAll(".testimonial-card-item");
+      if (tarjetas.length === 0) return;
+
+      const maxIndice = totalTarjetas - visibles;
+      if (indiceActual > maxIndice) {
+        indiceActual = 0;
+      } else if (indiceActual < 0) {
+        indiceActual = maxIndice;
+      }
+
+      const primerTarjeta = tarjetas[0];
+      const estiloGap = parseFloat(window.getComputedStyle(pista).gap) || 20;
+      const anchoPaso = primerTarjeta.offsetWidth + estiloGap;
+
+      pista.style.transform = `translateX(-${indiceActual * anchoPaso}px)`;
+
+      if (indicador) {
+        indicador.textContent = `Opiniones ${indiceActual + 1} a ${Math.min(indiceActual + visibles, totalTarjetas)} de ${totalTarjetas}`;
+      }
+    }
+
+    function avanzar() {
+      const visibles = obtenerTarjetasVisibles();
+      const maxIndice = totalTarjetas - visibles;
+      if (indiceActual >= maxIndice) {
+        indiceActual = 0;
+      } else {
+        indiceActual += 1;
+      }
+      actualizarPosicion();
+    }
+
+    function retroceder() {
+      const visibles = obtenerTarjetasVisibles();
+      const maxIndice = totalTarjetas - visibles;
+      if (indiceActual <= 0) {
+        indiceActual = maxIndice;
+      } else {
+        indiceActual -= 1;
+      }
+      actualizarPosicion();
+    }
+
+    function iniciarRotacion() {
+      detenerRotacion();
+      if (!pausado) {
+        temporizador = window.setInterval(() => {
+          avanzar();
+        }, 5000);
+      }
+    }
+
+    function detenerRotacion() {
+      if (temporizador) {
+        window.clearInterval(temporizador);
+        temporizador = null;
+      }
+    }
+
+    btnNext?.addEventListener("click", () => {
+      avanzar();
+      iniciarRotacion();
+    });
+
+    btnPrev?.addEventListener("click", () => {
+      retroceder();
+      iniciarRotacion();
+    });
+
+    btnPausa?.addEventListener("click", () => {
+      pausado = !pausado;
+      if (textoPausa) textoPausa.textContent = pausado ? "Reanudar" : "Pausar";
+      if (pausado) {
+        detenerRotacion();
+      } else {
+        iniciarRotacion();
+      }
+    });
+
+    contenedor.addEventListener("mouseenter", () => detenerRotacion());
+    contenedor.addEventListener("mouseleave", () => { if (!pausado) iniciarRotacion(); });
+    contenedor.addEventListener("focusin", () => detenerRotacion());
+    contenedor.addEventListener("focusout", () => { if (!pausado) iniciarRotacion(); });
+
+    window.addEventListener("resize", () => {
+      actualizarPosicion();
+    });
+
+    actualizarPosicion();
+    iniciarRotacion();
+  })();
+</script>

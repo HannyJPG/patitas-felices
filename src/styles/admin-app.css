@@ -1,0 +1,479 @@
+/* ==========================================================================
+   APLICACIÓN ADMINISTRATIVA INDEPENDIENTE — CLÍNICA PATITAS FELICES
+   Paleta: Azul Marino (#0B2545), Verde (#15803D), Fondo Claro (#F4F8F6), Blanco (#FFFFFF)
+   ========================================================================== */
+
+:root {
+    --admin-navy: #0B2545;
+    --admin-navy-light: #133B6E;
+    --admin-green: #15803D;
+    --admin-green-hover: #116932;
+    --admin-green-soft: #E6F4EC;
+    --admin-bg: #F4F8F6;
+    --admin-surface: #FFFFFF;
+    --admin-border: #CBDAD2;
+    --admin-line: #DCE8E1;
+    --admin-text: #0B2545;
+    --admin-muted: #455E79;
+    --admin-font: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { font-family: var(--admin-font); scroll-behavior: smooth; }
+body {
+    margin: 0;
+    min-height: 100svh;
+    background-color: var(--admin-bg);
+    color: var(--admin-text);
+    line-height: 1.55;
+}
+
+/* Estructura principal con barra lateral fija en escritorio y barra superior en móvil */
+.admin-shell {
+    display: grid;
+    grid-template-columns: 265px minmax(0, 1fr);
+    min-height: 100svh;
+}
+
+.admin-sidebar {
+    background: var(--admin-navy);
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1.15rem;
+    position: sticky;
+    top: 0;
+    height: 100svh;
+}
+
+.admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    text-decoration: none;
+    color: #FFFFFF;
+}
+.admin-brand img {
+    width: 46px;
+    height: 46px;
+    object-fit: cover;
+    border-radius: 0.6rem;
+    background: #FFFFFF;
+}
+.admin-brand-title { font-weight: 700; font-size: 1.05rem; display: block; }
+.admin-brand-sub { font-size: 0.76rem; color: #A7F3D0; display: block; }
+
+.admin-nav {
+    display: grid;
+    gap: 0.35rem;
+    margin-block: 1.25rem auto;
+}
+.admin-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: none;
+    border-radius: 0.65rem;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.86);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.admin-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+}
+.admin-nav-btn.active {
+    background: var(--admin-green);
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.admin-sidebar-footer {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    display: grid;
+    gap: 0.5rem;
+}
+.admin-sidebar-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 0.6rem;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.admin-sidebar-link:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* Área principal de trabajo */
+.admin-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.admin-topbar {
+    background: var(--admin-surface);
+    border-bottom: 1px solid var(--admin-line);
+    padding: 1rem 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.admin-topbar h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--admin-navy);
+}
+.admin-topbar-meta {
+    font-size: 0.85rem;
+    color: var(--admin-muted);
+}
+
+.admin-user-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.badge-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    background: var(--admin-green-soft);
+    color: var(--admin-green);
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid var(--admin-border);
+}
+.badge-demo {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.65rem;
+    border-radius: 999px;
+    background: #EDF4FF;
+    color: var(--admin-navy);
+    font-size: 0.74rem;
+    font-weight: 600;
+    border: 1px solid #BBD2F6;
+}
+
+.admin-content {
+    padding: 1.5rem 1.75rem 3rem;
+    max-width: 1440px;
+    width: 100%;
+    margin-inline: auto;
+}
+
+/* Barra global de filtros por fecha */
+.filter-bar {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: 0 4px 14px rgba(11, 37, 69, 0.04);
+}
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.85rem;
+}
+.field-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.field-block label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-navy);
+}
+.admin-input, .admin-select {
+    min-height: 40px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.55rem;
+    background: #FFFFFF;
+    color: var(--admin-navy);
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+.admin-input:focus, .admin-select:focus {
+    outline: 2px solid var(--admin-green);
+    outline-offset: 1px;
+    border-color: var(--admin-green);
+}
+
+.btn-admin {
+    min-height: 40px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.55rem;
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-decoration: none;
+}
+.btn-admin-primary {
+    background: var(--admin-green);
+    color: #FFFFFF;
+}
+.btn-admin-primary:hover { background: var(--admin-green-hover); }
+.btn-admin-navy {
+    background: var(--admin-navy);
+    color: #FFFFFF;
+}
+.btn-admin-navy:hover { background: var(--admin-navy-light); }
+.btn-admin-outline {
+    background: #FFFFFF;
+    color: var(--admin-navy);
+    border-color: var(--admin-border);
+}
+.btn-admin-outline:hover {
+    background: var(--admin-navy);
+    color: #FFFFFF;
+    border-color: var(--admin-navy);
+}
+
+/* Tarjetas KPI */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.kpi-card {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-top: 4px solid var(--admin-green);
+    border-radius: 0.95rem;
+    padding: 1.15rem 1.25rem;
+    box-shadow: 0 4px 12px rgba(11, 37, 69, 0.04);
+}
+.kpi-card.navy-top { border-top-color: var(--admin-navy); }
+.kpi-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--admin-muted);
+    display: block;
+}
+.kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--admin-navy);
+    margin-block: 0.25rem;
+    display: block;
+}
+.kpi-sub {
+    font-size: 0.78rem;
+    color: var(--admin-muted);
+}
+
+/* Paneles de gráficos y secciones */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+.admin-panel {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 1rem;
+    padding: 1.35rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 14px rgba(11, 37, 69, 0.04);
+}
+.panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.12rem;
+    color: var(--admin-navy);
+}
+
+/* Gráfico de barras visual adaptable */
+.bar-chart {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+    align-items: end;
+    gap: 0.65rem;
+    height: 195px;
+    padding: 1rem 0.5rem 0.25rem;
+    border-bottom: 1px solid var(--admin-line);
+}
+.bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 0.35rem;
+}
+.bar-fill {
+    width: 100%;
+    max-width: 42px;
+    border-radius: 0.45rem 0.45rem 0 0;
+    background: linear-gradient(180deg, var(--admin-green), var(--admin-navy));
+    transition: height 0.25s ease;
+    min-height: 6px;
+}
+.bar-fill.traffic {
+    background: linear-gradient(180deg, #1E6091, var(--admin-navy));
+}
+.bar-val {
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--admin-navy);
+}
+.bar-date {
+    font-size: 0.72rem;
+    color: var(--admin-muted);
+    text-align: center;
+}
+
+/* Tabla interactiva tipo Excel */
+.excel-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 1rem;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-line);
+    border-radius: 0.8rem;
+    margin-bottom: 1rem;
+}
+.excel-table-wrap {
+    max-height: 440px;
+    overflow: auto;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.75rem;
+    background: #FFFFFF;
+}
+.excel-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.88rem;
+}
+.excel-table th,
+.excel-table td {
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid var(--admin-line);
+    border-right: 1px solid var(--admin-line);
+    text-align: left;
+    white-space: nowrap;
+}
+.excel-table th:last-child,
+.excel-table td:last-child { border-right: none; }
+.excel-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--admin-navy);
+    color: #FFFFFF;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+}
+.excel-table thead th:hover { background: var(--admin-navy-light); }
+.excel-table tbody tr:nth-child(even) { background: #F9FCFA; }
+.excel-table tbody tr:hover { background: var(--admin-green-soft); }
+.excel-table tfoot td {
+    position: sticky;
+    bottom: 0;
+    background: #E6F2EC;
+    color: var(--admin-navy);
+    font-weight: 700;
+    border-top: 2px solid var(--admin-green);
+}
+.num-cell { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+.excel-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.9rem;
+    font-size: 0.86rem;
+    color: var(--admin-muted);
+}
+
+.activity-list {
+    display: grid;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.activity-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0.95rem;
+    border: 1px solid var(--admin-line);
+    border-radius: 0.7rem;
+    background: #FFFFFF;
+}
+
+@media (max-width: 1080px) {
+    .admin-shell { grid-template-columns: 1fr; }
+    .admin-sidebar {
+        position: static;
+        height: auto;
+        padding: 1rem;
+    }
+    .admin-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-block: 0.75rem;
+    }
+    .admin-nav-btn { width: auto; }
+    .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .charts-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 575.98px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .admin-content { padding: 1rem; }
+    .admin-topbar { padding: 1rem; }
+}

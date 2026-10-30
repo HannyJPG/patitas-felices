@@ -1,0 +1,230 @@
+---
+// Sedes.astro - Selector de sedes con mapa y datos de ubicación
+const sedes = [
+  {
+    id: "miraflores",
+    nombre: "Sede Miraflores (Principal)",
+    distrito: "Miraflores",
+    direccion: "Av. Comandante Espinar 450, Miraflores, Lima",
+    referencia: "A 2 cuadras del Óvalo Gutiérrez y cerca al Parque Tradiciones.",
+    horarioSemana: "Lunes a Sábado: 8:00 AM – 8:00 PM",
+    horarioDomingo: "Domingo: 9:00 AM – 2:00 PM",
+    telefono: "+51 990 853 697",
+    cochera: "4 cocheras para clientes en el frontis.",
+    servicios: ["Consulta general", "Vacunas y desparasitación", "Laboratorio clínico", "Farmacia veterinaria"],
+    mapaEmbed: "https://maps.google.com/maps?q=Av.+Comandante+Espinar+450,+Miraflores,+Lima&t=&z=16&ie=UTF8&iwloc=&output=embed",
+    mapaUrl: "https://maps.google.com/?q=Av.+Comandante+Espinar+450,+Miraflores,+Lima"
+  },
+  {
+    id: "san-borja",
+    nombre: "Sede San Borja",
+    distrito: "San Borja",
+    direccion: "Av. San Luis 2180, San Borja, Lima",
+    referencia: "Cruce con Av. Las Artes Norte, cerca al Pentagonito.",
+    horarioSemana: "Lunes a Sábado: 8:30 AM – 7:30 PM",
+    horarioDomingo: "Domingo: Cerrado",
+    telefono: "+51 990 853 697",
+    cochera: "Estacionamiento frontal disponible.",
+    servicios: ["Consulta preventiva", "Vacunatorio", "Pet shop", "Desparasitación"],
+    mapaEmbed: "https://maps.google.com/maps?q=Av.+San+Luis+2180,+San+Borja,+Lima&t=&z=16&ie=UTF8&iwloc=&output=embed",
+    mapaUrl: "https://maps.google.com/?q=Av.+San+Luis+2180,+San+Borja,+Lima"
+  },
+  {
+    id: "surco",
+    nombre: "Sede Surco (Chacarilla)",
+    distrito: "Santiago de Surco",
+    direccion: "Av. Primavera 780, Urb. Chacarilla, Surco, Lima",
+    referencia: "Frente a zona comercial Chacarilla, cerca al C.C. Caminos del Inca.",
+    horarioSemana: "Lunes a Sábado: 9:00 AM – 8:00 PM",
+    horarioDomingo: "Domingo: 9:00 AM – 1:00 PM",
+    telefono: "+51 990 853 697",
+    cochera: "Estacionamiento privado.",
+    servicios: ["Consulta médica", "Diagnóstico por imágenes", "Farmacia", "Baños medicados"],
+    mapaEmbed: "https://maps.google.com/maps?q=Av.+Primavera+780,+Santiago+de+Surco,+Lima&t=&z=16&ie=UTF8&iwloc=&output=embed",
+    mapaUrl: "https://maps.google.com/?q=Av.+Primavera+780,+Santiago+de+Surco,+Lima"
+  }
+];
+const sedeInicial = sedes[0];
+---
+<section id="sedes" class="section-spacing sedes-section" aria-labelledby="sedes-titulo">
+  <div class="container">
+    
+    <!-- Encabezado del apartado -->
+    <div class="section-heading text-center">
+      <p class="eyebrow mb-1">Nuestras sedes</p>
+      <h2 id="sedes-titulo" class="mt-1">Ubicación y horarios de atención</h2>
+      <p class="text-muted">
+        Elige la sede más cercana a tu domicilio para consultar dirección, horarios y mapa.
+      </p>
+    </div>
+
+    <!-- Selector de sedes sin emojis -->
+    <div class="sedes-selector-nav d-flex flex-wrap justify-content-center gap-2 mb-4" role="tablist" aria-label="Seleccionar sede">
+      {sedes.map((sede, idx) => (
+        <button
+          type="button"
+          class:list={["btn", "btn-sede-tab", { active: idx === 0 }]}
+          data-sede-id={sede.id}
+          data-sede-nombre={sede.nombre}
+          data-sede-direccion={sede.direccion}
+          data-sede-referencia={sede.referencia}
+          data-sede-semana={sede.horarioSemana}
+          data-sede-domingo={sede.horarioDomingo}
+          data-sede-telefono={sede.telefono}
+          data-sede-cochera={sede.cochera}
+          data-sede-servicios={sede.servicios.join(", ")}
+          data-sede-embed={sede.mapaEmbed}
+          data-sede-url={sede.mapaUrl}
+          role="tab"
+          aria-selected={idx === 0 ? "true" : "false"}
+        >
+          <span>{sede.distrito}</span>
+          {idx === 0 && <span class="sede-pill-principal">Principal</span>}
+        </button>
+      ))}
+    </div>
+
+    <!-- Contenido: Detalle de Dirección + Mapa -->
+    <div class="row g-4 align-items-stretch">
+      
+      <!-- Detalle de Dirección -->
+      <div class="col-12 col-lg-5">
+        <div class="sede-info-card h-100 p-4 rounded border d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span class="sede-distrito-badge" id="sede-detalle-distrito">{sedeInicial.distrito}</span>
+              <span class="small text-muted" id="sede-detalle-estado">Atención con cita</span>
+            </div>
+
+            <h3 class="h5 fw-bold text-dark mb-3" id="sede-detalle-nombre">{sedeInicial.nombre}</h3>
+            
+            <div class="mb-2">
+              <strong class="d-block small text-dark">Dirección:</strong>
+              <span class="text-muted small" id="sede-detalle-direccion">{sedeInicial.direccion}</span>
+            </div>
+
+            <div class="mb-2">
+              <strong class="d-block small text-dark">Referencia:</strong>
+              <span class="text-muted small" id="sede-detalle-referencia">{sedeInicial.referencia}</span>
+            </div>
+
+            <div class="mb-2">
+              <strong class="d-block small text-dark">Horario:</strong>
+              <span class="text-muted small d-block" id="sede-detalle-semana">{sedeInicial.horarioSemana}</span>
+              <span class="text-muted small d-block" id="sede-detalle-domingo">{sedeInicial.horarioDomingo}</span>
+            </div>
+
+            <div class="mb-3">
+              <strong class="d-block small text-dark">Estacionamiento:</strong>
+              <span class="text-muted small" id="sede-detalle-cochera">{sedeInicial.cochera}</span>
+            </div>
+
+            <div class="sede-servicios-box p-2 rounded mb-3">
+              <strong class="d-block small text-dark mb-1">Servicios en sede:</strong>
+              <span class="text-muted small" id="sede-detalle-servicios">{sedeInicial.servicios.join(" · ")}</span>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+            <a 
+              id="sede-enlace-maps" 
+              class="btn btn-primary btn-sm flex-grow-1" 
+              href={sedeInicial.mapaUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <span>Ver en Google Maps</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <button 
+              type="button"
+              class="btn btn-outline-primary btn-sm" 
+              data-abrir-modal-cita
+            >
+              Agendar cita
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Mapa de Google Maps -->
+      <div class="col-12 col-lg-7">
+        <div class="sede-map-container h-100 rounded border overflow-hidden">
+          <div class="map-overlay-header p-2 px-3 d-flex justify-content-between align-items-center">
+            <small class="fw-semibold text-dark">
+              Ubicación: <span id="mapa-sede-nombre">{sedeInicial.nombre}</span>
+            </small>
+            <small class="text-muted">Google Maps</small>
+          </div>
+          <iframe
+            id="iframe-google-maps"
+            src={sedeInicial.mapaEmbed}
+            width="100%"
+            height="420"
+            style="border:0; display:block; min-height: 380px;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Ubicación de sede en Google Maps"
+          ></iframe>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- Script para el selector de sedes -->
+<script>
+  (() => {
+    const botones = document.querySelectorAll(".btn-sede-tab");
+    const elemNombre = document.getElementById("sede-detalle-nombre");
+    const elemDistrito = document.getElementById("sede-detalle-distrito");
+    const elemDireccion = document.getElementById("sede-detalle-direccion");
+    const elemReferencia = document.getElementById("sede-detalle-referencia");
+    const elemSemana = document.getElementById("sede-detalle-semana");
+    const elemDomingo = document.getElementById("sede-detalle-domingo");
+    const elemCochera = document.getElementById("sede-detalle-cochera");
+    const elemServicios = document.getElementById("sede-detalle-servicios");
+    const enlaceMaps = document.getElementById("sede-enlace-maps");
+    const mapaIframe = document.getElementById("iframe-google-maps");
+    const mapaNombre = document.getElementById("mapa-sede-nombre");
+
+    botones.forEach(btn => {
+      btn.addEventListener("click", () => {
+        botones.forEach(b => {
+          b.classList.remove("active");
+          b.setAttribute("aria-selected", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+
+        const nombre = btn.getAttribute("data-sede-nombre") || "";
+        const direccion = btn.getAttribute("data-sede-direccion") || "";
+        const referencia = btn.getAttribute("data-sede-referencia") || "";
+        const semana = btn.getAttribute("data-sede-semana") || "";
+        const domingo = btn.getAttribute("data-sede-domingo") || "";
+        const cochera = btn.getAttribute("data-sede-cochera") || "";
+        const servicios = btn.getAttribute("data-sede-servicios") || "";
+        const embed = btn.getAttribute("data-sede-embed") || "";
+        const url = btn.getAttribute("data-sede-url") || "";
+        const distrito = btn.textContent.replace("Principal", "").trim();
+
+        if (elemNombre) elemNombre.textContent = nombre;
+        if (elemDistrito) elemDistrito.textContent = distrito;
+        if (elemDireccion) elemDireccion.textContent = direccion;
+        if (elemReferencia) elemReferencia.textContent = referencia;
+        if (elemSemana) elemSemana.textContent = semana;
+        if (elemDomingo) elemDomingo.textContent = domingo;
+        if (elemCochera) elemCochera.textContent = cochera;
+        if (elemServicios) elemServicios.textContent = servicios.split(", ").join(" · ");
+        if (enlaceMaps) enlaceMaps.setAttribute("href", url);
+        if (mapaIframe) mapaIframe.setAttribute("src", embed);
+        if (mapaNombre) mapaNombre.textContent = nombre;
+      });
+    });
+  })();
+</script>

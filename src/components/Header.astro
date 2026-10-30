@@ -1,0 +1,120 @@
+---
+import { portada } from "../data/portada.js";
+import ModalLogin from "./ModalLogin.astro";
+
+interface Props { inicio?: boolean; }
+const { inicio = false } = Astro.props;
+const ruta = Astro.url.pathname;
+const enlaces = [
+  { texto: "Inicio", href: "/" },
+  { texto: "Servicios", href: "/#servicios" },
+  { texto: "Nosotros", href: "/#nosotros" },
+  { texto: "Sedes", href: "/#sedes" },
+  { texto: "Opiniones", href: "/#testimonios" },
+  { texto: "Tienda & Farmacia", href: "/tienda" }
+];
+---
+<header class="site-header sticky-top">
+  <nav class="navbar navbar-expand-lg site-navbar" aria-label="Navegación principal">
+    <div class="container">
+      <a class="navbar-brand" href="/" aria-label="Patitas Felices, ir al inicio">
+        <img class="brand-logo" src="/img/logotipoveterinaria.jpg" width="1741" height="725" alt="Patitas Felices · Clínica veterinaria" />
+      </a>
+      
+      <button class="navbar-toggler menu-toggle" type="button" data-menu-toggle data-bs-toggle="collapse" data-bs-target="#menu-principal" aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir menú de navegación" hidden>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+        <span>Menú</span>
+      </button>
+
+      <div class="navbar-collapse" id="menu-principal" data-main-menu>
+        <ul class="navbar-nav mx-lg-auto">
+          {enlaces.map(enlace => (
+            <li class="nav-item">
+              <a class:list={["nav-link", { active: enlace.href === ruta }]} href={enlace.href} aria-current={enlace.href === ruta ? "page" : undefined}>
+                {enlace.texto}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div class="nav-actions">
+          <!-- Botón Iniciar Sesión (visible cuando NO hay sesión) -->
+          <button type="button" class="btn btn-header-login" id="btn-header-login" data-abrir-login aria-haspopup="dialog">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <span>Iniciar sesión</span>
+          </button>
+
+          <!-- Menú Dinámico "Ver perfil" (visible cuando SÍ hay sesión activa) -->
+          <div class="dropdown d-none" id="dropdown-header-perfil">
+            <button class="btn btn-header-perfil dropdown-toggle" type="button" id="btn-perfil-menu" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="header-avatar-circle" id="header-avatar-inicial">U</span>
+              <span id="header-texto-perfil">Ver perfil</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="btn-perfil-menu">
+              <li class="px-3 py-2 border-bottom">
+                <span class="d-block fw-bold text-truncate" id="header-menu-nombre">Mi Cuenta</span>
+                <span class="badge bg-secondary-subtle text-dark" id="header-menu-rol">Usuario</span>
+              </li>
+              <li><a class="dropdown-item py-2" id="header-enlace-espacio" href="/cliente">Mi panel</a></li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <button class="dropdown-item py-2 text-danger" type="button" id="header-btn-cerrar-sesion">
+                  Cerrar sesión
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Botón fijo Agendar cita -->
+          <button type="button" class="btn btn-cita-header" data-abrir-modal-cita>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Agendar cita</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+{inicio && (
+  <section class="hero" aria-labelledby="portada-titulo">
+    <div class="hero-background" aria-hidden="true">
+      <img class="hero-media" src={portada.imagen} width="704" height="378" alt="" fetchpriority="high" />
+      {portada.video && (
+        <video class="hero-media" data-hero-video muted loop playsinline preload="none" poster={portada.imagen}>
+          <source src={portada.video} type={portada.tipoVideo} />
+        </video>
+      )}
+      <div class="hero-shade"></div>
+    </div>
+    <div class="container hero-content">
+      <div class="hero-copy">
+        <p class="eyebrow hero-eyebrow mb-2">Clínica Veterinaria Patitas Felices</p>
+        <h1 id="portada-titulo">Son parte de tu familia.<br />Su cuidado también es el nuestro.</h1>
+        <p class="hero-description">Atención veterinaria general, vacunación, controles de salud y asesoría cercana en cada etapa de su vida.</p>
+        
+        <div class="hero-actions">
+          <button type="button" class="btn btn-cita-header" data-abrir-modal-cita>Agendar cita</button>
+          <a class="btn btn-outline-light" href="/#servicios">Ver servicios</a>
+        </div>
+        {portada.video && <button type="button" class="btn btn-outline-light hero-video-toggle" data-hero-video-toggle hidden>Reproducir video de fondo</button>}
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- Modal Global de Autenticación -->
+<ModalLogin />
+
+<script>
+  import "../scripts/header-auth.js";
+</script>

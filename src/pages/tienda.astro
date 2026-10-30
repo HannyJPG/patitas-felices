@@ -1,0 +1,253 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const catalogoInicial = [
+  { 
+    id: 1, 
+    codigo: "VET-001", 
+    nombre: "Antipulgas Bravecto Chewable 10-20kg", 
+    categoria: "Farmacia", 
+    descripcion: "Protección oral por 12 semanas contra pulgas y garrapatas.", 
+    precio: 145.00, 
+    stock: 25,
+    imagen: "/img/productos/imagen%20de%20bravecto.jpg"
+  },
+  { 
+    id: 2, 
+    codigo: "VET-002", 
+    nombre: "Alimento Clínico Renal Canine 2kg", 
+    categoria: "Nutrición", 
+    descripcion: "Dieta de soporte renal e hidratación.", 
+    precio: 89.50, 
+    stock: 18,
+    imagen: "/img/productos/alimento%20clinico%20renal.jpg"
+  },
+  { 
+    id: 3, 
+    codigo: "VET-003", 
+    nombre: "Shampoo Dermatológico Clorhexidina 250ml", 
+    categoria: "Higiene", 
+    descripcion: "Fórmula antiséptica para piel sensible.", 
+    precio: 48.00, 
+    stock: 30,
+    imagen: "/img/productos/shampoo%20dermatologico.jpg"
+  },
+  { 
+    id: 4, 
+    codigo: "VET-004", 
+    nombre: "Suplemento Omega 3 & Vitaminas Pelaje", 
+    categoria: "Suplementos", 
+    descripcion: "60 cápsulas blandas para articulaciones y pelaje.", 
+    precio: 65.00, 
+    stock: 20,
+    imagen: "/img/productos/suplemento.jpg"
+  },
+  { 
+    id: 5, 
+    codigo: "VET-005", 
+    nombre: "Collar Isabelino Ajustable Acolchado", 
+    categoria: "Accesorios", 
+    descripcion: "Para recuperación postoperatoria sin roce.", 
+    precio: 35.00, 
+    stock: 15,
+    imagen: "/img/productos/collar%20isabelino.jpg"
+  },
+  { 
+    id: 6, 
+    codigo: "VET-006", 
+    nombre: "Kit Dental Enzimático Veterinario", 
+    categoria: "Higiene", 
+    descripcion: "Pasta enzimática y cepillo dental suave.", 
+    precio: 42.00, 
+    stock: 12,
+    imagen: "/img/productos/kit%20clinico%20dental.jpg"
+  }
+];
+---
+<Layout title="Tienda y Farmacia Veterinaria | Patitas Felices">
+  <main class="container section-spacing" id="contenido" tabindex="-1">
+    <div class="appointment-intro">
+      <p class="eyebrow mb-1">Catálogo</p>
+      <h1 id="tienda-titulo" class="mt-1">Tienda y Farmacia Veterinaria</h1>
+      <p class="lead text-muted">
+        Productos para el cuidado de tu mascota con emisión de boleta electrónica.
+      </p>
+    </div>
+
+    <div class="row g-4 align-items-start">
+      <div class="col-12 col-lg-8">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+          <div>
+            <h2 class="h5 mb-0 fw-bold">Productos disponibles</h2>
+            <small class="text-muted">Precios en soles peruanos</small>
+          </div>
+          <span id="estado-catalogo" class="small text-muted">
+            Stock disponible
+          </span>
+        </div>
+
+        <!-- Rejilla de productos con sus imágenes individuales -->
+        <div id="grid-productos" class="row g-3">
+          {catalogoInicial.map(prod => (
+            <div class="col-12 col-md-6" data-producto-card={prod.id}>
+              <article class="product-card h-100 d-flex flex-column">
+                
+                <!-- Caja de imagen con marco simple -->
+                <div class="product-image-box position-relative overflow-hidden mb-3">
+                  <img 
+                    src={prod.imagen} 
+                    alt={prod.nombre} 
+                    class="product-image"
+                    loading="lazy" 
+                  />
+                  <span class="product-category-chip">{prod.categoria}</span>
+                  <span class="product-stock-chip" data-stock-badge={prod.id}>
+                    Stock: {prod.stock}
+                  </span>
+                </div>
+
+                <!-- Detalle del producto -->
+                <div class="product-info-body d-flex flex-column flex-grow-1">
+                  <span class="product-code small text-muted mb-1">{prod.codigo}</span>
+                  <h3 class="product-title h6 fw-bold mb-1">{prod.nombre}</h3>
+                  <p class="product-desc small text-muted mb-3 flex-grow-1">{prod.descripcion}</p>
+
+                  <!-- Pie: Precio y Botón de añadir -->
+                  <div class="product-footer d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                    <div>
+                      <small class="text-muted d-block" style="font-size: 0.72rem;">PRECIO</small>
+                      <strong class="product-price">S/ {prod.precio.toFixed(2)}</strong>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm btn-add-cart d-inline-flex align-items-center gap-1"
+                      data-seleccionar-producto={prod.id}
+                      data-nombre={prod.nombre}
+                      data-precio={prod.precio}
+                    >
+                      <span>Añadir</span>
+                    </button>
+                  </div>
+                </div>
+
+              </article>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Barra lateral de Checkout y Carrito -->
+      <aside class="col-12 col-lg-4" aria-labelledby="checkout-titulo">
+        <div class="appointment-form checkout-sidebar border rounded p-3">
+          <p class="eyebrow mb-1">Resumen</p>
+          <h2 id="checkout-titulo" class="h5 fw-bold mb-3">Tu Pedido</h2>
+
+          <div id="lista-pedido" class="mb-3">
+            <p class="small text-muted mb-0">No has seleccionado productos aún.</p>
+          </div>
+
+          <dl class="appointment-summary border-top border-bottom py-2 my-3">
+            <dt>Subtotal</dt><dd id="resumen-subtotal">S/ 0.00</dd>
+            <dt>I.G.V. (18%)</dt><dd id="resumen-igv">S/ 0.00</dd>
+            <dt class="fw-bold">Total a pagar</dt><dd><strong id="resumen-total" class="text-dark">S/ 0.00</strong></dd>
+          </dl>
+
+          <form id="formulario-checkout" method="post" novalidate>
+            <div id="alerta-checkout" class="alert alert-danger py-2 small" role="alert" hidden></div>
+
+            <div id="aviso-requiere-login" class="alert alert-secondary py-2 small mb-3 d-none" role="alert">
+              <p class="mb-1 fw-bold text-dark">Inicia sesión para comprar</p>
+              <p class="mb-2 small text-muted">Para emitir la boleta electrónica a tu nombre debes acceder a tu cuenta.</p>
+              <button type="button" class="btn btn-primary btn-sm w-100" id="btn-login-desde-tienda">
+                Iniciar sesión / Registrarme
+              </button>
+            </div>
+
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <label class="form-label small fw-semibold mb-1" for="cliente-nombre">Nombre y apellido</label>
+                <span class="badge bg-light text-secondary border small" style="font-size: 0.7rem;">Cuenta activa</span>
+              </div>
+              <input 
+                class="form-control form-control-sm bg-light" 
+                id="cliente-nombre" 
+                name="cliente_nombre" 
+                type="text" 
+                required 
+                readonly 
+                placeholder="Inicia sesión para comprar" 
+                style="cursor: not-allowed;"
+              />
+              <small id="nota-nombre-cuenta" class="text-muted d-block mt-1" style="font-size: 0.73rem;">
+                Nombre verificado de tu cuenta (bloqueado para emisión fiscal).
+              </small>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label small fw-semibold mb-1" for="tipo-documento">Tipo de identificación</label>
+              <select class="form-select form-select-sm" id="tipo-documento" name="tipo_documento">
+                <option value="DNI" selected>DNI (8 dígitos)</option>
+                <option value="RUC">RUC (11 dígitos)</option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <label class="form-label small fw-semibold mb-1" for="cliente-documento">Número de documento</label>
+                <span id="badge-doc-estado" class="badge bg-light text-secondary border small" style="font-size: 0.7rem;">Por vincular</span>
+              </div>
+              <input 
+                class="form-control form-control-sm" 
+                id="cliente-documento" 
+                name="cliente_documento" 
+                type="text" 
+                required 
+                minlength="8" 
+                maxlength="8" 
+                inputmode="numeric"
+                placeholder="Ingresa los 8 dígitos de tu DNI" 
+              />
+              <small id="nota-documento" class="text-muted d-block mt-1" style="font-size: 0.73rem;">
+                Este número quedará registrado permanentemente en tu perfil como identificador único.
+              </small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold" for="metodo-pago">Medio de pago</label>
+              <select class="form-select form-select-sm" id="metodo-pago" name="metodo_pago">
+                <option value="Yape / Plin">Yape / Plin</option>
+                <option value="Tarjeta Visa / Mastercard">Tarjeta Visa / Mastercard</option>
+                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+              </select>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button id="btn-procesar-venta" type="submit" class="btn btn-primary btn-sm py-2">
+                Generar boleta de compra
+              </button>
+              <button id="btn-vaciar-pedido" type="button" class="btn btn-outline-secondary btn-sm">
+                Vaciar lista
+              </button>
+            </div>
+          </form>
+
+          <div id="resultado-boleta" class="alert alert-success mt-3 small p-2" role="status" hidden>
+            <p class="fw-bold mb-1">Venta registrada</p>
+            <p class="small mb-2">Boleta: <strong id="boleta-numero"></strong></p>
+            <div class="d-grid gap-2">
+              <button id="btn-descargar-pdf" type="button" class="btn btn-success btn-sm">
+                Descargar boleta (PDF)
+              </button>
+              <a id="enlace-whatsapp-boleta" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success btn-sm">
+                Enviar a WhatsApp ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script>
+    import "../scripts/tienda.js";
+  </script>
+</Layout>

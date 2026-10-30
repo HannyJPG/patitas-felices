@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Acceso Administrativo | Patitas Felices">
+  <script is:inline>
+    window.location.replace("/admin-app");
+  </script>
+  <main class="container section-spacing text-center py-5" id="contenido" tabindex="-1">
+    <h1 id="admin-titulo" class="h4 mb-3">Redirigiendo al Panel Administrativo...</h1>
+    <p class="text-muted mb-3">Si no eres redirigido automáticamente, haz clic en el siguiente botón:</p>
+    <a href="/admin-app" class="btn btn-primary">Abrir Aplicación Administrativa</a>
+  </main>
+</Layout>

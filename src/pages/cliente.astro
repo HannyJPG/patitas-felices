@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Mi cuenta y mascotas | Patitas Felices">
+  <script is:inline>
+    window.location.replace("/perfil");
+  </script>
+  <main class="container section-spacing text-center py-5" id="contenido" tabindex="-1">
+    <h1 id="cliente-titulo" class="h4 mb-3">Redirigiendo a tu panel de perfil...</h1>
+    <p class="text-muted mb-3">Si no eres redirigido automáticamente, haz clic en el siguiente botón:</p>
+    <a href="/perfil" class="btn btn-primary">Ir a Mi Perfil</a>
+  </main>
+</Layout>

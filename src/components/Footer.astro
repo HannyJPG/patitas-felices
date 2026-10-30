@@ -1,0 +1,27 @@
+---
+import { clinica } from "../data/clinica.js";
+import { enlaceWhatsApp } from "../scripts/whatsapp.js";
+const anio = new Intl.DateTimeFormat("es-PE", { timeZone: "America/Lima", year: "numeric" }).format(new Date());
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/" class="footer-brand-name">Patitas Felices</a>
+        <p>Un cuidado cercano para quienes son parte de tu familia.</p>
+        <a class="footer-phone" href={enlaceWhatsApp()} target="_blank" rel="noopener noreferrer">Telefono Patitas  <span aria-hidden="true">↗</span></a>
+      </div>
+      <nav aria-label="Navegación del pie de página">
+        <a href="/">Inicio</a>
+        <a href="/#servicios">Servicios</a>
+        <a href="/tienda">Tienda</a>
+        <a href="#modalAgendarCita" data-abrir-modal-cita>Agendar cita</a>
+        <a href="/perfil">Mi Perfil</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; {anio} Clínica Patitas Felices. Sistema Integral Astro + FastAPI.</p>
+      <p>Gestión de Historias Clínicas, Pacientes y Facturación.</p>
+    </div>
+  </div>
+</footer>

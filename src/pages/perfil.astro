@@ -1,0 +1,633 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Mi Perfil y Panel Clínico | Patitas Felices">
+  <main class="container section-spacing" id="contenido" tabindex="-1">
+    
+    <!-- Banner superior del Usuario -->
+    <section class="profile-banner mb-4 p-4 rounded border shadow-sm bg-white" aria-labelledby="perfil-usuario-nombre">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div 
+            id="perfil-avatar" 
+            class="d-flex align-items-center justify-content-center text-white fw-bold rounded-circle shadow-sm"
+            style="width: 56px; height: 56px; font-size: 1.35rem; background-color: #E89B5B;"
+          >
+            PF
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h1 id="perfil-usuario-nombre" class="h4 mb-0 fw-bold text-dark">Mi Perfil</h1>
+              <span id="perfil-usuario-rol" class="badge bg-light text-secondary border small">Cargando rol...</span>
+              <span id="perfil-usuario-estado" class="badge bg-success-subtle text-success border border-success-subtle small">Activo</span>
+            </div>
+            <p id="perfil-usuario-detalle" class="small text-muted mb-0">Cargando información de cuenta...</p>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <a href="/tienda" class="btn btn-outline-secondary btn-sm" id="btn-banner-tienda">Ir a la tienda</a>
+          <button type="button" class="btn btn-outline-danger btn-sm" id="btn-cerrar-sesion-perfil">
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Alertas globales del panel -->
+    <div id="alerta-perfil-global" class="alert alert-info py-2 px-3 small d-none" role="alert"></div>
+
+    <!-- Estructura SPA: 2 Columnas -->
+    <div class="row g-4 align-items-start">
+      
+      <!-- Columna Lateral: Navegación por pestañas -->
+      <aside class="col-12 col-md-4 col-lg-3" aria-label="Menú del panel">
+        <div class="card p-3 rounded border shadow-sm bg-white">
+          <p class="small text-muted fw-bold text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+            Navegación
+          </p>
+          <div class="nav nav-pills flex-column gap-1" id="menu-tabs-perfil" role="tablist">
+            
+            <!-- Pestañas de Cliente -->
+            <button class="nav-link active text-start py-2 px-3" data-tab-target="tab-perfil" type="button" role="tab">
+              Mi perfil
+            </button>
+            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-mascotas" data-role-filter="cliente" type="button" role="tab">
+              Mis mascotas
+            </button>
+            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-compras" data-role-filter="cliente" type="button" role="tab">
+              Mis compras y boletas
+            </button>
+            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-pagos" data-role-filter="cliente" type="button" role="tab">
+              Métodos de pago
+            </button>
+            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-citas" data-role-filter="cliente" type="button" role="tab">
+              Mis citas médicas
+            </button>
+
+            <!-- Pestañas de Doctor -->
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-agenda" data-role-filter="doctor" type="button" role="tab">
+              Agenda de pacientes
+            </button>
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-farmacia" data-role-filter="doctor" type="button" role="tab">
+              Catálogo de farmacia
+            </button>
+
+            <!-- Pestañas de Administrador -->
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-crm" data-role-filter="admin" type="button" role="tab">
+              CRM y Finanzas
+            </button>
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-solicitudes" data-role-filter="admin" type="button" role="tab">
+              Solicitudes de mascotas <span id="badge-contador-solicitudes" class="badge bg-warning text-dark ms-1 d-none">0</span>
+            </button>
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-personal" data-role-filter="admin" type="button" role="tab">
+              Gestión de personal
+            </button>
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-usuarios" data-role-filter="admin" type="button" role="tab">
+              Control de cuentas
+            </button>
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-bd" data-role-filter="admin" type="button" role="tab">
+              Visor de 16 tablas
+            </button>
+
+          </div>
+
+          <div class="border-top pt-3 mt-3">
+            <button type="button" class="btn btn-outline-danger btn-sm w-100" id="btn-sidebar-cerrar-sesion">
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Columna Principal: Paneles de contenido reactivo -->
+      <section class="col-12 col-md-8 col-lg-9" aria-live="polite">
+        
+        <!-- ===================================================================
+             1. PANEL: MI PERFIL (Datos, DNI/RUC inmutable, Cambiar contraseña)
+             =================================================================== -->
+        <article id="panel-perfil" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Información de Cuenta</h2>
+              <small class="text-muted">Consulta tus datos personales e identificación oficial.</small>
+            </div>
+            <span class="badge bg-light text-secondary border">Cuenta protegida</span>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6">
+              <label class="form-label small text-muted mb-1">Nombre completo</label>
+              <p id="perfil-campo-nombre" class="fw-semibold mb-0 text-dark">-</p>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label small text-muted mb-1">Correo electrónico</label>
+              <p id="perfil-campo-email" class="fw-semibold mb-0 text-dark">-</p>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label small text-muted mb-1">Teléfono de contacto</label>
+              <p id="perfil-campo-telefono" class="fw-semibold mb-0 text-dark">-</p>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label small text-muted mb-1">Rol en el sistema</label>
+              <p id="perfil-campo-rol" class="fw-semibold mb-0 text-dark">-</p>
+            </div>
+          </div>
+
+          <!-- Documento oficial (DNI / RUC) -->
+          <div class="border rounded p-3 bg-light mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="h6 fw-bold mb-0 text-dark">Identificador oficial (DNI / RUC)</h3>
+              <span id="badge-estado-doc-perfil" class="badge bg-secondary small">Consultando</span>
+            </div>
+            <div id="contenedor-doc-perfil">
+              <p class="small text-muted mb-0">Cargando estado de identificación...</p>
+            </div>
+
+            <!-- Formulario para vincular documento si aún no tiene -->
+            <form id="form-vincular-doc-perfil" class="row g-2 align-items-end mt-2 d-none" novalidate>
+              <div class="col-12 col-sm-4">
+                <label class="form-label small mb-1" for="perfil-select-tipo-doc">Tipo</label>
+                <select class="form-select form-select-sm" id="perfil-select-tipo-doc">
+                  <option value="DNI" selected>DNI (8 dígitos)</option>
+                  <option value="RUC">RUC (11 dígitos)</option>
+                </select>
+              </div>
+              <div class="col-12 col-sm-5">
+                <label class="form-label small mb-1" for="perfil-input-num-doc">Número de documento</label>
+                <input type="text" class="form-control form-control-sm" id="perfil-input-num-doc" required maxlength="8" inputmode="numeric" placeholder="Ej: 74859632" />
+              </div>
+              <div class="col-12 col-sm-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1" id="btn-submit-vincular-doc">Vincular</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-cancelar-vincular-doc">Cancelar</button>
+              </div>
+              <div class="col-12">
+                <small class="text-muted d-block" style="font-size: 0.72rem;">
+                  Nota: Al ser tu identificador fiscal único, una vez guardado quedará sellado y no podrá ser modificado.
+                </small>
+              </div>
+            </form>
+          </div>
+
+          <!-- Formulario para Cambiar Contraseña -->
+          <div class="border rounded p-3 bg-white">
+            <h3 class="h6 fw-bold mb-1 text-dark">Seguridad de la Cuenta</h3>
+            <p class="small text-muted mb-3">Actualiza tu contraseña de acceso cuando lo necesites.</p>
+            
+            <div id="alerta-cambio-password" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+
+            <form id="form-cambiar-password" class="row g-3" novalidate>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1 fw-semibold" for="input-pass-actual">Contraseña actual *</label>
+                <input type="password" class="form-control form-control-sm" id="input-pass-actual" required placeholder="Tu clave actual" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1 fw-semibold" for="input-pass-nueva">Nueva contraseña *</label>
+                <input type="password" class="form-control form-control-sm" id="input-pass-nueva" required minlength="6" placeholder="Mínimo 6 caracteres" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1 fw-semibold" for="input-pass-confirmar">Confirmar nueva *</label>
+                <input type="password" class="form-control form-control-sm" id="input-pass-confirmar" required minlength="6" placeholder="Repite la nueva clave" />
+              </div>
+              <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-outline-dark btn-sm" id="btn-guardar-password">
+                  Actualizar contraseña
+                </button>
+              </div>
+            </form>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             2. PANEL: MIS MASCOTAS (Listado, Alta, Solicitudes con justificación)
+             =================================================================== -->
+        <article id="panel-mascotas" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Mis Mascotas Registradas</h2>
+              <small class="text-muted">Fichas clínicas de tus compañeros y gestión de cambios.</small>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-toggle-alta-mascota">
+              + Añadir mascota
+            </button>
+          </div>
+
+          <!-- Formulario desplegable para nueva mascota -->
+          <div id="wrap-alta-mascota" class="p-3 mb-4 border rounded bg-light d-none">
+            <h3 class="h6 fw-bold mb-2 text-dark">Registrar nueva mascota</h3>
+            <div id="alerta-alta-mascota" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+            
+            <form id="form-alta-mascota" class="row g-2" novalidate>
+              <div class="col-12 col-sm-6">
+                <label class="form-label small mb-1" for="alta-mascota-nombre">Nombre *</label>
+                <input type="text" class="form-control form-control-sm" id="alta-mascota-nombre" required placeholder="Ej. Toby" />
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label small mb-1" for="alta-mascota-especie">Especie *</label>
+                <select class="form-select form-select-sm" id="alta-mascota-especie">
+                  <option value="Perro" selected>Perro</option>
+                  <option value="Gato">Gato</option>
+                  <option value="Ave">Ave</option>
+                  <option value="Conejo">Conejo</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label small mb-1" for="alta-mascota-raza">Raza</label>
+                <input type="text" class="form-control form-control-sm" id="alta-mascota-raza" placeholder="Ej. Beagle, Mestizo" />
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label small mb-1" for="alta-mascota-sexo">Sexo</label>
+                <select class="form-select form-select-sm" id="alta-mascota-sexo">
+                  <option value="H" selected>Hembra</option>
+                  <option value="M">Macho</option>
+                </select>
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label small mb-1" for="alta-mascota-edad">Edad (años)</label>
+                <input type="number" class="form-control form-control-sm" id="alta-mascota-edad" min="0" max="30" value="1" />
+              </div>
+              <div class="col-12 col-sm-6">
+                <label class="form-label small mb-1" for="alta-mascota-peso">Peso (kg)</label>
+                <input type="number" step="0.1" class="form-control form-control-sm" id="alta-mascota-peso" min="0.1" max="150" value="5.0" />
+              </div>
+              <div class="col-12">
+                <label class="form-label small mb-1" for="alta-mascota-resumen">Observaciones o vacunas</label>
+                <input type="text" class="form-control form-control-sm" id="alta-mascota-resumen" placeholder="Ej. Vacuna séxtuple al día, control preventivo" />
+              </div>
+              <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-cancelar-alta-mascota">Cancelar</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="btn-guardar-alta-mascota">Guardar mascota</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Contenedor dinámico de tarjetas de mascotas -->
+          <div id="contenedor-lista-mascotas" class="d-grid gap-3 mb-4">
+            <p class="small text-muted mb-0">Cargando tus mascotas...</p>
+          </div>
+
+          <!-- Historial de solicitudes de cambios enviadas -->
+          <div class="border-top pt-3 mt-3">
+            <h3 class="h6 fw-bold mb-1 text-dark">Solicitudes de cambios y bajas enviadas</h3>
+            <p class="small text-muted mb-2">Por seguridad clínica, las modificaciones o bajas requieren la aceptación del administrador.</p>
+            <div id="contenedor-mis-solicitudes" class="small text-muted">
+              <p class="mb-0">No tienes solicitudes pendientes.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             3. PANEL: MIS COMPRAS Y BOLETAS (Historial y Descargas)
+             =================================================================== -->
+        <article id="panel-compras" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="border-bottom pb-2 mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark">Mis Compras y Boletas Electrónicas</h2>
+            <small class="text-muted">Comprobantes fiscales de tus productos adquiridos en farmacia y tienda.</small>
+          </div>
+
+          <div id="contenedor-mis-compras">
+            <p class="small text-muted mb-0">Consultando historial de compras...</p>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             4. PANEL: MÉTODOS DE PAGO (Ejemplar visual / Maqueta)
+             =================================================================== -->
+        <article id="panel-pagos" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Métodos de Pago</h2>
+              <small class="text-muted">Billetera de pagos registrada para tus compras y reservas.</small>
+            </div>
+            <span class="badge bg-light text-secondary border small">Demostración visual</span>
+          </div>
+
+          <div class="alert alert-secondary py-2 px-3 small mb-3">
+            <p class="mb-0">
+              <strong>Nota informativa:</strong> Este panel es un ejemplar ilustrativo para previsualizar tus tarjetas y cuentas de pago. En Patitas Felices los pagos se procesan en recepción física o mediante confirmación directa por Yape / Plin.
+            </p>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <!-- Tarjeta 1 (Visa) -->
+            <div class="col-12 col-md-6">
+              <div class="p-3 rounded border bg-light position-relative">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="badge bg-primary text-white">VISA</span>
+                  <span class="badge bg-light text-secondary border small">Predeterminada</span>
+                </div>
+                <p class="fw-bold fs-6 mb-1 text-dark" style="letter-spacing: 1px;">•••• •••• •••• 4821</p>
+                <div class="d-flex justify-content-between text-muted small">
+                  <span>Titular registrado</span>
+                  <span>Vence: 08/28</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjeta 2 (Mastercard) -->
+            <div class="col-12 col-md-6">
+              <div class="p-3 rounded border bg-light position-relative">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="badge bg-danger text-white">Mastercard</span>
+                  <span class="text-muted small">Secundaria</span>
+                </div>
+                <p class="fw-bold fs-6 mb-1 text-dark" style="letter-spacing: 1px;">•••• •••• •••• 9104</p>
+                <div class="d-flex justify-content-between text-muted small">
+                  <span>Titular registrado</span>
+                  <span>Vence: 11/27</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Yape / Plin -->
+            <div class="col-12">
+              <div class="p-3 rounded border bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                  <span class="badge bg-purple text-white mb-1" style="background-color: #742774;">Yape / Plin</span>
+                  <p class="mb-0 small text-dark fw-semibold">Número vinculado: Al teléfono registrado en tu cuenta</p>
+                </div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Habilitado</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-mock-agregar-tarjeta">
+            + Añadir tarjeta (Ejemplar ilustrativo)
+          </button>
+        </article>
+
+        <!-- ===================================================================
+             5. PANEL: MIS CITAS MÉDICAS (Cliente)
+             =================================================================== -->
+        <article id="panel-citas" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Mis Citas Médicas</h2>
+              <small class="text-muted">Próximas visitas y evaluaciones clínicas de tus mascotas.</small>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" data-abrir-modal-cita>Agendar nueva cita</button>
+          </div>
+
+          <div id="contenedor-mis-citas">
+            <p class="small text-muted mb-0">Consultando citas...</p>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             6. PANEL: AGENDA MÉDICA (Doctor)
+             =================================================================== -->
+        <article id="panel-agenda" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Agenda de Pacientes</h2>
+              <small class="text-muted">Confirmación y atención médica de citas en 1 clic.</small>
+            </div>
+            <span class="badge bg-light text-secondary border">Turno activo</span>
+          </div>
+
+          <!-- Formulario de atención médica -->
+          <div id="wrap-atencion-doctor" class="p-3 mb-4 border rounded bg-light d-none">
+            <h3 class="h6 fw-bold mb-2 text-dark">Registrar Evaluación Clínica</h3>
+            <div id="alerta-atencion-doctor" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+            
+            <form id="form-atencion-doctor" class="row g-2" novalidate>
+              <input type="hidden" id="doctor-input-cita-id" />
+              <div class="col-12">
+                <p id="doctor-info-paciente" class="small fw-bold text-dark mb-1">-</p>
+              </div>
+              <div class="col-12">
+                <label class="form-label small mb-1 fw-semibold" for="doctor-input-diagnostico">Diagnóstico clínico *</label>
+                <textarea class="form-control form-control-sm" id="doctor-input-diagnostico" rows="2" required placeholder="Detalle del estado del paciente..."></textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label small mb-1 fw-semibold" for="doctor-input-tratamiento">Tratamiento y receta médica *</label>
+                <textarea class="form-control form-control-sm" id="doctor-input-tratamiento" rows="2" required placeholder="Medicamentos, dosis y días..."></textarea>
+              </div>
+              <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-cancelar-atencion">Cancelar</button>
+                <button type="submit" class="btn btn-success btn-sm" id="btn-guardar-atencion">Guardar y finalizar atención</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="contenedor-agenda-doctor">
+            <p class="small text-muted mb-0">Cargando agenda...</p>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             7. PANEL: CATÁLOGO CLÍNICO (Doctor)
+             =================================================================== -->
+        <article id="panel-farmacia" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="border-bottom pb-2 mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark">Catálogo de Farmacia e Insumos</h2>
+            <small class="text-muted">Consulta rápida de stock disponible en tiempo real.</small>
+          </div>
+          <div id="contenedor-farmacia-doctor">
+            <p class="small text-muted mb-0">Cargando catálogo...</p>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             8. PANEL: CRM Y FINANZAS (Admin)
+             =================================================================== -->
+        <article id="panel-crm" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="border-bottom pb-2 mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark">Métricas Financieras y CRM</h2>
+            <small class="text-muted">Control de ventas totales y facturación de la clínica.</small>
+          </div>
+          <div id="contenedor-crm-admin">
+            <p class="small text-muted mb-0">Cargando métricas...</p>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             9. PANEL: SOLICITUDES DE MASCOTAS (Admin - Aprobación/Rechazo)
+             =================================================================== -->
+        <article id="panel-solicitudes" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="border-bottom pb-2 mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark">Bandeja de Solicitudes de Mascotas</h2>
+            <small class="text-muted">Evalúa y aprueba las peticiones de cambios o bajas de pacientes solicitadas por propietarios.</small>
+          </div>
+          <div id="contenedor-solicitudes-admin">
+            <p class="small text-muted mb-0">Cargando solicitudes...</p>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             10. PANEL: GESTIÓN DE PERSONAL (Admin)
+             =================================================================== -->
+        <article id="panel-personal" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="border-bottom pb-2 mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark">Alta de Personal Médico y Administrativo</h2>
+            <small class="text-muted">Registra doctores con colegiatura CMVP o nuevos administradores.</small>
+          </div>
+
+          <div id="alerta-alta-personal" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+
+          <form id="form-alta-personal" class="row g-3" novalidate>
+            <div class="col-12 col-md-6">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-nombre">Nombre y apellido *</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-nombre" required placeholder="Ej. Dr. Mario Ruiz" />
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-email">Correo electrónico *</label>
+              <input type="email" class="form-control form-control-sm" id="personal-input-email" required placeholder="doctor@patitasfelices.pe" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-rol">Rol asignado *</label>
+              <select class="form-select form-select-sm" id="personal-input-rol">
+                <option value="doctor" selected>Médico Veterinario (Doctor)</option>
+                <option value="admin">Administrador de Clínica</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-cmvp">Colegiatura CMVP</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-cmvp" placeholder="CMVP-12345" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-especialidad">Especialidad médica</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-especialidad" value="Medicina General" />
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-telefono">Teléfono</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-telefono" placeholder="987654321" />
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-password">Contraseña inicial *</label>
+              <input type="password" class="form-control form-control-sm" id="personal-input-password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-personal">
+                Registrar nuevo personal
+              </button>
+            </div>
+          </form>
+        </article>
+
+        <!-- ===================================================================
+             11. PANEL: CONTROL DE CUENTAS (Admin)
+             =================================================================== -->
+        <article id="panel-usuarios" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="border-bottom pb-2 mb-3">
+            <h2 class="h5 fw-bold mb-0 text-dark">Control de Usuarios</h2>
+            <small class="text-muted">Activa o suspende cuentas de clientes y personal en tiempo real.</small>
+          </div>
+          <div id="contenedor-usuarios-admin">
+            <p class="small text-muted mb-0">Cargando usuarios...</p>
+          </div>
+        </article>
+
+        <!-- ===================================================================
+             12. PANEL: VISOR DE 16 TABLAS (Admin)
+             =================================================================== -->
+        <article id="panel-bd" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <div>
+              <h2 class="h5 fw-bold mb-0 text-dark">Visor de las 16 Tablas Relacionales</h2>
+              <small class="text-muted">Explora el modelo DER completo sincronizado en tiempo real.</small>
+            </div>
+            <a href="/visor-bd" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm">
+              Abrir visor completo ↗
+            </a>
+          </div>
+          <div id="contenedor-visor-tablas-resumen">
+            <p class="small text-muted mb-0">Consultando tablas de la base de datos...</p>
+          </div>
+        </article>
+
+      </section>
+    </div>
+
+    <!-- Modal para Solicitud de Edición / Baja de Mascota -->
+    <div class="modal fade" id="modalSolicitudMascota" tabindex="-1" aria-labelledby="modalSolicitudTitulo" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title h6 fw-bold" id="modalSolicitudTitulo">Solicitar cambio de mascota</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <form id="form-solicitud-mascota" novalidate>
+            <div class="modal-body">
+              <input type="hidden" id="solicitud-input-mascota-id" />
+              <input type="hidden" id="solicitud-input-tipo" />
+              
+              <div id="alerta-solicitud-modal" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+
+              <p id="solicitud-mensaje-intro" class="small text-muted mb-3">
+                Por favor describe detalladamente la razón de la solicitud para que el administrador evalúe su aprobación.
+              </p>
+
+              <!-- Campos editables solo si el tipo es 'editar' -->
+              <div id="wrap-campos-edicion-mascota" class="d-none mb-3">
+                <div class="row g-2">
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label small mb-1" for="edit-mascota-nombre">Nombre *</label>
+                    <input type="text" class="form-control form-control-sm" id="edit-mascota-nombre" required />
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label small mb-1" for="edit-mascota-especie">Especie</label>
+                    <select class="form-select form-select-sm" id="edit-mascota-especie">
+                      <option value="Perro">Perro</option>
+                      <option value="Gato">Gato</option>
+                      <option value="Ave">Ave</option>
+                      <option value="Conejo">Conejo</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label small mb-1" for="edit-mascota-raza">Raza</label>
+                    <input type="text" class="form-control form-control-sm" id="edit-mascota-raza" />
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label small mb-1" for="edit-mascota-edad">Edad (años)</label>
+                    <input type="number" class="form-control form-control-sm" id="edit-mascota-edad" min="0" max="30" />
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label small mb-1" for="edit-mascota-peso">Peso (kg)</label>
+                    <input type="number" step="0.1" class="form-control form-control-sm" id="edit-mascota-peso" min="0.1" max="150" />
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <label class="form-label small mb-1" for="edit-mascota-resumen">Notas / Vacunas</label>
+                    <input type="text" class="form-control form-control-sm" id="edit-mascota-resumen" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Motivo / Justificación obligatoria -->
+              <div class="mb-2">
+                <label class="form-label small fw-semibold mb-1" for="solicitud-input-motivo">
+                  Motivo descriptivo / Justificación *
+                </label>
+                <textarea 
+                  class="form-control form-control-sm" 
+                  id="solicitud-input-motivo" 
+                  rows="3" 
+                  required 
+                  minlength="5" 
+                  placeholder="Explica la razón de esta decisión para la revisión administrativa..."
+                ></textarea>
+                <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
+                  Requerido para el historial médico del paciente.
+                </small>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-solicitud-modal">
+                Enviar solicitud
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    import "../scripts/perfil.js";
+  </script>
+</Layout>

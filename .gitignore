@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+.npm-cache/
+__pycache__/
+*.pyc
+.pytest_cache/
+playwright-report/
+test-results/
+.env
+*.bat
+scratch/
+Clinca veterinaria.md

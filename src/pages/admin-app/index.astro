@@ -1,0 +1,336 @@
+---
+// Entrada de la Aplicación Administrativa Independiente (/admin-app/)
+// No utiliza el Layout público ni Bootstrap; mantiene su propia estructura, navegación y estilos.
+import "../../styles/admin-app.css";
+---
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0B2545" />
+    <title>Administración y Reportes | Clínica Patitas Felices</title>
+    <link rel="icon" href="/img/logotipoveterinaria.jpg" type="image/jpeg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="admin-sidebar" aria-label="Menú de administración">
+        <div>
+          <a class="admin-brand" href="/">
+            <img src="/img/logotipoveterinaria.jpg" width="46" height="46" alt="Logotipo Patitas Felices" />
+            <span>
+              <span class="admin-brand-title">Patitas Felices</span>
+              <span class="admin-brand-sub">Gestión y Reportes</span>
+            </span>
+          </a>
+
+          <nav class="admin-nav" aria-label="Secciones administrativas">
+            <button type="button" class="admin-nav-btn active" data-nav-target="todo">
+              Vista general del panel
+            </button>
+            <button type="button" class="admin-nav-btn" data-nav-target="seccion-ventas">
+              Ventas (Tabla tipo Excel)
+            </button>
+            <button type="button" class="admin-nav-btn" data-nav-target="seccion-graficos">
+              Evolución y tráfico
+            </button>
+            <button type="button" class="admin-nav-btn" data-nav-target="seccion-citas">
+              Actividad y citas recientes
+            </button>
+            <button type="button" class="admin-nav-btn" data-nav-target="seccion-usuarios">
+              Usuarios e inventario
+            </button>
+          </nav>
+        </div>
+
+        <div class="admin-sidebar-footer">
+          <a class="admin-sidebar-link" href="/">Ir a la página pública</a>
+          <a class="admin-sidebar-link" href="/tienda">Abrir tienda veterinaria</a>
+          <a class="admin-sidebar-link" href="/login">Cambiar de usuario</a>
+        </div>
+      </aside>
+
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div>
+            <h1 id="admin-app-titulo">Panel Administrativo y Financiero</h1>
+            <div class="admin-topbar-meta" id="admin-estado-conexion">
+              Sincronizando indicadores con los servicios de la clínica...
+            </div>
+          </div>
+          <div class="admin-user-pill">
+            <span class="badge-role" id="admin-usuario-activo">Dra. Melany Díaz · Administración</span>
+            <button id="btn-recargar-panel" type="button" class="btn-admin btn-admin-outline">
+              Actualizar datos
+            </button>
+          </div>
+        </header>
+
+        <main class="admin-content" id="contenido" tabindex="-1">
+          <section class="filter-bar" aria-label="Filtros por periodo de fechas">
+            <div class="filter-group">
+              <div class="field-block">
+                <label for="filtro-fecha-desde">Fecha desde</label>
+                <input class="admin-input" id="filtro-fecha-desde" type="date" value="2026-10-01" />
+              </div>
+              <div class="field-block">
+                <label for="filtro-fecha-hasta">Fecha hasta</label>
+                <input class="admin-input" id="filtro-fecha-hasta" type="date" value="2026-11-30" />
+              </div>
+              <div class="field-block">
+                <label for="filtro-origen-datos">Conjunto de datos</label>
+                <select class="admin-select" id="filtro-origen-datos">
+                  <option value="todos" selected>Reales + Serie histórica de demostración</option>
+                  <option value="reales">Solo registros guardados en base de datos</option>
+                  <option value="demo">Solo registros de demostración</option>
+                </select>
+              </div>
+              <button id="btn-aplicar-fechas" type="button" class="btn-admin btn-admin-primary">
+                Aplicar periodo
+              </button>
+            </div>
+
+            <div class="filter-group">
+              <button type="button" class="btn-admin btn-admin-outline" data-rango-rapido="todo">
+                Todo el historial
+              </button>
+              <button type="button" class="btn-admin btn-admin-outline" data-rango-rapido="7dias">
+                Últimos 7 días
+              </button>
+              <button type="button" class="btn-admin btn-admin-outline" data-rango-rapido="hoy">
+                Hoy
+              </button>
+            </div>
+          </section>
+
+          <section class="kpi-grid" aria-label="Indicadores principales">
+            <article class="kpi-card">
+              <span class="kpi-label">Ingresos en el periodo</span>
+              <strong class="kpi-value" id="kpi-ingresos">S/ 0.00</strong>
+              <span class="kpi-sub" id="kpi-ingresos-sub">0 comprobantes en el rango</span>
+            </article>
+            <article class="kpi-card navy-top">
+              <span class="kpi-label">Citas programadas</span>
+              <strong class="kpi-value" id="kpi-citas">0</strong>
+              <span class="kpi-sub" id="kpi-citas-sub">0 pendientes de atención</span>
+            </article>
+            <article class="kpi-card">
+              <span class="kpi-label">Pacientes registrados</span>
+              <strong class="kpi-value" id="kpi-pacientes">0</strong>
+              <span class="kpi-sub">Mascotas con ficha activa</span>
+            </article>
+            <article class="kpi-card navy-top">
+              <span class="kpi-label">Usuarios y stock disponible</span>
+              <strong class="kpi-value" id="kpi-usuarios">0 / 0</strong>
+              <span class="kpi-sub" id="kpi-stock-sub">0 unidades en farmacia</span>
+            </article>
+          </section>
+
+          <section id="seccion-graficos" class="charts-grid" aria-label="Gráficos de evolución y tráfico">
+            <article class="admin-panel mb-0">
+              <div class="panel-header">
+                <h2>Evolución de ventas por fecha (S/)</h2>
+                <span class="badge-role" id="etiqueta-total-grafico">S/ 0.00</span>
+              </div>
+              <p class="admin-topbar-meta" style="margin-top:0;">
+                Importes diarios facturados dentro del rango de fechas seleccionado.
+              </p>
+              <div id="grafico-ventas-barras" class="bar-chart" role="img" aria-label="Gráfico de barras de evolución de ventas por fecha"></div>
+            </article>
+
+            <article class="admin-panel mb-0">
+              <div class="panel-header">
+                <h2>Tráfico de usuarios y consultas por periodo</h2>
+                <span class="badge-demo">Incluye serie histórica de demostración</span>
+              </div>
+              <p class="admin-topbar-meta" style="margin-top:0;">
+                Combina la actividad en vivo del día actual con datos históricos de demostración claramente identificados.
+              </p>
+              <div id="grafico-trafico-barras" class="bar-chart" role="img" aria-label="Gráfico de visitas y consultas por fecha"></div>
+            </article>
+          </section>
+
+          <section id="seccion-ventas" class="admin-panel" aria-labelledby="titulo-tabla-excel">
+            <div class="panel-header">
+              <div>
+                <h2 id="titulo-tabla-excel">Libro de Ventas e Ingresos (Hoja Interactiva)</h2>
+                <div class="admin-topbar-meta">
+                  Ordena haciendo clic en los encabezados, agrupa por fecha o servicio y exporta a CSV o Excel.
+                </div>
+              </div>
+              <div class="filter-group">
+                <button id="btn-exportar-csv" type="button" class="btn-admin btn-admin-outline">
+                  Exportar CSV (.csv)
+                </button>
+                <button id="btn-exportar-excel" type="button" class="btn-admin btn-admin-primary">
+                  Exportar Excel (.xls)
+                </button>
+              </div>
+            </div>
+
+            <div class="excel-toolbar">
+              <div class="filter-group">
+                <div class="field-block">
+                  <label for="excel-buscar">Buscar en la tabla</label>
+                  <input class="admin-input" id="excel-buscar" type="search" placeholder="Cliente, DNI, boleta o concepto..." />
+                </div>
+
+                <div class="field-block">
+                  <label for="excel-agrupacion">Modo de vista / agrupación</label>
+                  <select class="admin-select" id="excel-agrupacion">
+                    <option value="detalle" selected>Detalle por comprobante</option>
+                    <option value="fecha">Resumen agrupado por fecha</option>
+                    <option value="servicio">Resumen agrupado por servicio / categoría</option>
+                  </select>
+                </div>
+
+                <div class="field-block">
+                  <label for="excel-categoria">Servicio o categoría</label>
+                  <select class="admin-select" id="excel-categoria">
+                    <option value="todas" selected>Todas las categorías</option>
+                    <option value="Consulta general">Consulta general</option>
+                    <option value="Vacunación">Vacunación</option>
+                    <option value="Desparasitación">Desparasitación</option>
+                    <option value="Farmacia">Farmacia</option>
+                    <option value="Nutrición">Nutrición</option>
+                    <option value="Higiene">Higiene</option>
+                  </select>
+                </div>
+
+                <div class="field-block">
+                  <label for="excel-pago">Medio de pago</label>
+                  <select class="admin-select" id="excel-pago">
+                    <option value="todos" selected>Todos los medios</option>
+                    <option value="Yape">Yape / Plin</option>
+                    <option value="Tarjeta">Tarjeta Visa / Mastercard</option>
+                    <option value="Transferencia">Transferencia Bancaria</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-block">
+                <label for="excel-filas-pagina">Filas por página</label>
+                <select class="admin-select" id="excel-filas-pagina">
+                  <option value="5">5 filas</option>
+                  <option value="10" selected>10 filas</option>
+                  <option value="25">25 filas</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="excel-table-wrap">
+              <table class="excel-table" id="tabla-ventas-excel">
+                <thead id="excel-thead"></thead>
+                <tbody id="excel-tbody"></tbody>
+                <tfoot id="excel-tfoot"></tfoot>
+              </table>
+            </div>
+
+            <div class="excel-pagination">
+              <span id="excel-info-paginacion">Mostrando 0 de 0 registros</span>
+              <div class="filter-group">
+                <button id="btn-pagina-anterior" type="button" class="btn-admin btn-admin-outline">
+                  ← Anterior
+                </button>
+                <span id="excel-indicador-pagina">Página 1 de 1</span>
+                <button id="btn-pagina-siguiente" type="button" class="btn-admin btn-admin-outline">
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section id="seccion-citas" class="admin-panel" aria-labelledby="titulo-actividad">
+            <div class="panel-header">
+              <h2 id="titulo-actividad">Actividad reciente y citas del periodo</h2>
+              <a href="/doctor" class="btn-admin btn-admin-outline">Ir a la agenda médica</a>
+            </div>
+            <ul id="lista-actividad-reciente" class="activity-list"></ul>
+          </section>
+
+          <section id="seccion-usuarios" class="charts-grid" aria-label="Usuarios e inventario">
+            <article class="admin-panel mb-0">
+              <div class="panel-header">
+                <h2>Cuentas de usuarios registradas</h2>
+                <button type="button" class="btn-admin btn-admin-primary" id="btn-toggle-alta-personal">
+                  + Nuevo Personal
+                </button>
+              </div>
+
+              <!-- Formulario desplegable para dar de alta nuevo doctor o admin -->
+              <div id="panel-alta-personal" class="border rounded p-3 mb-3" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; color: #0B2545;">Alta de personal médico o administrativo</h3>
+                <div id="alerta-alta-error" style="display: none; color: #b91c1c; background: #fee2e2; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.82rem; margin-bottom: 0.75rem;" role="alert"></div>
+                <div id="alerta-alta-success" style="display: none; color: #15803d; background: #dcfce7; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.82rem; margin-bottom: 0.75rem;" role="alert"></div>
+
+                <form id="form-alta-personal" novalidate>
+                  <div class="filter-group mb-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div class="field-block">
+                      <label for="alta-nombre">Nombre y Apellidos *</label>
+                      <input type="text" class="admin-input" id="alta-nombre" required placeholder="Ej. Dr. Mario Paredes" />
+                    </div>
+                    <div class="field-block">
+                      <label for="alta-rol">Rol asignado *</label>
+                      <select class="admin-select" id="alta-rol" required>
+                        <option value="doctor" selected>Médico Veterinario (Doctor)</option>
+                        <option value="admin">Administrador de Clínica</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="filter-group mb-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div class="field-block">
+                      <label for="alta-email">Correo corporativo *</label>
+                      <input type="email" class="admin-input" id="alta-email" required placeholder="mario@patitasfelices.pe" />
+                    </div>
+                    <div class="field-block">
+                      <label for="alta-password">Contraseña inicial *</label>
+                      <input type="password" class="admin-input" id="alta-password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+                    </div>
+                  </div>
+
+                  <div class="filter-group mb-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;" id="fila-detalles-doctor">
+                    <div class="field-block">
+                      <label for="alta-telefono">Teléfono</label>
+                      <input type="tel" class="admin-input" id="alta-telefono" placeholder="987654321" />
+                    </div>
+                    <div class="field-block" id="campo-alta-cmvp">
+                      <label for="alta-cmvp">N° Colegiatura (CMVP)</label>
+                      <input type="text" class="admin-input" id="alta-cmvp" placeholder="CMVP-15420" />
+                    </div>
+                    <div class="field-block" id="campo-alta-especialidad">
+                      <label for="alta-especialidad">Especialidad</label>
+                      <input type="text" class="admin-input" id="alta-especialidad" placeholder="Medicina General" />
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button type="button" class="btn-admin btn-admin-outline" id="btn-cancelar-alta">Cancelar</button>
+                    <button type="submit" class="btn-admin btn-admin-primary" id="btn-submit-alta">Guardar y activar</button>
+                  </div>
+                </form>
+              </div>
+
+              <div id="contenedor-usuarios-admin" class="activity-list"></div>
+            </article>
+
+            <article class="admin-panel mb-0">
+              <div class="panel-header">
+                <h2>Existencias en farmacia y tienda</h2>
+                <a href="/tienda" class="btn-admin btn-admin-outline">Ver tienda</a>
+              </div>
+              <div id="contenedor-inventario-admin" class="activity-list"></div>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      import "../../scripts/admin-app.js";
+    </script>
+  </body>
+</html>

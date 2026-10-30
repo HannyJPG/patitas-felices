@@ -1,0 +1,19 @@
+{
+  "name": "Clínica Veterinaria Patitas Felices",
+  "short_name": "Patitas Felices",
+  "description": "Atención veterinaria cercana, reserva de citas, tienda clínica y seguimiento de mascotas.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F4F8F6",
+  "theme_color": "#0B2545",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/img/logotipoveterinaria.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+---
+import { SERVICIOS } from "../data/servicios.js";
+---
+<select class="form-select" id="servicio" name="servicio" required aria-describedby="error-servicio">
+  <option value="">Selecciona un servicio</option>
+  {Object.entries(SERVICIOS).map(([valor, etiqueta]) => (
+    <option value={valor}>{etiqueta}</option>
+  ))}
+</select>

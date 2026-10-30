@@ -1,0 +1,89 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Agenda y Pacientes (Veterinario) | Patitas Felices">
+  <main class="container section-spacing" id="contenido" tabindex="-1">
+    <div class="appointment-intro">
+      <p class="eyebrow">Espacio del veterinario</p>
+      <h1 id="doctor-titulo">Agenda Médica y Pacientes Asignados</h1>
+      <p class="lead">Consulta tu turno profesional, revisa las visitas programadas del día y actualiza el historial clínico de tus pacientes.</p>
+    </div>
+
+    <section class="profile-banner mb-4" aria-labelledby="perfil-doctor-titulo">
+      <div>
+        <span class="status-label mb-2">Perfil profesional</span>
+        <h2 id="perfil-doctor-titulo" class="h4">Dr. Carlos Mendoza · CMVP-10452</h2>
+        <p id="perfil-doctor-detalle">Especialidad: Medicina General, Preventiva y Dermatología · Turno: Lunes a Sábado (09:00 a 18:00)</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <button id="btn-recargar-agenda" type="button" class="btn btn-light">Actualizar agenda</button>
+        <a href="/login" class="btn btn-outline-light">Cambiar de cuenta</a>
+      </div>
+    </section>
+
+    <div class="row g-4 align-items-start">
+      <div class="col-12 col-lg-7">
+        <section class="appointment-form mb-4" aria-labelledby="agenda-citas-titulo">
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <h2 id="agenda-citas-titulo" class="form-section-title mb-0">Citas programadas</h2>
+            <span id="contador-citas-doctor" class="status-label mb-0">Agenda activa</span>
+          </div>
+          <div id="contenedor-citas-doctor" class="d-grid gap-3">
+            <p class="small-note mb-0">Cargando citas asignadas...</p>
+          </div>
+        </section>
+
+        <section class="appointment-form" aria-labelledby="historial-mascotas-titulo">
+          <h2 id="historial-mascotas-titulo" class="form-section-title">Pacientes asignados</h2>
+          <div id="contenedor-mascotas-doctor" class="row g-3">
+            <p class="small-note mb-0">Cargando fichas clínicas de pacientes...</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="col-12 col-lg-5" aria-labelledby="atencion-clinica-titulo">
+        <div class="appointment-form">
+          <span class="status-label">Ficha de atención</span>
+          <h2 id="atencion-clinica-titulo" class="form-section-title">Registrar diagnóstico y tratamiento</h2>
+
+          <form id="formulario-diagnostico" method="post" novalidate>
+            <div id="alerta-doctor" class="alert alert-info py-2 px-3 small" role="status" hidden></div>
+
+            <input type="hidden" id="doctor-cita-id" name="cita_id" value="" />
+
+            <div class="alert alert-light border py-2 px-3 small mb-3 text-muted" id="doctor-cita-activa-info">
+              Selecciona una cita de la lista con el botón "Atender paciente" para redactar su evaluación.
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="doctor-cita-estado">Estado de la atención</label>
+              <select class="form-select" id="doctor-cita-estado" name="estado">
+                <option value="confirmada">Confirmada</option>
+                <option value="atendida" selected>Atendida (Alta médica)</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="doctor-diagnostico">Diagnóstico clínico</label>
+              <textarea class="form-control" id="doctor-diagnostico" name="diagnostico" rows="3" required>Paciente estable, temperatura normal y mucosas rosadas.</textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="doctor-tratamiento">Tratamiento e indicaciones</label>
+              <textarea class="form-control" id="doctor-tratamiento" name="tratamiento" rows="3" required>Control preventivo en 15 días y suplemento nutricional.</textarea>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Guardar evaluación médica</button>
+            </div>
+          </form>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script>
+    import "../scripts/doctor.js";
+  </script>
+</Layout>

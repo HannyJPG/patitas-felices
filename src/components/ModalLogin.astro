@@ -1,0 +1,221 @@
+---
+// ModalLogin.astro - Modal de autenticación y registro sencillo y sobrio
+---
+<div class="modal fade modal-patitas" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginTitulo" aria-hidden="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content modal-patitas-content border">
+      
+      <!-- Cabecera simple -->
+      <div class="modal-header border-bottom pb-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="modal-chip-tag">Patitas Felices</span>
+          <span class="modal-chip-sub" id="modal-subtitulo-tag">Portal de Usuarios</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar ventana" id="btn-cerrar-modal-x"></button>
+      </div>
+
+      <div class="modal-body px-4 pt-3 pb-4">
+        
+        <!-- Pestañas de cambio: Iniciar sesión / Registrarme -->
+        <div class="modal-tab-nav mb-3" role="tablist">
+          <button type="button" class="btn-modal-tab active" id="tab-modal-login" role="tab" aria-selected="true" aria-controls="vista-login">
+            Iniciar sesión
+          </button>
+          <button type="button" class="btn-modal-tab" id="tab-modal-registro" role="tab" aria-selected="false" aria-controls="vista-registro">
+            Registrarme
+          </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VISTA 1: INICIAR SESIÓN                   -->
+        <!-- ========================================== -->
+        <div id="vista-login" role="tabpanel" aria-labelledby="tab-modal-login">
+          <!-- Título -->
+          <div class="text-center mb-3">
+            <h2 class="modal-title h5 fw-bold mb-1" id="modalLoginTitulo">Ingreso al sistema</h2>
+            <p class="small text-muted mb-0">Escribe tus credenciales para acceder a tu panel de usuario.</p>
+          </div>
+
+          <!-- Alertas dinámicas de Login -->
+          <div id="modal-login-error" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+          <div id="modal-login-success" class="alert alert-success py-2 px-3 small d-none" role="alert"></div>
+
+          <!-- Formulario de Login -->
+          <form id="form-modal-login" novalidate autocomplete="on">
+            <div class="mb-3">
+              <label for="modal-input-email" class="form-label small fw-semibold">Correo electrónico</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="modal-input-email" 
+                name="email" 
+                placeholder="ejemplo@patitasfelices.pe" 
+                required 
+                autocomplete="username" 
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="modal-input-password" class="form-label small fw-semibold">Contraseña</label>
+              <div class="input-group">
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  id="modal-input-password" 
+                  name="password" 
+                  placeholder="Ingresa tu contraseña" 
+                  required 
+                  autocomplete="current-password" 
+                />
+                <button class="btn btn-outline-secondary" type="button" id="btn-modal-toggle-pass" aria-label="Mostrar u ocultar contraseña">
+                  Ver
+                </button>
+              </div>
+            </div>
+
+            <!-- Opciones: Recordar mis datos y Recuperar -->
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="modal-check-recordar" checked>
+                <label class="form-check-label small user-select-none" for="modal-check-recordar">
+                  Recordar mis datos
+                </label>
+              </div>
+              <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none btn-recordar-link" id="btn-recordar-contrasena">
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+
+            <!-- Panel de información sobre contraseña -->
+            <div id="panel-recordar-ayuda" class="card card-body bg-light border py-2 px-3 mb-3 small d-none" role="region" aria-label="Ayuda para recordar contraseña">
+              <p class="mb-0 text-muted">
+                Si activas la opción de recordar datos, tu correo se completará automáticamente en este navegador. Para restablecer tu acceso personal o si olvidaste tu clave, comunícate con recepción o utiliza una cuenta de prueba.
+              </p>
+            </div>
+
+            <!-- Botón de ingreso -->
+            <button type="submit" id="btn-modal-submit" class="btn btn-primary w-100 py-2 fw-semibold">
+              <span class="spinner-border spinner-border-sm me-2 d-none" id="spinner-modal-login" role="status" aria-hidden="true"></span>
+              <span id="texto-modal-submit">Iniciar sesión</span>
+            </button>
+          </form>
+
+          <!-- Divisor simple -->
+          <div class="modal-separador my-3">
+            <span>Cuentas de prueba rápida</span>
+          </div>
+
+          <!-- Botones de acceso rápido simples sin emojis -->
+          <div class="d-grid gap-2" id="modal-botones-demo">
+            <button type="button" class="btn btn-demo-pill" data-demo-email="cliente@patitasfelices.pe" data-demo-pass="cliente123">
+              <span class="demo-desc">
+                <strong class="d-block">Cliente / Propietario</strong>
+                <small class="text-muted">cliente@patitasfelices.pe</small>
+              </span>
+              <span class="demo-arrow">→</span>
+            </button>
+
+            <button type="button" class="btn btn-demo-pill" data-demo-email="doctor@patitasfelices.pe" data-demo-pass="doctor123">
+              <span class="demo-desc">
+                <strong class="d-block">Veterinario</strong>
+                <small class="text-muted">doctor@patitasfelices.pe</small>
+              </span>
+              <span class="demo-arrow">→</span>
+            </button>
+
+            <button type="button" class="btn btn-demo-pill" data-demo-email="admin@patitasfelices.pe" data-demo-pass="admin123">
+              <span class="demo-desc">
+                <strong class="d-block">Administrador</strong>
+                <small class="text-muted">admin@patitasfelices.pe</small>
+              </span>
+              <span class="demo-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VISTA 2: REGISTRO DE NUEVO CLIENTE         -->
+        <!-- ========================================== -->
+        <div id="vista-registro" class="d-none" role="tabpanel" aria-labelledby="tab-modal-registro">
+          <!-- Título -->
+          <div class="text-center mb-3">
+            <h2 class="modal-title h5 fw-bold mb-1">Crear cuenta de cliente</h2>
+            <p class="small text-muted mb-0">Registra tus datos para solicitar citas y guardar el historial de tus mascotas.</p>
+          </div>
+
+          <!-- Alertas dinámicas de Registro -->
+          <div id="modal-registro-error" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
+          <div id="modal-registro-success" class="alert alert-success py-2 px-3 small d-none" role="alert"></div>
+
+          <!-- Formulario de Registro -->
+          <form id="form-modal-registro" novalidate autocomplete="on">
+            <div class="mb-3">
+              <label for="registro-input-nombre" class="form-label small fw-semibold">Nombre y Apellidos</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="registro-input-nombre" 
+                name="nombre" 
+                placeholder="Ej. Carmen Quispe" 
+                required 
+                minlength="2"
+                autocomplete="name" 
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="registro-input-telefono" class="form-label small fw-semibold">Teléfono de contacto</label>
+              <input 
+                type="tel" 
+                class="form-control" 
+                id="registro-input-telefono" 
+                name="telefono" 
+                placeholder="Ej. 987654321" 
+                autocomplete="tel" 
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="registro-input-email" class="form-label small fw-semibold">Correo electrónico</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="registro-input-email" 
+                name="email" 
+                placeholder="tunombre@ejemplo.com" 
+                required 
+                autocomplete="email" 
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="registro-input-password" class="form-label small fw-semibold">Contraseña</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                id="registro-input-password" 
+                name="password" 
+                placeholder="Mínimo 6 caracteres" 
+                required 
+                minlength="6"
+                autocomplete="new-password" 
+              />
+              <div class="form-text" style="font-size: 0.76rem;">Usa al menos 6 caracteres para tu seguridad.</div>
+            </div>
+
+            <!-- Botón de Registro -->
+            <button type="submit" id="btn-registro-submit" class="btn btn-primary w-100 py-2 fw-semibold">
+              <span class="spinner-border spinner-border-sm me-2 d-none" id="spinner-modal-registro" role="status" aria-hidden="true"></span>
+              <span id="texto-registro-submit">Crear mi cuenta</span>
+            </button>
+          </form>
+
+          <p class="small text-muted text-center mt-3 mb-0" style="font-size: 0.78rem;">
+            Las cuentas de médicos veterinarios y administradores son gestionadas por la dirección de la clínica.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
