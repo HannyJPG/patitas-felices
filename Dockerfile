@@ -15,5 +15,6 @@ COPY backend ./backend
 COPY database ./database
 COPY --from=frontend-builder /app/dist ./dist
 ENV PORT=8000
+ENV DB_ENGINE=sqlite
 EXPOSE 8000
 CMD ["sh", "-c", "python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

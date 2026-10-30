@@ -1521,8 +1521,11 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
 # =============================================================================
 
 def obtener_adaptador_bd() -> IDatabaseAdapter:
-    """Fábrica que devuelve el Adapter de Base de Datos configurado en .env."""
-    motor = os.getenv("DB_ENGINE", "sqlite").lower()
-    if motor == "supabase":
-        return SupabasePostgresAdapter()
+    """Fábrica que devuelve el Adapter de Base de Datos SQLite unificado (16 tablas)."""
+    db_path = os.getenv("SQLITE_PATH")
+    if db_path:
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        full_path = base_dir / db_path if not Path(db_path).is_absolute() else Path(db_path)
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        return SQLiteDatabaseAdapter(str(full_path))
     return SQLiteDatabaseAdapter()
