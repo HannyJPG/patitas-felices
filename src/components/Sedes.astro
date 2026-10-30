@@ -151,18 +151,12 @@ const sedeInicial = sedes[0];
 
       <!-- Mapa de Google Maps -->
       <div class="col-12 col-lg-7">
-        <div class="sede-map-container h-100 rounded border overflow-hidden">
-          <div class="map-overlay-header p-2 px-3 d-flex justify-content-between align-items-center">
-            <small class="fw-semibold text-dark">
-              Ubicación: <span id="mapa-sede-nombre">{sedeInicial.nombre}</span>
-            </small>
-            <small class="text-muted">Google Maps</small>
-          </div>
+        <div class="sede-map-container h-100 rounded border overflow-hidden position-relative">
           <iframe
             id="iframe-google-maps"
             src={sedeInicial.mapaEmbed}
             width="100%"
-            height="420"
+            height="100%"
             style="border:0; display:block; min-height: 380px;"
             allowfullscreen=""
             loading="lazy"

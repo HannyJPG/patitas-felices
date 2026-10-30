@@ -12,55 +12,72 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
       </p>
     </div>
 
-    <!-- Rejilla de servicios -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4">
-      {servicios.map(servicio => (
-        <div class="col">
-          <article class="service-card-renovada h-100 d-flex flex-column">
-            
-            <!-- Barra superior: Categoría y Duración -->
-            <div class="service-card-top d-flex justify-content-between align-items-center mb-3">
-              <span class="service-category-badge">{servicio.categoria}</span>
-              <span class="service-duration-badge">{servicio.duracion}</span>
-            </div>
+    <!-- Rejilla de servicios (carrusel deslizable interactivo en responsive) -->
+    <div class="services-carousel-wrapper position-relative mb-4">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 services-grid-track" id="servicios-carrusel-track">
+        {servicios.map((servicio, index) => (
+          <div class="col service-carousel-col" data-service-index={index}>
+            <article class="service-card-renovada h-100 d-flex flex-column">
+              
+              <!-- Barra superior: Categoría y Duración -->
+              <div class="service-card-top d-flex justify-content-between align-items-center mb-3">
+                <span class="service-category-badge">{servicio.categoria}</span>
+                <span class="service-duration-badge">{servicio.duracion}</span>
+              </div>
 
-            <!-- Ícono y Título -->
-            <div class="service-icon-box mb-3" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d={servicio.icono} />
-              </svg>
-            </div>
-            
-            <h3 class="service-card-title h6 fw-bold mb-2">{servicio.titulo}</h3>
-            <p class="service-card-desc text-muted small mb-3">{servicio.descripcion}</p>
+              <!-- Ícono y Título -->
+              <div class="service-icon-box mb-3" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={servicio.icono} />
+                </svg>
+              </div>
+              
+              <h3 class="service-card-title h6 fw-bold mb-2">{servicio.titulo}</h3>
+              <p class="service-card-desc text-muted small mb-3">{servicio.descripcion}</p>
 
-            <!-- Lista de puntos incluidos -->
-            <ul class="service-features-list list-unstyled mb-3 flex-grow-1">
-              {servicio.caracteristicas.map(item => (
-                <li class="d-flex align-items-start gap-2 mb-1 small text-muted">
-                  <span class="service-check-icon" aria-hidden="true">—</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+              <!-- Lista de puntos incluidos -->
+              <ul class="service-features-list list-unstyled mb-3 flex-grow-1">
+                {servicio.caracteristicas.map(item => (
+                  <li class="d-flex align-items-start gap-2 mb-1 small text-muted">
+                    <span class="service-check-icon" aria-hidden="true">—</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
 
-            <!-- Botón de agendar -->
-            <div class="service-card-action pt-2 border-top">
-              <button 
-                type="button"
-                class="btn btn-service-select w-100" 
-                data-abrir-modal-cita
-                data-servicio={servicio.id} 
-                aria-label={"Elegir servicio " + servicio.titulo}
-              >
-                <span>Elegir servicio</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
+              <!-- Botón de agendar -->
+              <div class="service-card-action pt-2 border-top">
+                <button 
+                  type="button"
+                  class="btn btn-service-select w-100" 
+                  data-abrir-modal-cita
+                  data-servicio={servicio.id} 
+                  aria-label={"Elegir servicio " + servicio.titulo}
+                >
+                  <span>Elegir servicio</span>
+                  <span aria-hidden="true">→</span>
+                </button>
+              </div>
 
-          </article>
+            </article>
+          </div>
+        ))}
+      </div>
+
+      <!-- Indicadores y controles táctiles visibles solo en responsive -->
+      <div class="services-carousel-nav d-md-none d-flex align-items-center justify-content-between mt-3 px-1">
+        <button type="button" class="btn btn-outline-primary btn-sm services-nav-btn" id="btn-services-prev" aria-label="Ver servicio anterior">
+          <span aria-hidden="true">←</span>
+        </button>
+        <div class="services-dots-container d-flex gap-1" id="services-dots">
+          {servicios.map((_, i) => (
+            <span class:list={["service-dot", { active: i === 0 }]} data-dot-index={i}></span>
+          ))}
         </div>
-      ))}
+        <button type="button" class="btn btn-outline-primary btn-sm services-nav-btn" id="btn-services-next" aria-label="Ver servicio siguiente">
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
     </div>
 
     <!-- Barra de consulta rápida inferior -->
@@ -77,3 +94,74 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
 
   </div>
 </section>
+
+<script>
+  (() => {
+    const track = document.getElementById("servicios-carrusel-track");
+    const btnPrev = document.getElementById("btn-services-prev");
+    const btnNext = document.getElementById("btn-services-next");
+    const dots = document.querySelectorAll(".service-dot");
+
+    if (!track) return;
+
+    const items = track.querySelectorAll(".service-carousel-col");
+    let currentIndex = 0;
+
+    function updateCarousel() {
+      if (window.innerWidth >= 768) {
+        // En desktop/tablet no actúa carrusel
+        return;
+      }
+      if (currentIndex >= items.length) currentIndex = 0;
+      if (currentIndex < 0) currentIndex = items.length - 1;
+
+      const target = items[currentIndex];
+      if (target) {
+        track.scrollTo({
+          left: target.offsetLeft - track.offsetLeft,
+          behavior: "smooth"
+        });
+      }
+
+      dots.forEach((dot, idx) => {
+        if (idx === currentIndex) {
+          dot.classList.add("active");
+        } else {
+          dot.classList.remove("active");
+        }
+      });
+    }
+
+    btnNext?.addEventListener("click", () => {
+      currentIndex++;
+      updateCarousel();
+    });
+
+    btnPrev?.addEventListener("click", () => {
+      currentIndex--;
+      updateCarousel();
+    });
+
+    dots.forEach((dot, idx) => {
+      dot.addEventListener("click", () => {
+        currentIndex = idx;
+        updateCarousel();
+      });
+    });
+
+    // Detectar scroll táctil nativo para actualizar los dots
+    track.addEventListener("scroll", () => {
+      if (window.innerWidth >= 768) return;
+      const scrollPos = track.scrollLeft;
+      const itemWidth = items[0]?.offsetWidth || 1;
+      const newIndex = Math.round(scrollPos / itemWidth);
+      if (newIndex !== currentIndex && newIndex >= 0 && newIndex < items.length) {
+        currentIndex = newIndex;
+        dots.forEach((dot, idx) => {
+          if (idx === currentIndex) dot.classList.add("active");
+          else dot.classList.remove("active");
+        });
+      }
+    }, { passive: true });
+  })();
+</script>

@@ -77,45 +77,13 @@ const testimonios = [
   <div class="container">
     
     <!-- Encabezado del apartado -->
-    <div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-3">
-      <div>
-        <p class="eyebrow mb-1">Opiniones</p>
-        <h2 id="testimonios-titulo" class="mt-1 mb-1">Comentarios de clientes</h2>
-        <p class="text-muted mb-0">Experiencias de familias que atienden a sus mascotas en la clínica.</p>
-      </div>
-
-      <!-- Controles manuales y botón de pausa -->
-      <div class="testimonial-controls d-flex align-items-center gap-2">
-        <button 
-          type="button" 
-          class="btn btn-outline-primary btn-sm testimonial-nav-btn" 
-          id="btn-testimonios-prev" 
-          aria-label="Ver opinión anterior"
-        >
-          <span aria-hidden="true">←</span>
-        </button>
-
-        <button 
-          type="button" 
-          class="btn btn-outline-primary btn-sm testimonial-pause-btn" 
-          id="btn-testimonios-pausa" 
-          aria-label="Pausar o reanudar rotación automática"
-        >
-          <span id="texto-testimonios-pausa">Pausar</span>
-        </button>
-
-        <button 
-          type="button" 
-          class="btn btn-outline-primary btn-sm testimonial-nav-btn" 
-          id="btn-testimonios-next" 
-          aria-label="Ver opinión siguiente"
-        >
-          <span aria-hidden="true">→</span>
-        </button>
-      </div>
+    <div class="mb-4">
+      <p class="eyebrow mb-1">Opiniones</p>
+      <h2 id="testimonios-titulo" class="mt-1 mb-1">Comentarios de clientes</h2>
+      <p class="text-muted mb-0">Experiencias de familias que atienden a sus mascotas en la clínica.</p>
     </div>
 
-    <!-- Contenedor del carrusel de 4 tarjetas visibles -->
+    <!-- Contenedor del carrusel de tarjetas visibles -->
     <div class="testimonial-slider-wrapper position-relative" id="slider-testimonios-contenedor">
       <div class="testimonial-slider-track" id="slider-testimonios-pista" role="region" aria-label="Carrusel de testimonios" aria-live="polite">
         {testimonios.map((t, idx) => (
@@ -154,31 +122,45 @@ const testimonios = [
       </div>
     </div>
 
-    <!-- Indicador de tarjetas y tiempo de rotación -->
-    <div class="d-flex justify-content-between align-items-center mt-3 text-muted small px-1">
-      <span id="indicador-testimonios">Opiniones de clientes</span>
-      <span class="text-muted">Rotación cada 5s</span>
+    <!-- Controles en responsive situados debajo del carrusel -->
+    <div class="testimonial-mobile-controls d-md-none d-flex justify-content-center align-items-center gap-3 mt-3">
+      <button 
+        type="button" 
+        class="btn btn-outline-primary btn-sm testimonial-nav-btn" 
+        id="btn-testimonios-prev" 
+        aria-label="Ver opinión anterior"
+      >
+        <span aria-hidden="true">←</span>
+      </button>
+
+      <span id="indicador-testimonios-mobile" class="small text-muted fw-semibold">1 / 7</span>
+
+      <button 
+        type="button" 
+        class="btn btn-outline-primary btn-sm testimonial-nav-btn" 
+        id="btn-testimonios-next" 
+        aria-label="Ver opinión siguiente"
+      >
+        <span aria-hidden="true">→</span>
+      </button>
     </div>
 
   </div>
 </section>
 
-<!-- Script interactivo: 7 tarjetas, 4 visibles en desktop, movimiento cada 5 segundos -->
+<!-- Script interactivo: rotación suave con interacción táctil, hover y controles móviles -->
 <script>
   (() => {
     const contenedor = document.getElementById("slider-testimonios-contenedor");
     const pista = document.getElementById("slider-testimonios-pista");
     const btnPrev = document.getElementById("btn-testimonios-prev");
     const btnNext = document.getElementById("btn-testimonios-next");
-    const btnPausa = document.getElementById("btn-testimonios-pausa");
-    const textoPausa = document.getElementById("texto-testimonios-pausa");
-    const indicador = document.getElementById("indicador-testimonios");
+    const indicadorMobile = document.getElementById("indicador-testimonios-mobile");
 
     if (!pista || !contenedor) return;
 
     const totalTarjetas = 7;
     let indiceActual = 0;
-    let pausado = false;
     let temporizador = null;
 
     function obtenerTarjetasVisibles() {
@@ -206,8 +188,8 @@ const testimonios = [
 
       pista.style.transform = `translateX(-${indiceActual * anchoPaso}px)`;
 
-      if (indicador) {
-        indicador.textContent = `Opiniones ${indiceActual + 1} a ${Math.min(indiceActual + visibles, totalTarjetas)} de ${totalTarjetas}`;
+      if (indicadorMobile) {
+        indicadorMobile.textContent = `${indiceActual + 1} / ${totalTarjetas}`;
       }
     }
 
@@ -235,11 +217,9 @@ const testimonios = [
 
     function iniciarRotacion() {
       detenerRotacion();
-      if (!pausado) {
-        temporizador = window.setInterval(() => {
-          avanzar();
-        }, 5000);
-      }
+      temporizador = window.setInterval(() => {
+        avanzar();
+      }, 5000);
     }
 
     function detenerRotacion() {
@@ -259,20 +239,32 @@ const testimonios = [
       iniciarRotacion();
     });
 
-    btnPausa?.addEventListener("click", () => {
-      pausado = !pausado;
-      if (textoPausa) textoPausa.textContent = pausado ? "Reanudar" : "Pausar";
-      if (pausado) {
-        detenerRotacion();
-      } else {
-        iniciarRotacion();
+    // Soporte táctil / touch swipe para que el usuario pueda deslizar
+    let startX = 0;
+    let endX = 0;
+
+    contenedor.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+      detenerRotacion();
+    }, { passive: true });
+
+    contenedor.addEventListener("touchend", (e) => {
+      endX = e.changedTouches[0].clientX;
+      const diff = startX - endX;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) {
+          avanzar();
+        } else {
+          retroceder();
+        }
       }
-    });
+      iniciarRotacion();
+    }, { passive: true });
 
     contenedor.addEventListener("mouseenter", () => detenerRotacion());
-    contenedor.addEventListener("mouseleave", () => { if (!pausado) iniciarRotacion(); });
+    contenedor.addEventListener("mouseleave", () => iniciarRotacion());
     contenedor.addEventListener("focusin", () => detenerRotacion());
-    contenedor.addEventListener("focusout", () => { if (!pausado) iniciarRotacion(); });
+    contenedor.addEventListener("focusout", () => iniciarRotacion());
 
     window.addEventListener("resize", () => {
       actualizarPosicion();
