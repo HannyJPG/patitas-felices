@@ -249,6 +249,20 @@ img { max-width: 100%; }
     box-shadow: 0 4px 20px rgba(232, 155, 91, 0.07);
 }
 .site-navbar .navbar-brand { padding: 0; margin-right: 1.5rem; }
+.brand-badge-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--color-peach);
+    box-shadow: 0 3px 10px rgba(232, 155, 91, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.navbar-brand:hover .brand-badge-img {
+    transform: scale(1.06) rotate(3deg);
+    box-shadow: 0 6px 14px rgba(232, 155, 91, 0.35);
+}
 .brand-badge-icon {
     width: 38px;
     height: 38px;
