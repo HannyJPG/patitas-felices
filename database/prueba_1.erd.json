@@ -6,7 +6,7 @@
     "originY": 0,
     "zoomLevel": 1,
     "show": 495,
-    "database": 4,
+    "database": 16,
     "databaseName": "",
     "canvasType": "ERD",
     "language": 1,
@@ -28,91 +28,102 @@
   },
   "doc": {
     "tableIds": [
+      "tbl_usuarios_rbac",
       "U9QD_HE3u0jZW67JMeOEP",
+      "03h1od5bygzsaitsf7qmwt5l3",
+      "03h2kdzymh2erxfrx5hoip71r",
       "Sbwd4cPvC31gUY6dtMPUZ",
-      "KNHznS0dHAkEkdA8ZevJd",
-      "pIE2EIMsSZKETgu_WGVZC",
       "FWO8l6QJzJV9OsiSKtEk6",
+      "KNHznS0dHAkEkdA8ZevJd",
       "AhsfDOEQdlNkfs1kaAJy3",
+      "pIE2EIMsSZKETgu_WGVZC",
       "SPIErIz8afsZYyy6IvdhT",
       "03h1obbj8s79m9z0by164wyec",
-      "03h1od5bygzsaitsf7qmwt5l3",
       "03h1okp27micq4os9l9ka33wv",
-      "03h2kdzymh2erxfrx5hoip71r",
-      "03h2kjuukb1rfa09penr2oahf",
       "03h2kk4nd0u5tt6dq00p2kymz",
-      "tbl_usuarios_rbac",
+      "03h2kjuukb1rfa09penr2oahf",
       "tbl_productos_tienda",
       "tbl_detalle_ventas"
     ],
     "relationshipIds": [
-      "25OsmA_wLEQQHhG6fJTLd",
-      "t_gvqEwXCOhJxV7X02FG1",
-      "ave_EEUc03NAO6ClQwgnm",
-      "MYiIW-Mi72LFlAEcunFAK",
-      "03h1o6liplez3fh8alcsrem31",
-      "03h1ocd5a0dttpmh78fe8vbdx",
-      "03h1oll5lz7qhmw0bza0l6f5l",
-      "03h2bxk41mr1cz5ryd4j774y6",
-      "03h2kicd98iusiendi0svx1ht",
-      "03h2kip3yifigrsh7c8f9slra",
-      "03h2kltibl8qi3ac669gxjnxu",
-      "03h2klwjz6mastxtkugtjr4nl",
-      "03h2klzw5rp15othfs0za6i22"
+      "rel_01",
+      "rel_02",
+      "rel_03",
+      "rel_04",
+      "rel_05",
+      "rel_06",
+      "rel_07",
+      "rel_08",
+      "rel_09",
+      "rel_10",
+      "rel_11",
+      "rel_12",
+      "rel_13",
+      "rel_14",
+      "rel_15",
+      "rel_16",
+      "rel_17"
     ],
     "indexIds": [],
     "memoIds": []
   },
   "collections": {
     "tableEntities": {
-      "03h1obbj8s79m9z0by164wyec": {
-        "id": "03h1obbj8s79m9z0by164wyec",
-        "name": "Historial_clinico",
-        "comment": "",
+      "tbl_usuarios_rbac": {
+        "id": "tbl_usuarios_rbac",
+        "name": "usuarios",
+        "comment": "Seguridad Proxy JWT y Roles RBAC",
         "columnIds": [
-          "03h1obja3qwj5lwdn1qagembl",
-          "03h1ocd5a0dttpmh78dfz6l2p",
-          "03h1obmljalkbthach8k7o6fv",
-          "03h1ocjqcp3t2wxtmjzhntefk",
-          "03h1ocmkxpeia6ntjvdzkakgr",
-          "03h1ocsmtuvn5v9iepvhen6w7"
+          "col_usuarios_01",
+          "col_usuarios_02",
+          "col_usuarios_03",
+          "col_usuarios_04",
+          "col_usuarios_05",
+          "col_usuarios_06",
+          "col_usuarios_07",
+          "col_usuarios_08",
+          "col_usuarios_09",
+          "col_usuarios_10"
         ],
         "ui": {
-          "x": -534.5327,
-          "y": 427.7775,
+          "x": 80,
+          "y": -260,
+          "color": "#4CAF50"
+        }
+      },
+      "U9QD_HE3u0jZW67JMeOEP": {
+        "id": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "Dueno",
+        "comment": "",
+        "columnIds": [
+          "col_dueno_01",
+          "col_dueno_02",
+          "col_dueno_03",
+          "col_dueno_04",
+          "col_dueno_05",
+          "col_dueno_06",
+          "col_dueno_07",
+          "col_dueno_08",
+          "col_dueno_09"
+        ],
+        "ui": {
+          "x": 83.3048,
+          "y": 73.0436,
           "color": ""
         }
       },
       "03h1od5bygzsaitsf7qmwt5l3": {
         "id": "03h1od5bygzsaitsf7qmwt5l3",
-        "name": "Especie ",
+        "name": "Especie",
         "comment": "",
         "columnIds": [
-          "03h1odp1fcj3pgcb3h1r59jmd",
-          "03h1odzzad6rj2md0c6lxk339",
-          "03h1ogpnhfka4r3yay30bn6vv"
+          "col_especie_01",
+          "col_especie_02",
+          "col_especie_03"
         ],
         "ui": {
           "x": -1068.4578,
           "y": 169.7922,
-          "color": ""
-        }
-      },
-      "03h1okp27micq4os9l9ka33wv": {
-        "id": "03h1okp27micq4os9l9ka33wv",
-        "name": "Receta",
-        "comment": "",
-        "columnIds": [
-          "03h2c41pqpxjfj2v22vkvpptq",
-          "03h1oll5lz7qhmw0bz88e6sie",
-          "03h1olinc7le00rv34tfcylf0",
-          "03h1olo00wmpni6l47bdl2h5t",
-          "03h1olt8b0r6pg6vxrqlei3hg",
-          "03h1omk7p4sy7sihd7sor5r4a"
-        ],
-        "ui": {
-          "x": 65.7296,
-          "y": 1177.1496,
           "color": ""
         }
       },
@@ -121,10 +132,10 @@
         "name": "Razas",
         "comment": "",
         "columnIds": [
-          "03h2ke174f3mfq9k66z7zai2e",
-          "03h2kicd98iusiendhym64pmc",
-          "03h2ke5ud5jyfdbw9d52f32zp",
-          "03h2kfdo13xtbhi66d9eoqpa2"
+          "col_razas_01",
+          "col_razas_02",
+          "col_razas_03",
+          "col_razas_04"
         ],
         "ui": {
           "x": -1033,
@@ -132,69 +143,42 @@
           "color": ""
         }
       },
-      "03h2kjuukb1rfa09penr2oahf": {
-        "id": "03h2kjuukb1rfa09penr2oahf",
-        "name": "Pago",
-        "comment": "",
+      "Sbwd4cPvC31gUY6dtMPUZ": {
+        "id": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "Paciente",
+        "comment": "Mascota y estado de su solicitud mas reciente.",
         "columnIds": [
-          "03h2kjvubtgjlen2286hlna1d",
-          "03h2klzw5rp15othfryigoaxu",
-          "03h2kk0ngg83094dbm5swbt95",
-          "03h2km7gjpww4eqtot9jfi8nz"
+          "col_paciente_01",
+          "col_paciente_02",
+          "col_paciente_03",
+          "col_paciente_04",
+          "col_paciente_05",
+          "col_paciente_06",
+          "col_paciente_07",
+          "col_paciente_08",
+          "col_paciente_09",
+          "col_paciente_10",
+          "col_paciente_11",
+          "col_paciente_12",
+          "col_paciente_13",
+          "col_paciente_14",
+          "col_paciente_15",
+          "col_paciente_16"
         ],
         "ui": {
-          "x": 1368,
-          "y": 1377,
-          "color": ""
-        }
-      },
-      "03h2kk4nd0u5tt6dq00p2kymz": {
-        "id": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "Factura ",
-        "comment": "",
-        "columnIds": [
-          "03h2kkqug4ei2upf011wfhzre",
-          "03h2kltibfu9ts3y8kvx11px1",
-          "03h2klwjz6mastxtkue1cz4je",
-          "03h2kl9oro3vziiidx3sga0uf",
-          "03h2kld60dxx2pc3yn1tyxam7",
-          "03h2kleq8m694qrnyk9gpec1o",
-          "03h2klfri75sevxd4fucqgn4s",
-          "03h2klk1mtsagwekcplcckf6n",
-          "03h2kllxzm9vpii9tpu7zyvch",
-          "03h2kln3b13ikmgrsewa2wkpa",
-          "03h2klogafzwpcld2a8lf141r"
-        ],
-        "ui": {
-          "x": 1379,
-          "y": 847,
-          "color": ""
-        }
-      },
-      "AhsfDOEQdlNkfs1kaAJy3": {
-        "id": "AhsfDOEQdlNkfs1kaAJy3",
-        "name": "Servicios",
-        "comment": "",
-        "columnIds": [
-          "8-gaHBNWMl71qBhAADtz0",
-          "tcqXePEuUs4RaNNu-8r40",
-          "4gs4m8wPRmBO-DOa6VE71",
-          "V31y1KBZ_7-vO9r38awI5"
-        ],
-        "ui": {
-          "x": 772.224,
-          "y": 1390.4278,
+          "x": -569.502,
+          "y": 79.3596,
           "color": ""
         }
       },
       "FWO8l6QJzJV9OsiSKtEk6": {
         "id": "FWO8l6QJzJV9OsiSKtEk6",
-        "name": "Especialidad ",
+        "name": "Especialidad",
         "comment": "",
         "columnIds": [
-          "jOl0E-ILzMFVfC--bfkDJ",
-          "fYje5Yb4jJKJTXDvkwlwH",
-          "IPChHGSsQwJkHTnIEUJ8J"
+          "col_especialidad_01",
+          "col_especialidad_02",
+          "col_especialidad_03"
         ],
         "ui": {
           "x": 1066.06,
@@ -207,14 +191,15 @@
         "name": "Veterinario",
         "comment": "",
         "columnIds": [
-          "Ft3qn-B9UmXIx6MZHRvBs",
-          "fWtNU_eJFyBVxJWIXZZlb",
-          "PPXuqGEL_IQAEaaRIup7Z",
-          "FUZfA9H26oatDGQgM1Nte",
-          "VnagtWxqyK03h9Z1Im3Jk",
-          "sP21saDNi85PfLp-nADII",
-          "p0kinJoqoY8WHj4KExgiT",
-          "WMYwp0x9HkOf2p7tXPfty"
+          "col_veterinario_01",
+          "col_veterinario_02",
+          "col_veterinario_03",
+          "col_veterinario_04",
+          "col_veterinario_05",
+          "col_veterinario_06",
+          "col_veterinario_07",
+          "col_veterinario_08",
+          "col_veterinario_09"
         ],
         "ui": {
           "x": 1054.9063,
@@ -222,73 +207,40 @@
           "color": ""
         }
       },
-      "SPIErIz8afsZYyy6IvdhT": {
-        "id": "SPIErIz8afsZYyy6IvdhT",
-        "name": "Detalle_servicios ",
+      "AhsfDOEQdlNkfs1kaAJy3": {
+        "id": "AhsfDOEQdlNkfs1kaAJy3",
+        "name": "Servicios",
         "comment": "",
         "columnIds": [
-          "03h1o6liplez3fh8alb0fleto",
-          "M7gZW7yFyf8KzczEWl5uo",
-          "03h1o6n11rup1zhucocg0rpnl"
+          "col_servicios_01",
+          "col_servicios_02",
+          "col_servicios_03",
+          "col_servicios_04"
         ],
         "ui": {
-          "x": 771.2146,
-          "y": 1225.3047,
-          "color": ""
-        }
-      },
-      "Sbwd4cPvC31gUY6dtMPUZ": {
-        "id": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "Paciente",
-        "comment": "",
-        "columnIds": [
-          "n3Rkzy620-pyRj0dSx6j4",
-          "SDEpv1VXuOEOLWh7deftl",
-          "03h2kip3yifigrsh7c63b8v5p",
-          "Bqm_JMtYxAO9Tau3jmAnt",
-          "kQIZcySAGvISyqWmKA4Gc",
-          "sUbd2nM1TOpzWNXQ_bjfv",
-          "wtfu8XQjSLrddNPkKM2yE",
-          "-Nev1IBn1BjHQ11NODeyo",
-          "C65aA-HugnZwbtkipMDKK"
-        ],
-        "ui": {
-          "x": -569.502,
-          "y": 79.3596,
-          "color": ""
-        }
-      },
-      "U9QD_HE3u0jZW67JMeOEP": {
-        "id": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "Dueño",
-        "comment": "",
-        "columnIds": [
-          "-y9WrrQmd7eKJOtU-XC_F",
-          "6fzlghmhRjGT5tQHgCq4e",
-          "u2VhQvTvmRIbtkmJ6_IOg",
-          "qCbGNI-AAmPrMoW2hBCKR",
-          "ZWG78CrRUPV-dDvy_feL2",
-          "MCT4VrJPa2YvQi5U9P5ng",
-          "PbvfoLd_XYaon1UwL0iZd"
-        ],
-        "ui": {
-          "x": 83.3048,
-          "y": 73.0436,
+          "x": 772.224,
+          "y": 1390.4278,
           "color": ""
         }
       },
       "pIE2EIMsSZKETgu_WGVZC": {
         "id": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "Cita ",
+        "name": "Cita",
         "comment": "",
         "columnIds": [
-          "hU3XWjz40Jllb6viyWia_",
-          "6BxQWIvInH372x59spvy3",
-          "03h2bxk41mr1cz5ryd2u3r8s0",
-          "y63Sewn2X2eFw5t_OADqd",
-          "JSa4CA0UArxeQ2yMVXqkg",
-          "dTS7OZnQVTM1n49uipD3f",
-          "PQjPfDIWUE3NgbDWxxOva"
+          "col_cita_01",
+          "col_cita_02",
+          "col_cita_03",
+          "col_cita_04",
+          "col_cita_05",
+          "col_cita_06",
+          "col_cita_07",
+          "col_cita_08",
+          "col_cita_09",
+          "col_cita_10",
+          "col_cita_11",
+          "col_cita_12",
+          "col_cita_13"
         ],
         "ui": {
           "x": 473.9407,
@@ -296,22 +248,102 @@
           "color": ""
         }
       },
-      "tbl_usuarios_rbac": {
-        "id": "tbl_usuarios_rbac",
-        "name": "usuarios",
-        "comment": "Seguridad Proxy JWT y Roles RBAC",
+      "SPIErIz8afsZYyy6IvdhT": {
+        "id": "SPIErIz8afsZYyy6IvdhT",
+        "name": "Detalle_servicios",
+        "comment": "",
         "columnIds": [
-          "col_u_id",
-          "col_u_nom",
-          "col_u_ema",
-          "col_u_pas",
-          "col_u_rol",
-          "col_u_est"
+          "col_detalle_servicios_01",
+          "col_detalle_servicios_02",
+          "col_detalle_servicios_03"
         ],
         "ui": {
-          "x": 80,
-          "y": -260,
-          "color": "#4CAF50"
+          "x": 771.2146,
+          "y": 1225.3047,
+          "color": ""
+        }
+      },
+      "03h1obbj8s79m9z0by164wyec": {
+        "id": "03h1obbj8s79m9z0by164wyec",
+        "name": "Historial_clinico",
+        "comment": "",
+        "columnIds": [
+          "col_historial_clinico_01",
+          "col_historial_clinico_02",
+          "col_historial_clinico_03",
+          "col_historial_clinico_04",
+          "col_historial_clinico_05",
+          "col_historial_clinico_06"
+        ],
+        "ui": {
+          "x": -534.5327,
+          "y": 427.7775,
+          "color": ""
+        }
+      },
+      "03h1okp27micq4os9l9ka33wv": {
+        "id": "03h1okp27micq4os9l9ka33wv",
+        "name": "Receta",
+        "comment": "",
+        "columnIds": [
+          "col_receta_01",
+          "col_receta_02",
+          "col_receta_03",
+          "col_receta_04",
+          "col_receta_05",
+          "col_receta_06"
+        ],
+        "ui": {
+          "x": 65.7296,
+          "y": 1177.1496,
+          "color": ""
+        }
+      },
+      "03h2kk4nd0u5tt6dq00p2kymz": {
+        "id": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "Factura",
+        "comment": "Comprobante clinico o de tienda. serie identifica punto emisor; numero es su correlativo.",
+        "columnIds": [
+          "col_factura_01",
+          "col_factura_02",
+          "col_factura_03",
+          "col_factura_04",
+          "col_factura_05",
+          "col_factura_06",
+          "col_factura_07",
+          "col_factura_08",
+          "col_factura_09",
+          "col_factura_10",
+          "col_factura_11",
+          "col_factura_12",
+          "col_factura_13",
+          "col_factura_14",
+          "col_factura_15",
+          "col_factura_16"
+        ],
+        "ui": {
+          "x": 1379,
+          "y": 847,
+          "color": ""
+        }
+      },
+      "03h2kjuukb1rfa09penr2oahf": {
+        "id": "03h2kjuukb1rfa09penr2oahf",
+        "name": "Pago",
+        "comment": "",
+        "columnIds": [
+          "col_pago_01",
+          "col_pago_02",
+          "col_pago_03",
+          "col_pago_04",
+          "col_pago_05",
+          "col_pago_06",
+          "col_pago_07"
+        ],
+        "ui": {
+          "x": 1368,
+          "y": 1377,
+          "color": ""
         }
       },
       "tbl_productos_tienda": {
@@ -319,11 +351,14 @@
         "name": "productos",
         "comment": "Catalogo Tienda y Stock (TiendaFacade)",
         "columnIds": [
-          "col_p_id",
-          "col_p_cod",
-          "col_p_nom",
-          "col_p_pre",
-          "col_p_stk"
+          "col_productos_01",
+          "col_productos_02",
+          "col_productos_03",
+          "col_productos_04",
+          "col_productos_05",
+          "col_productos_06",
+          "col_productos_07",
+          "col_productos_08"
         ],
         "ui": {
           "x": 1750,
@@ -336,11 +371,13 @@
         "name": "detalle_ventas",
         "comment": "Items de Boleta PDF generada por TiendaFacade",
         "columnIds": [
-          "col_dv_id",
-          "col_dv_fac",
-          "col_dv_prd",
-          "col_dv_can",
-          "col_dv_sub"
+          "col_detalle_ventas_01",
+          "col_detalle_ventas_02",
+          "col_detalle_ventas_03",
+          "col_detalle_ventas_04",
+          "col_detalle_ventas_05",
+          "col_detalle_ventas_06",
+          "col_detalle_ventas_07"
         ],
         "ui": {
           "x": 1750,
@@ -350,413 +387,485 @@
       }
     },
     "tableColumnEntities": {
-      "03h1obja3qwj5lwdn1qagembl": {
-        "id": "03h1obja3qwj5lwdn1qagembl",
-        "tableId": "03h1obbj8s79m9z0by164wyec",
-        "name": "Id_historial",
+      "col_usuarios_01": {
+        "id": "col_usuarios_01",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "id",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "BIGINT",
         "default": "AI",
         "options": 10
       },
-      "03h1obmljalkbthach8k7o6fv": {
-        "id": "03h1obmljalkbthach8k7o6fv",
-        "tableId": "03h1obbj8s79m9z0by164wyec",
-        "name": "Fecha",
+      "col_usuarios_02": {
+        "id": "col_usuarios_02",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "nombre",
         "comment": "",
-        "dataType": "DATETIME",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "03h1ocd5a0dttpmh78dfz6l2p": {
-        "id": "03h1ocd5a0dttpmh78dfz6l2p",
-        "tableId": "03h1obbj8s79m9z0by164wyec",
-        "name": "Id_cita",
+      "col_usuarios_03": {
+        "id": "col_usuarios_03",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "email",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 12
       },
-      "03h1ocjqcp3t2wxtmjzhntefk": {
-        "id": "03h1ocjqcp3t2wxtmjzhntefk",
-        "tableId": "03h1obbj8s79m9z0by164wyec",
-        "name": "Diagnostico",
+      "col_usuarios_04": {
+        "id": "col_usuarios_04",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "password_hash",
         "comment": "",
-        "dataType": "VARCHAR(100)",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "03h1ocmkxpeia6ntjvdzkakgr": {
-        "id": "03h1ocmkxpeia6ntjvdzkakgr",
-        "tableId": "03h1obbj8s79m9z0by164wyec",
-        "name": "Tratamiento",
+      "col_usuarios_05": {
+        "id": "col_usuarios_05",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "rol",
         "comment": "",
-        "dataType": "VARCHAR(100)",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "03h1ocsmtuvn5v9iepvhen6w7": {
-        "id": "03h1ocsmtuvn5v9iepvhen6w7",
-        "tableId": "03h1obbj8s79m9z0by164wyec",
-        "name": "Observaciones",
+      "col_usuarios_06": {
+        "id": "col_usuarios_06",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "estado",
         "comment": "",
-        "dataType": "VARCHAR(100)",
+        "dataType": "VARCHAR(500)",
+        "default": "'activo'",
+        "options": 8
+      },
+      "col_usuarios_07": {
+        "id": "col_usuarios_07",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "telefono",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 0
+      },
+      "col_usuarios_08": {
+        "id": "col_usuarios_08",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "tipo_documento",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "'DNI'",
+        "options": 0
+      },
+      "col_usuarios_09": {
+        "id": "col_usuarios_09",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "documento",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 4
+      },
+      "col_usuarios_10": {
+        "id": "col_usuarios_10",
+        "tableId": "tbl_usuarios_rbac",
+        "name": "creado_en",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "datetime('now', 'localtime')",
+        "options": 8
+      },
+      "col_dueno_01": {
+        "id": "col_dueno_01",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "id_dueno",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "AI",
+        "options": 10
+      },
+      "col_dueno_02": {
+        "id": "col_dueno_02",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "usuario_id",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 4
+      },
+      "col_dueno_03": {
+        "id": "col_dueno_03",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "dni",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 12
+      },
+      "col_dueno_04": {
+        "id": "col_dueno_04",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "tipo_documento",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "'DNI'",
+        "options": 8
+      },
+      "col_dueno_05": {
+        "id": "col_dueno_05",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "correo",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 12
+      },
+      "col_dueno_06": {
+        "id": "col_dueno_06",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "nombres",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "03h1odp1fcj3pgcb3h1r59jmd": {
-        "id": "03h1odp1fcj3pgcb3h1r59jmd",
+      "col_dueno_07": {
+        "id": "col_dueno_07",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "apellidos",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_dueno_08": {
+        "id": "col_dueno_08",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "telefono",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_dueno_09": {
+        "id": "col_dueno_09",
+        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+        "name": "fecha_registro",
+        "comment": "",
+        "dataType": "TIMESTAMPTZ",
+        "default": "datetime('now', 'localtime')",
+        "options": 8
+      },
+      "col_especie_01": {
+        "id": "col_especie_01",
         "tableId": "03h1od5bygzsaitsf7qmwt5l3",
         "name": "Id_especie",
         "comment": "",
-        "dataType": "INT",
-        "default": "",
+        "dataType": "BIGINT",
+        "default": "AI",
         "options": 10
       },
-      "03h1odzzad6rj2md0c6lxk339": {
-        "id": "03h1odzzad6rj2md0c6lxk339",
+      "col_especie_02": {
+        "id": "col_especie_02",
         "tableId": "03h1od5bygzsaitsf7qmwt5l3",
         "name": "Nombre",
         "comment": "",
-        "dataType": "VARCHAR(50)",
+        "dataType": "VARCHAR(500)",
         "default": "",
-        "options": 8
+        "options": 12
       },
-      "03h1ogpnhfka4r3yay30bn6vv": {
-        "id": "03h1ogpnhfka4r3yay30bn6vv",
+      "col_especie_03": {
+        "id": "col_especie_03",
         "tableId": "03h1od5bygzsaitsf7qmwt5l3",
-        "name": "Descripción",
+        "name": "Descripcion",
         "comment": "",
-        "dataType": "VARCHAR(100)",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "03h1olinc7le00rv34tfcylf0": {
-        "id": "03h1olinc7le00rv34tfcylf0",
-        "tableId": "03h1okp27micq4os9l9ka33wv",
-        "name": "medicamento",
-        "comment": "",
-        "dataType": "VARCHAR(90)",
-        "default": "",
-        "options": 8
-      },
-      "03h1oll5lz7qhmw0bz88e6sie": {
-        "id": "03h1oll5lz7qhmw0bz88e6sie",
-        "tableId": "03h1okp27micq4os9l9ka33wv",
-        "name": "Id_historial",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "03h1olo00wmpni6l47bdl2h5t": {
-        "id": "03h1olo00wmpni6l47bdl2h5t",
-        "tableId": "03h1okp27micq4os9l9ka33wv",
-        "name": "Dosis ",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "",
-        "options": 8
-      },
-      "03h1olt8b0r6pg6vxrqlei3hg": {
-        "id": "03h1olt8b0r6pg6vxrqlei3hg",
-        "tableId": "03h1okp27micq4os9l9ka33wv",
-        "name": "duracion_dias",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "03h1omk7p4sy7sihd7sor5r4a": {
-        "id": "03h1omk7p4sy7sihd7sor5r4a",
-        "tableId": "03h1okp27micq4os9l9ka33wv",
-        "name": "indicaciones",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "",
-        "options": 8
-      },
-      "03h2c41pqpxjfj2v22vkvpptq": {
-        "id": "03h2c41pqpxjfj2v22vkvpptq",
-        "tableId": "03h1okp27micq4os9l9ka33wv",
-        "name": "Id_receta",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 10
-      },
-      "03h2ke174f3mfq9k66z7zai2e": {
-        "id": "03h2ke174f3mfq9k66z7zai2e",
+      "col_razas_01": {
+        "id": "col_razas_01",
         "tableId": "03h2kdzymh2erxfrx5hoip71r",
         "name": "Id_raza",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "BIGINT",
         "default": "AI",
         "options": 10
       },
-      "03h2ke5ud5jyfdbw9d52f32zp": {
-        "id": "03h2ke5ud5jyfdbw9d52f32zp",
-        "tableId": "03h2kdzymh2erxfrx5hoip71r",
-        "name": "nombre",
-        "comment": "",
-        "dataType": "VARCHAR(60)",
-        "default": "",
-        "options": 8
-      },
-      "03h2kfdo13xtbhi66d9eoqpa2": {
-        "id": "03h2kfdo13xtbhi66d9eoqpa2",
-        "tableId": "03h2kdzymh2erxfrx5hoip71r",
-        "name": "Descripcion",
-        "comment": "",
-        "dataType": "VARCHAR(60)",
-        "default": "",
-        "options": 0
-      },
-      "03h2kicd98iusiendhym64pmc": {
-        "id": "03h2kicd98iusiendhym64pmc",
+      "col_razas_02": {
+        "id": "col_razas_02",
         "tableId": "03h2kdzymh2erxfrx5hoip71r",
         "name": "Id_especie",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "BIGINT",
         "default": "",
         "options": 8
       },
-      "03h2kjvubtgjlen2286hlna1d": {
-        "id": "03h2kjvubtgjlen2286hlna1d",
-        "tableId": "03h2kjuukb1rfa09penr2oahf",
-        "name": "id_pago",
+      "col_razas_03": {
+        "id": "col_razas_03",
+        "tableId": "03h2kdzymh2erxfrx5hoip71r",
+        "name": "nombre",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_razas_04": {
+        "id": "col_razas_04",
+        "tableId": "03h2kdzymh2erxfrx5hoip71r",
+        "name": "Descripcion",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 0
+      },
+      "col_paciente_01": {
+        "id": "col_paciente_01",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "id_paciente",
+        "comment": "",
+        "dataType": "BIGINT",
         "default": "AI",
         "options": 10
       },
-      "03h2kk0ngg83094dbm5swbt95": {
-        "id": "03h2kk0ngg83094dbm5swbt95",
-        "tableId": "03h2kjuukb1rfa09penr2oahf",
-        "name": "descripcioon",
-        "comment": "",
-        "dataType": "VARCHAR(60)",
-        "default": "",
-        "options": 8
-      },
-      "03h2klzw5rp15othfryigoaxu": {
-        "id": "03h2klzw5rp15othfryigoaxu",
-        "tableId": "03h2kjuukb1rfa09penr2oahf",
-        "name": "Id_servicios",
-        "comment": "",
-        "dataType": "INT ",
-        "default": "AI",
-        "options": 0
-      },
-      "03h2km7gjpww4eqtot9jfi8nz": {
-        "id": "03h2km7gjpww4eqtot9jfi8nz",
-        "tableId": "03h2kjuukb1rfa09penr2oahf",
-        "name": "cantidad",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 0
-      },
-      "03h2kkqug4ei2upf011wfhzre": {
-        "id": "03h2kkqug4ei2upf011wfhzre",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "id_factura",
-        "comment": "",
-        "dataType": "INT ",
-        "default": "",
-        "options": 2
-      },
-      "03h2kl9oro3vziiidx3sga0uf": {
-        "id": "03h2kl9oro3vziiidx3sga0uf",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "tipo ",
-        "comment": "boleta/facutra",
-        "dataType": "VARCHAR(50)",
-        "default": "",
-        "options": 8
-      },
-      "03h2kld60dxx2pc3yn1tyxam7": {
-        "id": "03h2kld60dxx2pc3yn1tyxam7",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "serie",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "03h2kleq8m694qrnyk9gpec1o": {
-        "id": "03h2kleq8m694qrnyk9gpec1o",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "numero ",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "03h2klfri75sevxd4fucqgn4s": {
-        "id": "03h2klfri75sevxd4fucqgn4s",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "fecha_emision",
-        "comment": "",
-        "dataType": "DATETIME",
-        "default": "",
-        "options": 8
-      },
-      "03h2klk1mtsagwekcplcckf6n": {
-        "id": "03h2klk1mtsagwekcplcckf6n",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "subtotal",
-        "comment": "",
-        "dataType": "INT ",
-        "default": "",
-        "options": 8
-      },
-      "03h2kllxzm9vpii9tpu7zyvch": {
-        "id": "03h2kllxzm9vpii9tpu7zyvch",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "igv",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "03h2kln3b13ikmgrsewa2wkpa": {
-        "id": "03h2kln3b13ikmgrsewa2wkpa",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "estado",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "03h2klogafzwpcld2a8lf141r": {
-        "id": "03h2klogafzwpcld2a8lf141r",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "xml_url",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "03h2kltibfu9ts3y8kvx11px1": {
-        "id": "03h2kltibfu9ts3y8kvx11px1",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "Id_cita",
-        "comment": "",
-        "dataType": "INT",
-        "default": "AI",
-        "options": 8
-      },
-      "03h2klwjz6mastxtkue1cz4je": {
-        "id": "03h2klwjz6mastxtkue1cz4je",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+      "col_paciente_02": {
+        "id": "col_paciente_02",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "id_dueno",
         "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 8
+      },
+      "col_paciente_03": {
+        "id": "col_paciente_03",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "Id_raza",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 8
+      },
+      "col_paciente_04": {
+        "id": "col_paciente_04",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "nombre",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_paciente_05": {
+        "id": "col_paciente_05",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "sexo",
+        "comment": "",
+        "dataType": "CHAR(1)",
+        "default": "'H'",
+        "options": 8
+      },
+      "col_paciente_06": {
+        "id": "col_paciente_06",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "fecha_nacimiento",
+        "comment": "",
+        "dataType": "DATE",
+        "default": "'2023-05-10'",
+        "options": 8
+      },
+      "col_paciente_07": {
+        "id": "col_paciente_07",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "edad",
+        "comment": "",
         "dataType": "INT",
+        "default": "1",
+        "options": 8
+      },
+      "col_paciente_08": {
+        "id": "col_paciente_08",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "peso_kg",
+        "comment": "",
+        "dataType": "NUMERIC(5,2)",
+        "default": "5.0",
+        "options": 8
+      },
+      "col_paciente_09": {
+        "id": "col_paciente_09",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "historial_resumen",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 0
+      },
+      "col_paciente_10": {
+        "id": "col_paciente_10",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "estado",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
         "default": "'Activo'",
         "options": 8
       },
-      "4gs4m8wPRmBO-DOa6VE71": {
-        "id": "4gs4m8wPRmBO-DOa6VE71",
-        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
-        "name": "Precio",
+      "col_paciente_11": {
+        "id": "col_paciente_11",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "fecha_registro",
         "comment": "",
-        "dataType": "DECIMAL(10,2)",
+        "dataType": "TIMESTAMPTZ",
+        "default": "datetime('now', 'localtime')",
+        "options": 8
+      },
+      "col_paciente_12": {
+        "id": "col_paciente_12",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "solicitud_tipo",
+        "comment": "Estado y datos de la ultima solicitud de esta mascota.",
+        "dataType": "VARCHAR(500)",
         "default": "",
-        "options": 8
+        "options": 0
       },
-      "8-gaHBNWMl71qBhAADtz0": {
-        "id": "8-gaHBNWMl71qBhAADtz0",
-        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
-        "name": "Id_servicios",
-        "comment": "",
-        "dataType": "INT ",
-        "default": "AI",
-        "options": 10
-      },
-      "V31y1KBZ_7-vO9r38awI5": {
-        "id": "V31y1KBZ_7-vO9r38awI5",
-        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
-        "name": "Estado",
-        "comment": "",
-        "dataType": "VARCHAR(20)",
-        "default": "Activo ",
-        "options": 8
-      },
-      "tcqXePEuUs4RaNNu-8r40": {
-        "id": "tcqXePEuUs4RaNNu-8r40",
-        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
-        "name": "Nombre",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
+      "col_paciente_13": {
+        "id": "col_paciente_13",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "solicitud_datos_nuevos",
+        "comment": "Estado y datos de la ultima solicitud de esta mascota.",
+        "dataType": "JSONB",
         "default": "",
-        "options": 8
+        "options": 0
       },
-      "IPChHGSsQwJkHTnIEUJ8J": {
-        "id": "IPChHGSsQwJkHTnIEUJ8J",
-        "tableId": "FWO8l6QJzJV9OsiSKtEk6",
-        "name": "Descripcion",
-        "comment": "",
-        "dataType": "VARCHAR(255)",
+      "col_paciente_14": {
+        "id": "col_paciente_14",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "solicitud_motivo",
+        "comment": "Estado y datos de la ultima solicitud de esta mascota.",
+        "dataType": "VARCHAR(500)",
         "default": "",
-        "options": 8
+        "options": 0
       },
-      "fYje5Yb4jJKJTXDvkwlwH": {
-        "id": "fYje5Yb4jJKJTXDvkwlwH",
-        "tableId": "FWO8l6QJzJV9OsiSKtEk6",
-        "name": "Nombre",
-        "comment": "",
-        "dataType": "VARCHAR(50)",
+      "col_paciente_15": {
+        "id": "col_paciente_15",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "solicitud_estado",
+        "comment": "Estado y datos de la ultima solicitud de esta mascota.",
+        "dataType": "VARCHAR(500)",
         "default": "",
-        "options": 8
+        "options": 0
       },
-      "jOl0E-ILzMFVfC--bfkDJ": {
-        "id": "jOl0E-ILzMFVfC--bfkDJ",
+      "col_paciente_16": {
+        "id": "col_paciente_16",
+        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+        "name": "solicitud_creado_en",
+        "comment": "Estado y datos de la ultima solicitud de esta mascota.",
+        "dataType": "TIMESTAMPTZ",
+        "default": "",
+        "options": 0
+      },
+      "col_especialidad_01": {
+        "id": "col_especialidad_01",
         "tableId": "FWO8l6QJzJV9OsiSKtEk6",
         "name": "Id_especialidad",
         "comment": "",
-        "dataType": "INT",
-        "default": "AI",
-        "options": 14
-      },
-      "FUZfA9H26oatDGQgM1Nte": {
-        "id": "FUZfA9H26oatDGQgM1Nte",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "nombres",
-        "comment": "",
-        "dataType": "VARCHAR(50)",
-        "default": "",
-        "options": 8
-      },
-      "Ft3qn-B9UmXIx6MZHRvBs": {
-        "id": "Ft3qn-B9UmXIx6MZHRvBs",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "Id_veterinario",
-        "comment": "",
-        "dataType": "INT",
+        "dataType": "BIGINT",
         "default": "AI",
         "options": 10
       },
-      "PPXuqGEL_IQAEaaRIup7Z": {
-        "id": "PPXuqGEL_IQAEaaRIup7Z",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "numero_colegiatura",
+      "col_especialidad_02": {
+        "id": "col_especialidad_02",
+        "tableId": "FWO8l6QJzJV9OsiSKtEk6",
+        "name": "Nombre",
         "comment": "",
-        "dataType": "VARCHAR(20)",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 12
       },
-      "VnagtWxqyK03h9Z1Im3Jk": {
-        "id": "VnagtWxqyK03h9Z1Im3Jk",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "Apellidos ",
+      "col_especialidad_03": {
+        "id": "col_especialidad_03",
+        "tableId": "FWO8l6QJzJV9OsiSKtEk6",
+        "name": "Descripcion",
         "comment": "",
-        "dataType": "VARCHAR(50)",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "WMYwp0x9HkOf2p7tXPfty": {
-        "id": "WMYwp0x9HkOf2p7tXPfty",
+      "col_veterinario_01": {
+        "id": "col_veterinario_01",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "Id_veterinario",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "AI",
+        "options": 10
+      },
+      "col_veterinario_02": {
+        "id": "col_veterinario_02",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "usuario_id",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 4
+      },
+      "col_veterinario_03": {
+        "id": "col_veterinario_03",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "Id_especialidad",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 8
+      },
+      "col_veterinario_04": {
+        "id": "col_veterinario_04",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "numero_colegiatura",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 12
+      },
+      "col_veterinario_05": {
+        "id": "col_veterinario_05",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "nombres",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_veterinario_06": {
+        "id": "col_veterinario_06",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "Apellidos",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_veterinario_07": {
+        "id": "col_veterinario_07",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "Telefono",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_veterinario_08": {
+        "id": "col_veterinario_08",
+        "tableId": "KNHznS0dHAkEkdA8ZevJd",
+        "name": "correo",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 12
+      },
+      "col_veterinario_09": {
+        "id": "col_veterinario_09",
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "Fecha_contratacion",
         "comment": "",
@@ -764,359 +873,557 @@
         "default": "",
         "options": 8
       },
-      "fWtNU_eJFyBVxJWIXZZlb": {
-        "id": "fWtNU_eJFyBVxJWIXZZlb",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "Id_especialidad",
+      "col_servicios_01": {
+        "id": "col_servicios_01",
+        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
+        "name": "Id_servicios",
         "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
+        "dataType": "BIGINT",
+        "default": "AI",
+        "options": 10
       },
-      "p0kinJoqoY8WHj4KExgiT": {
-        "id": "p0kinJoqoY8WHj4KExgiT",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "correo ",
+      "col_servicios_02": {
+        "id": "col_servicios_02",
+        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
+        "name": "Nombre",
         "comment": "",
-        "dataType": "VARCHAR(100)",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 12
       },
-      "sP21saDNi85PfLp-nADII": {
-        "id": "sP21saDNi85PfLp-nADII",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "Telefono ",
+      "col_servicios_03": {
+        "id": "col_servicios_03",
+        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
+        "name": "Precio",
         "comment": "",
-        "dataType": "VARCHAR(15) ",
+        "dataType": "NUMERIC(10,2)",
         "default": "",
         "options": 8
       },
-      "03h1o6liplez3fh8alb0fleto": {
-        "id": "03h1o6liplez3fh8alb0fleto",
-        "tableId": "SPIErIz8afsZYyy6IvdhT",
+      "col_servicios_04": {
+        "id": "col_servicios_04",
+        "tableId": "AhsfDOEQdlNkfs1kaAJy3",
+        "name": "Estado",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "'Activo'",
+        "options": 8
+      },
+      "col_cita_01": {
+        "id": "col_cita_01",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "Id_cita",
         "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 10
-      },
-      "03h1o6n11rup1zhucocg0rpnl": {
-        "id": "03h1o6n11rup1zhucocg0rpnl",
-        "tableId": "SPIErIz8afsZYyy6IvdhT",
-        "name": "precio_aplicado",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "M7gZW7yFyf8KzczEWl5uo": {
-        "id": "M7gZW7yFyf8KzczEWl5uo",
-        "tableId": "SPIErIz8afsZYyy6IvdhT",
-        "name": "Id_servicios",
-        "comment": "",
-        "dataType": "INT ",
-        "default": "",
-        "options": 10
-      },
-      "-Nev1IBn1BjHQ11NODeyo": {
-        "id": "-Nev1IBn1BjHQ11NODeyo",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "estado ",
-        "comment": "",
-        "dataType": "varchar(50)",
-        "default": "",
-        "options": 8
-      },
-      "03h2kip3yifigrsh7c63b8v5p": {
-        "id": "03h2kip3yifigrsh7c63b8v5p",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "Id_raza",
-        "comment": "",
-        "dataType": "INT",
+        "dataType": "BIGINT",
         "default": "AI",
-        "options": 8
+        "options": 10
       },
-      "Bqm_JMtYxAO9Tau3jmAnt": {
-        "id": "Bqm_JMtYxAO9Tau3jmAnt",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "nombre",
+      "col_cita_02": {
+        "id": "col_cita_02",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
+        "name": "Id_veterinario",
         "comment": "",
-        "dataType": "VARCHAR(50)",
+        "dataType": "BIGINT",
         "default": "",
         "options": 8
       },
-      "C65aA-HugnZwbtkipMDKK": {
-        "id": "C65aA-HugnZwbtkipMDKK",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "fecha_registro",
-        "comment": "",
-        "dataType": "DATETIME",
-        "default": "",
-        "options": 8
-      },
-      "SDEpv1VXuOEOLWh7deftl": {
-        "id": "SDEpv1VXuOEOLWh7deftl",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "id_dueño",
-        "comment": "",
-        "dataType": "INT",
-        "default": "",
-        "options": 8
-      },
-      "kQIZcySAGvISyqWmKA4Gc": {
-        "id": "kQIZcySAGvISyqWmKA4Gc",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "raza ",
-        "comment": "",
-        "dataType": "VARCHAR(50)",
-        "default": "",
-        "options": 8
-      },
-      "n3Rkzy620-pyRj0dSx6j4": {
-        "id": "n3Rkzy620-pyRj0dSx6j4",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+      "col_cita_03": {
+        "id": "col_cita_03",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "id_paciente",
-        "comment": "AI",
-        "dataType": "INT",
-        "default": "",
-        "options": 14
-      },
-      "sUbd2nM1TOpzWNXQ_bjfv": {
-        "id": "sUbd2nM1TOpzWNXQ_bjfv",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "sexo",
         "comment": "",
-        "dataType": "CHAR(1)",
+        "dataType": "BIGINT",
         "default": "",
-        "options": 8
+        "options": 0
       },
-      "wtfu8XQjSLrddNPkKM2yE": {
-        "id": "wtfu8XQjSLrddNPkKM2yE",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "fecha_nacimiento",
+      "col_cita_04": {
+        "id": "col_cita_04",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
+        "name": "fecha",
         "comment": "",
         "dataType": "DATE",
         "default": "",
         "options": 8
       },
-      "-y9WrrQmd7eKJOtU-XC_F": {
-        "id": "-y9WrrQmd7eKJOtU-XC_F",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "id_dueno",
+      "col_cita_05": {
+        "id": "col_cita_05",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
+        "name": "hora",
         "comment": "",
-        "dataType": "INT",
-        "default": "'Activo'",
-        "options": 10
-      },
-      "6fzlghmhRjGT5tQHgCq4e": {
-        "id": "6fzlghmhRjGT5tQHgCq4e",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "dni",
-        "comment": "",
-        "dataType": "VARCHAR(8)",
-        "default": "",
-        "options": 12
-      },
-      "MCT4VrJPa2YvQi5U9P5ng": {
-        "id": "MCT4VrJPa2YvQi5U9P5ng",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "apellidos",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
+        "dataType": "TIME",
         "default": "",
         "options": 8
       },
-      "PbvfoLd_XYaon1UwL0iZd": {
-        "id": "PbvfoLd_XYaon1UwL0iZd",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "fecha_registro",
+      "col_cita_06": {
+        "id": "col_cita_06",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
+        "name": "motivo",
         "comment": "",
-        "dataType": "DATETIME",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "ZWG78CrRUPV-dDvy_feL2": {
-        "id": "ZWG78CrRUPV-dDvy_feL2",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
+      "col_cita_07": {
+        "id": "col_cita_07",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
+        "name": "estado",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "'Pendiente'",
+        "options": 8
+      },
+      "col_cita_08": {
+        "id": "col_cita_08",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
+        "name": "propietario",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
+        "options": 8
+      },
+      "col_cita_09": {
+        "id": "col_cita_09",
+        "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "telefono",
         "comment": "",
-        "dataType": "VARCHAR(15)",
-        "default": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
         "options": 8
       },
-      "qCbGNI-AAmPrMoW2hBCKR": {
-        "id": "qCbGNI-AAmPrMoW2hBCKR",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "nombres",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "",
-        "options": 8
-      },
-      "u2VhQvTvmRIbtkmJ6_IOg": {
-        "id": "u2VhQvTvmRIbtkmJ6_IOg",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "correo",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "",
-        "options": 12
-      },
-      "03h2bxk41mr1cz5ryd2u3r8s0": {
-        "id": "03h2bxk41mr1cz5ryd2u3r8s0",
+      "col_cita_10": {
+        "id": "col_cita_10",
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "id_paciente",
+        "name": "mascota_nombre",
         "comment": "",
-        "dataType": "INT",
-        "default": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
         "options": 8
       },
-      "6BxQWIvInH372x59spvy3": {
-        "id": "6BxQWIvInH372x59spvy3",
+      "col_cita_11": {
+        "id": "col_cita_11",
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "Id_veterinario",
+        "name": "servicio",
         "comment": "",
-        "dataType": "INT",
-        "default": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
         "options": 8
       },
-      "JSa4CA0UArxeQ2yMVXqkg": {
-        "id": "JSa4CA0UArxeQ2yMVXqkg",
+      "col_cita_12": {
+        "id": "col_cita_12",
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "motivo ",
+        "name": "whatsapp_url",
         "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
         "options": 8
       },
-      "PQjPfDIWUE3NgbDWxxOva": {
-        "id": "PQjPfDIWUE3NgbDWxxOva",
+      "col_cita_13": {
+        "id": "col_cita_13",
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "fecha_registro",
         "comment": "",
-        "dataType": "DATETIME",
-        "default": "",
+        "dataType": "TIMESTAMPTZ",
+        "default": "datetime('now', 'localtime')",
         "options": 8
       },
-      "dTS7OZnQVTM1n49uipD3f": {
-        "id": "dTS7OZnQVTM1n49uipD3f",
-        "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "estado ",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "",
-        "options": 8
-      },
-      "hU3XWjz40Jllb6viyWia_": {
-        "id": "hU3XWjz40Jllb6viyWia_",
-        "tableId": "pIE2EIMsSZKETgu_WGVZC",
+      "col_detalle_servicios_01": {
+        "id": "col_detalle_servicios_01",
+        "tableId": "SPIErIz8afsZYyy6IvdhT",
         "name": "Id_cita",
         "comment": "",
-        "dataType": "INT",
-        "default": "AI",
-        "options": 14
-      },
-      "y63Sewn2X2eFw5t_OADqd": {
-        "id": "y63Sewn2X2eFw5t_OADqd",
-        "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "fecha ",
-        "comment": "",
-        "dataType": "DATETIME",
-        "default": "",
-        "options": 8
-      },
-      "col_u_id": {
-        "id": "col_u_id",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "id",
-        "comment": "PK",
-        "dataType": "INT",
+        "dataType": "BIGINT",
         "default": "AI",
         "options": 10
       },
-      "col_u_nom": {
-        "id": "col_u_nom",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "nombre",
+      "col_detalle_servicios_02": {
+        "id": "col_detalle_servicios_02",
+        "tableId": "SPIErIz8afsZYyy6IvdhT",
+        "name": "Id_servicios",
         "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "",
-        "options": 8
-      },
-      "col_u_ema": {
-        "id": "col_u_ema",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "email",
-        "comment": "UK",
-        "dataType": "VARCHAR(120)",
-        "default": "",
-        "options": 12
-      },
-      "col_u_pas": {
-        "id": "col_u_pas",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "password_hash",
-        "comment": "",
-        "dataType": "VARCHAR(255)",
-        "default": "",
-        "options": 8
-      },
-      "col_u_rol": {
-        "id": "col_u_rol",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "rol",
-        "comment": "cliente|doctor|admin",
-        "dataType": "VARCHAR(20)",
-        "default": "cliente",
-        "options": 8
-      },
-      "col_u_est": {
-        "id": "col_u_est",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "estado",
-        "comment": "activo|inactivo",
-        "dataType": "VARCHAR(20)",
-        "default": "activo",
-        "options": 8
-      },
-      "col_p_id": {
-        "id": "col_p_id",
-        "tableId": "tbl_productos_tienda",
-        "name": "id_producto",
-        "comment": "PK",
-        "dataType": "INT",
+        "dataType": "BIGINT",
         "default": "AI",
         "options": 10
       },
-      "col_p_cod": {
-        "id": "col_p_cod",
-        "tableId": "tbl_productos_tienda",
-        "name": "codigo",
-        "comment": "UK",
+      "col_detalle_servicios_03": {
+        "id": "col_detalle_servicios_03",
+        "tableId": "SPIErIz8afsZYyy6IvdhT",
+        "name": "precio_aplicado",
+        "comment": "",
+        "dataType": "NUMERIC(10,2)",
+        "default": "",
+        "options": 8
+      },
+      "col_historial_clinico_01": {
+        "id": "col_historial_clinico_01",
+        "tableId": "03h1obbj8s79m9z0by164wyec",
+        "name": "Id_historial",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "AI",
+        "options": 10
+      },
+      "col_historial_clinico_02": {
+        "id": "col_historial_clinico_02",
+        "tableId": "03h1obbj8s79m9z0by164wyec",
+        "name": "Id_cita",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 8
+      },
+      "col_historial_clinico_03": {
+        "id": "col_historial_clinico_03",
+        "tableId": "03h1obbj8s79m9z0by164wyec",
+        "name": "Fecha",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "datetime('now', 'localtime')",
+        "options": 8
+      },
+      "col_historial_clinico_04": {
+        "id": "col_historial_clinico_04",
+        "tableId": "03h1obbj8s79m9z0by164wyec",
+        "name": "Diagnostico",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
+        "options": 8
+      },
+      "col_historial_clinico_05": {
+        "id": "col_historial_clinico_05",
+        "tableId": "03h1obbj8s79m9z0by164wyec",
+        "name": "Tratamiento",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
+        "options": 8
+      },
+      "col_historial_clinico_06": {
+        "id": "col_historial_clinico_06",
+        "tableId": "03h1obbj8s79m9z0by164wyec",
+        "name": "Observaciones",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "''",
+        "options": 8
+      },
+      "col_receta_01": {
+        "id": "col_receta_01",
+        "tableId": "03h1okp27micq4os9l9ka33wv",
+        "name": "Id_receta",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "AI",
+        "options": 10
+      },
+      "col_receta_02": {
+        "id": "col_receta_02",
+        "tableId": "03h1okp27micq4os9l9ka33wv",
+        "name": "Id_historial",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 8
+      },
+      "col_receta_03": {
+        "id": "col_receta_03",
+        "tableId": "03h1okp27micq4os9l9ka33wv",
+        "name": "medicamento",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_receta_04": {
+        "id": "col_receta_04",
+        "tableId": "03h1okp27micq4os9l9ka33wv",
+        "name": "Dosis",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_receta_05": {
+        "id": "col_receta_05",
+        "tableId": "03h1okp27micq4os9l9ka33wv",
+        "name": "duracion_dias",
+        "comment": "",
+        "dataType": "INT",
+        "default": "",
+        "options": 8
+      },
+      "col_receta_06": {
+        "id": "col_receta_06",
+        "tableId": "03h1okp27micq4os9l9ka33wv",
+        "name": "indicaciones",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_factura_01": {
+        "id": "col_factura_01",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "id_factura",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "AI",
+        "options": 10
+      },
+      "col_factura_02": {
+        "id": "col_factura_02",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "Id_cita",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 0
+      },
+      "col_factura_03": {
+        "id": "col_factura_03",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "id_dueno",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 0
+      },
+      "col_factura_04": {
+        "id": "col_factura_04",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "tipo",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "'Boleta'",
+        "options": 8
+      },
+      "col_factura_05": {
+        "id": "col_factura_05",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "serie",
+        "comment": "Codigo del punto de emision, por ejemplo B001 o F001.",
+        "dataType": "VARCHAR(10)",
+        "default": "'B001'",
+        "options": 8
+      },
+      "col_factura_06": {
+        "id": "col_factura_06",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "numero",
+        "comment": "Correlativo secuencial dentro de la serie.",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 8
+      },
+      "col_factura_07": {
+        "id": "col_factura_07",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "numero_boleta",
+        "comment": "Numero completo visible, por ejemplo B001-000001.",
         "dataType": "VARCHAR(30)",
         "default": "",
         "options": 12
       },
-      "col_p_nom": {
-        "id": "col_p_nom",
-        "tableId": "tbl_productos_tienda",
-        "name": "nombre",
+      "col_factura_08": {
+        "id": "col_factura_08",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "fecha_emision",
         "comment": "",
-        "dataType": "VARCHAR(120)",
+        "dataType": "TIMESTAMPTZ",
+        "default": "datetime('now', 'localtime')",
+        "options": 8
+      },
+      "col_factura_09": {
+        "id": "col_factura_09",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "cliente_nombre",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
         "default": "",
         "options": 8
       },
-      "col_p_pre": {
-        "id": "col_p_pre",
-        "tableId": "tbl_productos_tienda",
-        "name": "precio",
+      "col_factura_10": {
+        "id": "col_factura_10",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "cliente_documento",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_factura_11": {
+        "id": "col_factura_11",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "subtotal",
         "comment": "",
         "dataType": "DECIMAL(10,2)",
         "default": "",
         "options": 8
       },
-      "col_p_stk": {
-        "id": "col_p_stk",
+      "col_factura_12": {
+        "id": "col_factura_12",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "igv",
+        "comment": "",
+        "dataType": "DECIMAL(10,2)",
+        "default": "",
+        "options": 8
+      },
+      "col_factura_13": {
+        "id": "col_factura_13",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "total",
+        "comment": "",
+        "dataType": "NUMERIC(12,2)",
+        "default": "",
+        "options": 8
+      },
+      "col_factura_14": {
+        "id": "col_factura_14",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "metodo_pago",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "'Tarjeta / Yape'",
+        "options": 8
+      },
+      "col_factura_15": {
+        "id": "col_factura_15",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "estado",
+        "comment": "",
+        "dataType": "VARCHAR(30)",
+        "default": "'Pagado'",
+        "options": 8
+      },
+      "col_factura_16": {
+        "id": "col_factura_16",
+        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+        "name": "pdf_url",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 0
+      },
+      "col_pago_01": {
+        "id": "col_pago_01",
+        "tableId": "03h2kjuukb1rfa09penr2oahf",
+        "name": "id_pago",
+        "comment": "",
+        "dataType": "INT",
+        "default": "AI",
+        "options": 10
+      },
+      "col_pago_02": {
+        "id": "col_pago_02",
+        "tableId": "03h2kjuukb1rfa09penr2oahf",
+        "name": "id_factura",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "",
+        "options": 0
+      },
+      "col_pago_03": {
+        "id": "col_pago_03",
+        "tableId": "03h2kjuukb1rfa09penr2oahf",
+        "name": "metodo_pago",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_pago_04": {
+        "id": "col_pago_04",
+        "tableId": "03h2kjuukb1rfa09penr2oahf",
+        "name": "monto",
+        "comment": "",
+        "dataType": "NUMERIC(12,2)",
+        "default": "0",
+        "options": 8
+      },
+      "col_pago_05": {
+        "id": "col_pago_05",
+        "tableId": "03h2kjuukb1rfa09penr2oahf",
+        "name": "estado",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "'Pagado'",
+        "options": 8
+      },
+      "col_pago_06": {
+        "id": "col_pago_06",
+        "tableId": "03h2kjuukb1rfa09penr2oahf",
+        "name": "fecha_pago",
+        "comment": "",
+        "dataType": "TIMESTAMPTZ",
+        "default": "datetime('now', 'localtime')",
+        "options": 8
+      },
+      "col_pago_07": {
+        "id": "col_pago_07",
+        "tableId": "03h2kjuukb1rfa09penr2oahf",
+        "name": "referencia",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 0
+      },
+      "col_productos_01": {
+        "id": "col_productos_01",
+        "tableId": "tbl_productos_tienda",
+        "name": "id",
+        "comment": "",
+        "dataType": "BIGINT",
+        "default": "AI",
+        "options": 10
+      },
+      "col_productos_02": {
+        "id": "col_productos_02",
+        "tableId": "tbl_productos_tienda",
+        "name": "codigo",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 12
+      },
+      "col_productos_03": {
+        "id": "col_productos_03",
+        "tableId": "tbl_productos_tienda",
+        "name": "nombre",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_productos_04": {
+        "id": "col_productos_04",
+        "tableId": "tbl_productos_tienda",
+        "name": "categoria",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_productos_05": {
+        "id": "col_productos_05",
+        "tableId": "tbl_productos_tienda",
+        "name": "descripcion",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_productos_06": {
+        "id": "col_productos_06",
+        "tableId": "tbl_productos_tienda",
+        "name": "precio",
+        "comment": "",
+        "dataType": "NUMERIC(10,2)",
+        "default": "",
+        "options": 8
+      },
+      "col_productos_07": {
+        "id": "col_productos_07",
         "tableId": "tbl_productos_tienda",
         "name": "stock",
         "comment": "",
@@ -1124,284 +1431,383 @@
         "default": "0",
         "options": 8
       },
-      "col_dv_id": {
-        "id": "col_dv_id",
+      "col_productos_08": {
+        "id": "col_productos_08",
+        "tableId": "tbl_productos_tienda",
+        "name": "activo",
+        "comment": "",
+        "dataType": "BOOLEAN",
+        "default": "1",
+        "options": 8
+      },
+      "col_detalle_ventas_01": {
+        "id": "col_detalle_ventas_01",
         "tableId": "tbl_detalle_ventas",
-        "name": "id_detalle_venta",
-        "comment": "PK",
-        "dataType": "INT",
+        "name": "id",
+        "comment": "",
+        "dataType": "BIGINT",
         "default": "AI",
         "options": 10
       },
-      "col_dv_fac": {
-        "id": "col_dv_fac",
+      "col_detalle_ventas_02": {
+        "id": "col_detalle_ventas_02",
         "tableId": "tbl_detalle_ventas",
         "name": "id_factura",
-        "comment": "FK",
-        "dataType": "INT",
+        "comment": "",
+        "dataType": "BIGINT",
         "default": "",
         "options": 8
       },
-      "col_dv_prd": {
-        "id": "col_dv_prd",
+      "col_detalle_ventas_03": {
+        "id": "col_detalle_ventas_03",
         "tableId": "tbl_detalle_ventas",
-        "name": "id_producto",
-        "comment": "FK",
-        "dataType": "INT",
+        "name": "producto_id",
+        "comment": "",
+        "dataType": "BIGINT",
         "default": "",
         "options": 8
       },
-      "col_dv_can": {
-        "id": "col_dv_can",
+      "col_detalle_ventas_04": {
+        "id": "col_detalle_ventas_04",
+        "tableId": "tbl_detalle_ventas",
+        "name": "producto_nombre",
+        "comment": "",
+        "dataType": "VARCHAR(500)",
+        "default": "",
+        "options": 8
+      },
+      "col_detalle_ventas_05": {
+        "id": "col_detalle_ventas_05",
         "tableId": "tbl_detalle_ventas",
         "name": "cantidad",
         "comment": "",
         "dataType": "INT",
-        "default": "1",
+        "default": "",
         "options": 8
       },
-      "col_dv_sub": {
-        "id": "col_dv_sub",
+      "col_detalle_ventas_06": {
+        "id": "col_detalle_ventas_06",
+        "tableId": "tbl_detalle_ventas",
+        "name": "precio_unitario",
+        "comment": "",
+        "dataType": "NUMERIC(10,2)",
+        "default": "",
+        "options": 8
+      },
+      "col_detalle_ventas_07": {
+        "id": "col_detalle_ventas_07",
         "tableId": "tbl_detalle_ventas",
         "name": "subtotal",
         "comment": "",
-        "dataType": "DECIMAL(10,2)",
+        "dataType": "NUMERIC(12,2)",
         "default": "",
         "options": 8
       }
     },
     "relationshipEntities": {
-      "03h1o6liplez3fh8alcsrem31": {
-        "id": "03h1o6liplez3fh8alcsrem31",
+      "rel_01": {
+        "id": "rel_01",
         "relationshipType": 16,
-        "onDelete": 1,
+        "onDelete": 8,
         "onUpdate": 1,
         "start": {
-          "tableId": "pIE2EIMsSZKETgu_WGVZC",
+          "tableId": "tbl_usuarios_rbac",
           "columnIds": [
-            "hU3XWjz40Jllb6viyWia_"
+            "col_usuarios_01"
           ]
         },
         "end": {
-          "tableId": "SPIErIz8afsZYyy6IvdhT",
+          "tableId": "U9QD_HE3u0jZW67JMeOEP",
           "columnIds": [
-            "03h1o6liplez3fh8alb0fleto"
+            "col_dueno_02"
           ]
         }
       },
-      "03h1ocd5a0dttpmh78fe8vbdx": {
-        "id": "03h1ocd5a0dttpmh78fe8vbdx",
-        "relationshipType": 16,
-        "onDelete": 1,
-        "onUpdate": 1,
-        "start": {
-          "tableId": "pIE2EIMsSZKETgu_WGVZC",
-          "columnIds": [
-            "hU3XWjz40Jllb6viyWia_"
-          ]
-        },
-        "end": {
-          "tableId": "03h1obbj8s79m9z0by164wyec",
-          "columnIds": [
-            "03h1ocd5a0dttpmh78dfz6l2p"
-          ]
-        }
-      },
-      "03h1oll5lz7qhmw0bza0l6f5l": {
-        "id": "03h1oll5lz7qhmw0bza0l6f5l",
-        "relationshipType": 16,
-        "onDelete": 1,
-        "onUpdate": 1,
-        "start": {
-          "tableId": "03h1obbj8s79m9z0by164wyec",
-          "columnIds": [
-            "03h1obja3qwj5lwdn1qagembl"
-          ]
-        },
-        "end": {
-          "tableId": "03h1okp27micq4os9l9ka33wv",
-          "columnIds": [
-            "03h1oll5lz7qhmw0bz88e6sie"
-          ]
-        }
-      },
-      "03h2bxk41mr1cz5ryd4j774y6": {
-        "id": "03h2bxk41mr1cz5ryd4j774y6",
-        "relationshipType": 16,
-        "onDelete": 1,
-        "onUpdate": 1,
-        "start": {
-          "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-          "columnIds": [
-            "n3Rkzy620-pyRj0dSx6j4"
-          ]
-        },
-        "end": {
-          "tableId": "pIE2EIMsSZKETgu_WGVZC",
-          "columnIds": [
-            "03h2bxk41mr1cz5ryd2u3r8s0"
-          ]
-        }
-      },
-      "03h2kicd98iusiendi0svx1ht": {
-        "id": "03h2kicd98iusiendi0svx1ht",
+      "rel_02": {
+        "id": "rel_02",
         "relationshipType": 16,
         "onDelete": 1,
         "onUpdate": 1,
         "start": {
           "tableId": "03h1od5bygzsaitsf7qmwt5l3",
           "columnIds": [
-            "03h1odp1fcj3pgcb3h1r59jmd"
+            "col_especie_01"
           ]
         },
         "end": {
           "tableId": "03h2kdzymh2erxfrx5hoip71r",
           "columnIds": [
-            "03h2kicd98iusiendhym64pmc"
+            "col_razas_02"
           ]
         }
       },
-      "03h2kip3yifigrsh7c8f9slra": {
-        "id": "03h2kip3yifigrsh7c8f9slra",
+      "rel_03": {
+        "id": "rel_03",
         "relationshipType": 16,
         "onDelete": 1,
         "onUpdate": 1,
         "start": {
           "tableId": "03h2kdzymh2erxfrx5hoip71r",
           "columnIds": [
-            "03h2ke174f3mfq9k66z7zai2e"
+            "col_razas_01"
           ]
         },
         "end": {
           "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
           "columnIds": [
-            "03h2kip3yifigrsh7c63b8v5p"
+            "col_paciente_03"
           ]
         }
       },
-      "03h2kltibl8qi3ac669gxjnxu": {
-        "id": "03h2kltibl8qi3ac669gxjnxu",
-        "relationshipType": 16,
-        "onDelete": 1,
-        "onUpdate": 1,
-        "start": {
-          "tableId": "pIE2EIMsSZKETgu_WGVZC",
-          "columnIds": [
-            "hU3XWjz40Jllb6viyWia_"
-          ]
-        },
-        "end": {
-          "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-          "columnIds": [
-            "03h2kltibfu9ts3y8kvx11px1"
-          ]
-        }
-      },
-      "03h2klwjz6mastxtkugtjr4nl": {
-        "id": "03h2klwjz6mastxtkugtjr4nl",
+      "rel_04": {
+        "id": "rel_04",
         "relationshipType": 16,
         "onDelete": 1,
         "onUpdate": 1,
         "start": {
           "tableId": "U9QD_HE3u0jZW67JMeOEP",
           "columnIds": [
-            "-y9WrrQmd7eKJOtU-XC_F"
-          ]
-        },
-        "end": {
-          "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-          "columnIds": [
-            "03h2klwjz6mastxtkue1cz4je"
-          ]
-        }
-      },
-      "03h2klzw5rp15othfs0za6i22": {
-        "id": "03h2klzw5rp15othfs0za6i22",
-        "relationshipType": 16,
-        "onDelete": 1,
-        "onUpdate": 1,
-        "start": {
-          "tableId": "AhsfDOEQdlNkfs1kaAJy3",
-          "columnIds": [
-            "8-gaHBNWMl71qBhAADtz0"
-          ]
-        },
-        "end": {
-          "tableId": "03h2kjuukb1rfa09penr2oahf",
-          "columnIds": [
-            "03h2klzw5rp15othfryigoaxu"
-          ]
-        }
-      },
-      "25OsmA_wLEQQHhG6fJTLd": {
-        "id": "25OsmA_wLEQQHhG6fJTLd",
-        "relationshipType": 16,
-        "onDelete": 1,
-        "onUpdate": 1,
-        "start": {
-          "tableId": "U9QD_HE3u0jZW67JMeOEP",
-          "columnIds": [
-            "-y9WrrQmd7eKJOtU-XC_F"
+            "col_dueno_01"
           ]
         },
         "end": {
           "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
           "columnIds": [
-            "SDEpv1VXuOEOLWh7deftl"
+            "col_paciente_02"
           ]
         }
       },
-      "MYiIW-Mi72LFlAEcunFAK": {
-        "id": "MYiIW-Mi72LFlAEcunFAK",
-        "relationshipType": 16,
-        "onDelete": 1,
-        "onUpdate": 1,
-        "start": {
-          "tableId": "AhsfDOEQdlNkfs1kaAJy3",
-          "columnIds": [
-            "8-gaHBNWMl71qBhAADtz0"
-          ]
-        },
-        "end": {
-          "tableId": "SPIErIz8afsZYyy6IvdhT",
-          "columnIds": [
-            "M7gZW7yFyf8KzczEWl5uo"
-          ]
-        }
-      },
-      "ave_EEUc03NAO6ClQwgnm": {
-        "id": "ave_EEUc03NAO6ClQwgnm",
+      "rel_05": {
+        "id": "rel_05",
         "relationshipType": 16,
         "onDelete": 1,
         "onUpdate": 1,
         "start": {
           "tableId": "FWO8l6QJzJV9OsiSKtEk6",
           "columnIds": [
-            "jOl0E-ILzMFVfC--bfkDJ"
+            "col_especialidad_01"
           ]
         },
         "end": {
           "tableId": "KNHznS0dHAkEkdA8ZevJd",
           "columnIds": [
-            "fWtNU_eJFyBVxJWIXZZlb"
+            "col_veterinario_03"
           ]
         }
       },
-      "t_gvqEwXCOhJxV7X02FG1": {
-        "id": "t_gvqEwXCOhJxV7X02FG1",
+      "rel_06": {
+        "id": "rel_06",
+        "relationshipType": 16,
+        "onDelete": 8,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "tbl_usuarios_rbac",
+          "columnIds": [
+            "col_usuarios_01"
+          ]
+        },
+        "end": {
+          "tableId": "KNHznS0dHAkEkdA8ZevJd",
+          "columnIds": [
+            "col_veterinario_02"
+          ]
+        }
+      },
+      "rel_07": {
+        "id": "rel_07",
+        "relationshipType": 16,
+        "onDelete": 8,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
+          "columnIds": [
+            "col_paciente_01"
+          ]
+        },
+        "end": {
+          "tableId": "pIE2EIMsSZKETgu_WGVZC",
+          "columnIds": [
+            "col_cita_03"
+          ]
+        }
+      },
+      "rel_08": {
+        "id": "rel_08",
         "relationshipType": 16,
         "onDelete": 1,
         "onUpdate": 1,
         "start": {
           "tableId": "KNHznS0dHAkEkdA8ZevJd",
           "columnIds": [
-            "Ft3qn-B9UmXIx6MZHRvBs"
+            "col_veterinario_01"
           ]
         },
         "end": {
           "tableId": "pIE2EIMsSZKETgu_WGVZC",
           "columnIds": [
-            "6BxQWIvInH372x59spvy3"
+            "col_cita_02"
+          ]
+        }
+      },
+      "rel_09": {
+        "id": "rel_09",
+        "relationshipType": 16,
+        "onDelete": 1,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "AhsfDOEQdlNkfs1kaAJy3",
+          "columnIds": [
+            "col_servicios_01"
+          ]
+        },
+        "end": {
+          "tableId": "SPIErIz8afsZYyy6IvdhT",
+          "columnIds": [
+            "col_detalle_servicios_02"
+          ]
+        }
+      },
+      "rel_10": {
+        "id": "rel_10",
+        "relationshipType": 16,
+        "onDelete": 4,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "pIE2EIMsSZKETgu_WGVZC",
+          "columnIds": [
+            "col_cita_01"
+          ]
+        },
+        "end": {
+          "tableId": "SPIErIz8afsZYyy6IvdhT",
+          "columnIds": [
+            "col_detalle_servicios_01"
+          ]
+        }
+      },
+      "rel_11": {
+        "id": "rel_11",
+        "relationshipType": 16,
+        "onDelete": 4,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "pIE2EIMsSZKETgu_WGVZC",
+          "columnIds": [
+            "col_cita_01"
+          ]
+        },
+        "end": {
+          "tableId": "03h1obbj8s79m9z0by164wyec",
+          "columnIds": [
+            "col_historial_clinico_02"
+          ]
+        }
+      },
+      "rel_12": {
+        "id": "rel_12",
+        "relationshipType": 16,
+        "onDelete": 4,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "03h1obbj8s79m9z0by164wyec",
+          "columnIds": [
+            "col_historial_clinico_01"
+          ]
+        },
+        "end": {
+          "tableId": "03h1okp27micq4os9l9ka33wv",
+          "columnIds": [
+            "col_receta_02"
+          ]
+        }
+      },
+      "rel_13": {
+        "id": "rel_13",
+        "relationshipType": 16,
+        "onDelete": 8,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "U9QD_HE3u0jZW67JMeOEP",
+          "columnIds": [
+            "col_dueno_01"
+          ]
+        },
+        "end": {
+          "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+          "columnIds": [
+            "col_factura_03"
+          ]
+        }
+      },
+      "rel_14": {
+        "id": "rel_14",
+        "relationshipType": 16,
+        "onDelete": 8,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "pIE2EIMsSZKETgu_WGVZC",
+          "columnIds": [
+            "col_cita_01"
+          ]
+        },
+        "end": {
+          "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+          "columnIds": [
+            "col_factura_02"
+          ]
+        }
+      },
+      "rel_15": {
+        "id": "rel_15",
+        "relationshipType": 16,
+        "onDelete": 4,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+          "columnIds": [
+            "col_factura_01"
+          ]
+        },
+        "end": {
+          "tableId": "03h2kjuukb1rfa09penr2oahf",
+          "columnIds": [
+            "col_pago_02"
+          ]
+        }
+      },
+      "rel_16": {
+        "id": "rel_16",
+        "relationshipType": 16,
+        "onDelete": 1,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "tbl_productos_tienda",
+          "columnIds": [
+            "col_productos_01"
+          ]
+        },
+        "end": {
+          "tableId": "tbl_detalle_ventas",
+          "columnIds": [
+            "col_detalle_ventas_03"
+          ]
+        }
+      },
+      "rel_17": {
+        "id": "rel_17",
+        "relationshipType": 16,
+        "onDelete": 4,
+        "onUpdate": 1,
+        "start": {
+          "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
+          "columnIds": [
+            "col_factura_01"
+          ]
+        },
+        "end": {
+          "tableId": "tbl_detalle_ventas",
+          "columnIds": [
+            "col_detalle_ventas_02"
           ]
         }
       }

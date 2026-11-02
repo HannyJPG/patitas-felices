@@ -290,205 +290,40 @@ class SQLiteDatabaseAdapter(IDatabaseAdapter):
             return self._persistent_conn
         conn = sqlite3.connect(self.db_path, check_same_thread=False)
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
     def _close_if_file(self, conn: sqlite3.Connection) -> None:
         if self._persistent_conn is None:
             conn.close()
 
+    def _owner_id_for_user(self, conn: sqlite3.Connection, usuario_id: int, create: bool = True) -> Optional[int]:
+        row = conn.execute("SELECT id_dueno FROM Dueno WHERE usuario_id = ?", (usuario_id,)).fetchone()
+        if row: return int(row[0])
+        user = conn.execute("SELECT * FROM usuarios WHERE id = ?", (usuario_id,)).fetchone()
+        if not user or not create: return None
+        parts = str(user["nombre"] or "Cliente").strip().split(" ", 1)
+        doc = user["documento"] or f"CLI{usuario_id:05d}"
+        cur = conn.execute("INSERT INTO Dueno (usuario_id,dni,tipo_documento,correo,nombres,apellidos,telefono) VALUES (?,?,?,?,?,?,?)",(usuario_id,doc,user["tipo_documento"] or "DNI",user["email"].lower(),parts[0],parts[1] if len(parts)>1 else "",user["telefono"] or ""))
+        return int(cur.lastrowid)
+
+    def _mascota_row(self, conn: sqlite3.Connection, mascota_id: int) -> Optional[Dict[str, Any]]:
+        row=conn.execute("SELECT p.id_paciente AS id,d.usuario_id,p.nombre,e.Nombre AS especie,r.nombre AS raza,p.edad,p.peso_kg,p.historial_resumen,p.sexo,p.fecha_nacimiento,p.estado,p.fecha_registro AS creado_en,COALESCE(u.nombre,d.nombres || ' ' || d.apellidos) AS propietario_nombre FROM Paciente p JOIN Dueno d ON d.id_dueno=p.id_dueno JOIN Razas r ON r.Id_raza=p.Id_raza JOIN Especie e ON e.Id_especie=r.Id_especie LEFT JOIN usuarios u ON u.id=d.usuario_id WHERE p.id_paciente=?",(mascota_id,)).fetchone()
+        return dict(row) if row else None
+
     def inicializar_esquema(self) -> None:
         conn = self._get_connection()
         try:
-            cur = conn.cursor()
-            cur.executescript(
-                """
-                CREATE TABLE IF NOT EXISTS Dueno (id_dueno INTEGER PRIMARY KEY AUTOINCREMENT, dni TEXT NOT NULL UNIQUE, correo TEXT NOT NULL UNIQUE, nombres TEXT NOT NULL, apellidos TEXT NOT NULL, telefono TEXT NOT NULL, fecha_registro TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                CREATE TABLE IF NOT EXISTS Especie (Id_especie INTEGER PRIMARY KEY AUTOINCREMENT, Nombre TEXT NOT NULL, Descripcion TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS Razas (Id_raza INTEGER PRIMARY KEY AUTOINCREMENT, Id_especie INTEGER NOT NULL, nombre TEXT NOT NULL, Descripcion TEXT);
-                CREATE TABLE IF NOT EXISTS Paciente (id_paciente INTEGER PRIMARY KEY AUTOINCREMENT, id_dueno INTEGER NOT NULL, Id_raza INTEGER NOT NULL, nombre TEXT NOT NULL, raza TEXT NOT NULL, sexo TEXT NOT NULL DEFAULT 'H', fecha_nacimiento TEXT NOT NULL DEFAULT '2023-05-10', estado TEXT NOT NULL DEFAULT 'Activo', fecha_registro TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                CREATE TABLE IF NOT EXISTS Especialidad (Id_especialidad INTEGER PRIMARY KEY AUTOINCREMENT, Nombre TEXT NOT NULL, Descripcion TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS Veterinario (Id_veterinario INTEGER PRIMARY KEY AUTOINCREMENT, Id_especialidad INTEGER NOT NULL, numero_colegiatura TEXT NOT NULL UNIQUE, nombres TEXT NOT NULL, Apellidos TEXT NOT NULL, Telefono TEXT NOT NULL, correo TEXT NOT NULL UNIQUE, Fecha_contratacion TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS Servicios (Id_servicios INTEGER PRIMARY KEY AUTOINCREMENT, Nombre TEXT NOT NULL, Precio REAL NOT NULL, Estado TEXT NOT NULL DEFAULT 'Activo');
-                CREATE TABLE IF NOT EXISTS Cita (Id_cita INTEGER PRIMARY KEY AUTOINCREMENT, Id_veterinario INTEGER NOT NULL, id_paciente INTEGER NOT NULL, fecha TEXT NOT NULL, motivo TEXT NOT NULL, estado TEXT NOT NULL DEFAULT 'Pendiente', fecha_registro TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                CREATE TABLE IF NOT EXISTS Detalle_servicios (Id_cita INTEGER NOT NULL, Id_servicios INTEGER NOT NULL, precio_aplicado REAL NOT NULL, PRIMARY KEY (Id_cita, Id_servicios));
-                CREATE TABLE IF NOT EXISTS Historial_clinico (Id_historial INTEGER PRIMARY KEY AUTOINCREMENT, Id_cita INTEGER NOT NULL, Fecha TEXT NOT NULL DEFAULT (datetime('now', 'localtime')), Diagnostico TEXT NOT NULL, Tratamiento TEXT NOT NULL, Observaciones TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS Receta (Id_receta INTEGER PRIMARY KEY AUTOINCREMENT, Id_historial INTEGER NOT NULL, medicamento TEXT NOT NULL, Dosis TEXT NOT NULL, duracion_dias INTEGER NOT NULL, indicaciones TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS Factura (id_factura INTEGER PRIMARY KEY AUTOINCREMENT, Id_cita INTEGER, id_dueno INTEGER NOT NULL, tipo TEXT NOT NULL DEFAULT 'Boleta', serie TEXT NOT NULL DEFAULT 'B001', numero INTEGER NOT NULL, fecha_emision TEXT NOT NULL DEFAULT (datetime('now', 'localtime')), subtotal REAL NOT NULL, igv REAL NOT NULL, estado TEXT NOT NULL DEFAULT 'Pagado', xml_url TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS Pago (id_pago INTEGER PRIMARY KEY AUTOINCREMENT, Id_servicios INTEGER NOT NULL, descripcioon TEXT NOT NULL, cantidad INTEGER NOT NULL DEFAULT 1);
-                CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, email TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, rol TEXT NOT NULL CHECK(rol IN ('cliente', 'doctor', 'admin')), estado TEXT NOT NULL DEFAULT 'activo' CHECK(estado IN ('activo', 'inactivo')), telefono TEXT, tipo_documento TEXT DEFAULT 'DNI', documento TEXT, creado_en TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                CREATE TABLE IF NOT EXISTS productos (id INTEGER PRIMARY KEY AUTOINCREMENT, codigo TEXT NOT NULL UNIQUE, nombre TEXT NOT NULL, categoria TEXT NOT NULL, descripcion TEXT NOT NULL, precio REAL NOT NULL, stock INTEGER NOT NULL DEFAULT 0, activo INTEGER NOT NULL DEFAULT 1);
-                CREATE TABLE IF NOT EXISTS detalle_ventas (id INTEGER PRIMARY KEY AUTOINCREMENT, venta_id INTEGER NOT NULL, producto_id INTEGER NOT NULL, producto_nombre TEXT NOT NULL, cantidad INTEGER NOT NULL, precio_unitario REAL NOT NULL, subtotal REAL NOT NULL);
-                CREATE TABLE IF NOT EXISTS mascotas (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario_id INTEGER NOT NULL, nombre TEXT NOT NULL, especie TEXT NOT NULL DEFAULT 'Perro', raza TEXT NOT NULL DEFAULT 'Mestizo', edad INTEGER NOT NULL DEFAULT 1, peso_kg REAL NOT NULL DEFAULT 5.0, historial_resumen TEXT, creado_en TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                CREATE TABLE IF NOT EXISTS citas (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario_id INTEGER, mascota_id INTEGER, doctor_id INTEGER, propietario TEXT NOT NULL, telefono TEXT NOT NULL, mascota_nombre TEXT NOT NULL, servicio TEXT NOT NULL, fecha TEXT NOT NULL, hora TEXT NOT NULL, motivo TEXT NOT NULL, estado TEXT NOT NULL DEFAULT 'pendiente', diagnostico TEXT DEFAULT '', tratamiento TEXT DEFAULT '', whatsapp_url TEXT DEFAULT '', creado_en TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                CREATE TABLE IF NOT EXISTS ventas (id INTEGER PRIMARY KEY AUTOINCREMENT, numero_boleta TEXT NOT NULL UNIQUE, usuario_id INTEGER NOT NULL, cliente_nombre TEXT NOT NULL, cliente_documento TEXT NOT NULL, subtotal REAL NOT NULL, igv REAL NOT NULL, total REAL NOT NULL, metodo_pago TEXT NOT NULL DEFAULT 'Tarjeta / Yape', estado TEXT NOT NULL DEFAULT 'pagado', creado_en TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                CREATE TABLE IF NOT EXISTS solicitudes_mascota (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario_id INTEGER NOT NULL, mascota_id INTEGER NOT NULL, tipo TEXT NOT NULL, datos_nuevos TEXT, motivo TEXT NOT NULL, estado TEXT NOT NULL DEFAULT 'pendiente', creado_en TEXT NOT NULL DEFAULT (datetime('now', 'localtime')));
-                """
-            )
-            # Asegurar columnas tipo_documento y documento en usuarios si la tabla ya existía
-            try:
-                cur.execute("ALTER TABLE usuarios ADD COLUMN tipo_documento TEXT DEFAULT 'DNI'")
-            except Exception:
-                pass
-            try:
-                cur.execute("ALTER TABLE usuarios ADD COLUMN documento TEXT")
-            except Exception:
-                pass
+            from .sqlite_schema import migrate_sqlite_schema
 
-            cur.execute("SELECT COUNT(*) AS total FROM usuarios")
-            if cur.fetchone()["total"] == 0:
-                usuarios_iniciales = (
-                    [
-                        ("Dra. Melany Díaz (Admin)", "admin@patitasfelices.pe", hashear_password("admin123"), "admin", "activo", "990853697"),
-                        ("Dr. Carlos Mendoza (Doctor)", "doctor@patitasfelices.pe", hashear_password("doctor123"), "doctor", "activo", "987654321"),
-                        ("Lucía Fernández (Cliente)", "cliente@patitasfelices.pe", hashear_password("cliente123"), "cliente", "activo", "912345678"),
-                        ("Usuario Suspendido (Prueba Proxy)", "inactivo@patitasfelices.pe", hashear_password("inactivo123"), "cliente", "inactivo", "900000000"),
-                    ]
-                    if self.db_path == ":memory:"
-                    else [
-                        ("Dra. Melany Díaz (Admin)", "admin@patitasfelices.pe", hashear_password("admin123"), "admin", "activo", "990853697"),
-                    ]
-                )
-                cur.executemany(
-                    "INSERT INTO usuarios (nombre, email, password_hash, rol, estado, telefono) VALUES (?, ?, ?, ?, ?, ?)",
-                    usuarios_iniciales,
-                )
-                cur.executemany(
-                    "INSERT INTO Dueno (dni, correo, nombres, apellidos, telefono) VALUES (?, ?, ?, ?, ?)",
-                    [
-                        ("74859632", "cliente@patitasfelices.pe", "Lucía", "Fernández", "912345678"),
-                        ("45896321", "jorge.ramirez@correo.pe", "Jorge", "Ramírez", "987112233"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Especie (Nombre, Descripcion) VALUES (?, ?)",
-                    [
-                        ("Canino", "Perros domésticos de todas las razas"),
-                        ("Felino", "Gatos domésticos"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Razas (Id_especie, nombre, Descripcion) VALUES (?, ?, ?)",
-                    [
-                        (1, "Golden Retriever", "Raza mediana-grande de temperamento dócil"),
-                        (2, "Siamés", "Felino de pelaje corto y ojos azules"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Paciente (id_dueno, Id_raza, nombre, raza, sexo, fecha_nacimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    [
-                        (1, 1, "Luna", "Golden Retriever", "H", "2023-03-15", "Activo"),
-                        (1, 2, "Michi", "Siamés", "M", "2024-06-10", "Activo"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Especialidad (Nombre, Descripcion) VALUES (?, ?)",
-                    [
-                        ("Medicina General e Interna", "Diagnóstico clínico primario y prevención"),
-                        ("Dermatología y Cirugía Menor", "Cuidado especializado de piel y tejidos"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Veterinario (Id_veterinario, Id_especialidad, numero_colegiatura, nombres, Apellidos, Telefono, correo, Fecha_contratacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    [
-                        (1, 1, "CMVP-10452", "Carlos", "Mendoza", "987654321", "doctor@patitasfelices.pe", "2024-01-15"),
-                        (2, 2, "CMVP-11890", "Melany", "Díaz Marín", "990853697", "admin@patitasfelices.pe", "2023-08-01"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Servicios (Nombre, Precio, Estado) VALUES (?, ?, ?)",
-                    [
-                        ("Consulta general", 60.00, "Activo"),
-                        ("Vacunación", 75.00, "Activo"),
-                        ("Desparasitación", 45.00, "Activo"),
-                        ("Control y seguimiento", 40.00, "Activo"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Cita (Id_veterinario, id_paciente, fecha, motivo, estado) VALUES (?, ?, ?, ?, ?)",
-                    [
-                        (1, 1, "2026-10-28 10:00", "Revisión preventiva de piel y control de peso.", "Confirmada"),
-                        (2, 2, "2026-10-29 11:30", "Refuerzo anual de vacuna triple felina.", "Pendiente"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Detalle_servicios (Id_cita, Id_servicios, precio_aplicado) VALUES (?, ?, ?)",
-                    [
-                        (1, 1, 60.00),
-                        (2, 2, 75.00),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Historial_clinico (Id_cita, Diagnostico, Tratamiento, Observaciones) VALUES (?, ?, ?, ?)",
-                    [
-                        (1, "Dermatitis alérgica leve controlada.", "Baño con clorhexidina cada 7 días.", "Paciente dócil, peso 24.5 kg."),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Receta (Id_historial, medicamento, Dosis, duracion_dias, indicaciones) VALUES (?, ?, ?, ?, ?)",
-                    [
-                        (1, "Shampoo Dermatológico Clorhexidina 250ml", "Aplicación tópica dejando actuar 10 min", 21, "Secar con toalla limpia sin frotar."),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Factura (Id_cita, id_dueno, tipo, serie, numero, subtotal, igv, estado, xml_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    [
-                        (1, 1, "Boleta", "B001", 1, 50.85, 9.15, "Pagado", "/api/tienda/boleta/1/pdf"),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO Pago (Id_servicios, descripcioon, cantidad) VALUES (?, ?, ?)",
-                    [
-                        (1, "Pago Yape por Consulta general de Luna", 1),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO productos (codigo, nombre, categoria, descripcion, precio, stock, activo) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    [
-                        ("VET-001", "Antipulgas Bravecto Chewable 10-20kg", "Farmacia", "Protección oral por 12 semanas contra pulgas y garrapatas.", 145.00, 25, 1),
-                        ("VET-002", "Alimento Clínico Renal Canine 2kg", "Nutrición", "Dieta terapéutica de soporte renal e hidratación.", 89.50, 18, 1),
-                        ("VET-003", "Shampoo Dermatológico Clorhexidina 250ml", "Higiene", "Fórmula hipoalergénica antiséptica para piel sensible.", 48.00, 30, 1),
-                        ("VET-004", "Suplemento Omega 3 & Vitaminas Pelaje", "Suplementos", "60 cápsulas blandas para articulaciones y brillo capilar.", 65.00, 20, 1),
-                        ("VET-005", "Collar Isabelino Ajustable Acolchado", "Accesorios", "Recuperación postoperatoria cómoda sin roce.", 35.00, 15, 1),
-                        ("VET-006", "Kit Dental Enzimático Veterinario", "Higiene", "Pasta enzimática y cepillo suave de doble cabezal.", 42.00, 12, 1),
-                    ],
-                )
-                cur.executemany(
-                    "INSERT INTO mascotas (usuario_id, nombre, especie, raza, edad, peso_kg, historial_resumen) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    [
-                        (3, "Luna", "Perro", "Golden Retriever", 3, 24.5, "Vacunación séxtuple vigente. Peso saludable."),
-                        (3, "Michi", "Gato", "Siamés", 2, 4.2, "Desparasitación interna completada en octubre."),
-                    ],
-                )
-                cur.executemany(
-                    """
-                    INSERT INTO citas (
-                        usuario_id, mascota_id, doctor_id, propietario, telefono,
-                        mascota_nombre, servicio, fecha, hora, motivo, estado,
-                        diagnostico, tratamiento, whatsapp_url
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    [
-                        (
-                            3, 1, 2, "Lucía Fernández", "912345678", "Luna", "consulta-general",
-                            "2026-10-30", "10:00", "Revisión preventiva de piel y control de peso.",
-                            "confirmada", "Dermatitis leve controlada.", "Baño medicado cada 7 días por 3 semanas.",
-                            "https://wa.me/51990853697?text=Cita%20confirmada",
-                        ),
-                        (
-                            3, 2, 2, "Lucía Fernández", "912345678", "Michi", "vacunacion",
-                            "2026-10-31", "11:30", "Refuerzo anual de vacuna triple felina.",
-                            "pendiente", "", "", "https://wa.me/51990853697?text=Solicitud%20vacunacion",
-                        ),
-                    ],
-                )
-            # Migrar automáticamente contraseñas en texto plano preexistentes a PBKDF2-SHA256
-            filas_u = cur.execute("SELECT id, password_hash FROM usuarios").fetchall()
-            for u_row in filas_u:
-                ph_actual = u_row["password_hash"] or ""
-                if ph_actual and not str(ph_actual).startswith(_PBKDF2_PREFIX):
-                    cur.execute(
+            migrate_sqlite_schema(conn, self.db_path, hashear_password)
+            rows = conn.execute("SELECT id, password_hash FROM usuarios").fetchall()
+            for row in rows:
+                password_hash = row["password_hash"] or ""
+                if password_hash and not str(password_hash).startswith(_PBKDF2_PREFIX):
+                    conn.execute(
                         "UPDATE usuarios SET password_hash = ? WHERE id = ?",
-                        (hashear_password(str(ph_actual)), u_row["id"]),
+                        (hashear_password(str(password_hash)), row["id"]),
                     )
             conn.commit()
         finally:
@@ -504,61 +339,22 @@ class SQLiteDatabaseAdapter(IDatabaseAdapter):
             self._close_if_file(conn)
 
     def crear_usuario(self, datos: Dict[str, Any]) -> Dict[str, Any]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            password_seguro = hashear_password(str(datos["password_hash"]))
-            cur = conn.execute(
-                """
-                INSERT INTO usuarios (nombre, email, password_hash, rol, estado, telefono, tipo_documento, documento)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    datos["nombre"].strip(),
-                    datos["email"].strip().lower(),
-                    password_seguro,
-                    datos.get("rol", "cliente"),
-                    datos.get("estado", "activo"),
-                    datos.get("telefono", "").strip(),
-                    datos.get("tipo_documento", "DNI"),
-                    datos.get("documento"),
-                ),
-            )
-            nuevo_id = cur.lastrowid
-            # Sincronización automática con la tabla Dueno del DER de 16 tablas
-            if datos.get("rol", "cliente") == "cliente":
-                partes = datos["nombre"].strip().split(" ", 1)
-                nombres = partes[0]
-                apellidos = partes[1] if len(partes) > 1 else "Cliente"
-                dni_val = datos.get("documento") or f"CLI{nuevo_id:05d}"
-                cur.execute(
-                    """
-                    INSERT OR IGNORE INTO Dueno (dni, correo, nombres, apellidos, telefono)
-                    VALUES (?, ?, ?, ?, ?)
-                    """,
-                    (dni_val, datos["email"].strip().lower(), nombres, apellidos, datos.get("telefono", "").strip()),
-                )
+            nombre=str(datos["nombre"]).strip(); email=str(datos["email"]).strip().lower()
+            cur=conn.execute("INSERT INTO usuarios (nombre,email,password_hash,rol,estado,telefono,tipo_documento,documento) VALUES (?,?,?,?,?,?,?,?)",(nombre,email,hashear_password(str(datos["password_hash"])),datos.get("rol","cliente"),datos.get("estado","activo"),str(datos.get("telefono","")).strip(),datos.get("tipo_documento","DNI"),datos.get("documento")))
+            nuevo_id=int(cur.lastrowid)
+            if datos.get("rol","cliente")=="cliente": self._owner_id_for_user(conn,nuevo_id)
             conn.commit()
-            cur = conn.execute("SELECT id, nombre, email, password_hash, rol, estado, telefono, tipo_documento, documento, creado_en FROM usuarios WHERE id = ?", (nuevo_id,))
-            return dict(cur.fetchone())
-        finally:
-            self._close_if_file(conn)
-
+            return dict(conn.execute("SELECT * FROM usuarios WHERE id=?",(nuevo_id,)).fetchone())
+        finally: self._close_if_file(conn)
     def actualizar_documento_usuario(self, usuario_id: int, tipo_documento: str, documento: str) -> Optional[Dict[str, Any]]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            conn.execute(
-                "UPDATE usuarios SET tipo_documento = ?, documento = ? WHERE id = ?",
-                (tipo_documento, documento, usuario_id),
-            )
-            cur = conn.execute("SELECT email FROM usuarios WHERE id = ?", (usuario_id,))
-            row = cur.fetchone()
-            if row:
-                conn.execute("UPDATE Dueno SET dni = ? WHERE correo = ?", (documento, row["email"]))
-            conn.commit()
-            return self.obtener_usuario_por_id(usuario_id)
-        finally:
-            self._close_if_file(conn)
-
+            conn.execute("UPDATE usuarios SET tipo_documento=?,documento=? WHERE id=?",(tipo_documento,documento,usuario_id))
+            conn.execute("UPDATE Dueno SET dni=?,tipo_documento=? WHERE usuario_id=?",(documento,tipo_documento,usuario_id))
+            conn.commit(); return self.obtener_usuario_por_id(usuario_id)
+        finally: self._close_if_file(conn)
     def cambiar_password_usuario(self, usuario_id: int, password_actual: str, password_nueva: str) -> bool:
         conn = self._get_connection()
         try:
@@ -576,138 +372,84 @@ class SQLiteDatabaseAdapter(IDatabaseAdapter):
             self._close_if_file(conn)
 
     def listar_compras_usuario(self, usuario_id: int) -> List[Dict[str, Any]]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            cur = conn.execute("SELECT * FROM ventas WHERE usuario_id = ? ORDER BY id DESC", (usuario_id,))
-            ventas = [dict(r) for r in cur.fetchall()]
-            for v in ventas:
-                cur_det = conn.execute("SELECT * FROM detalle_ventas WHERE venta_id = ? ORDER BY id ASC", (v["id"],))
-                v["detalles"] = [dict(d) for d in cur_det.fetchall()]
-            return ventas
-        finally:
-            self._close_if_file(conn)
-
-    def crear_solicitud_mascota(
-        self, usuario_id: int, mascota_id: int, tipo: str, motivo: str, datos_nuevos: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+            owner_id=self._owner_id_for_user(conn,usuario_id,create=False)
+            if owner_id is None:return []
+            rows=conn.execute("SELECT * FROM Factura WHERE id_dueno=? AND Id_cita IS NULL ORDER BY id_factura DESC",(owner_id,)).fetchall()
+            result=[]
+            for row in rows:
+                sale=dict(row); sale["id"]=sale["id_factura"]; sale["usuario_id"]=usuario_id; sale["creado_en"]=sale.get("fecha_emision")
+                sale["detalles"]=[dict(d) for d in conn.execute("SELECT id,id_factura,producto_id,producto_nombre,cantidad,precio_unitario,subtotal FROM detalle_ventas WHERE id_factura=? ORDER BY id",(sale["id_factura"],)).fetchall()]
+                result.append(sale)
+            return result
+        finally:self._close_if_file(conn)
+    def crear_solicitud_mascota(self, usuario_id: int, mascota_id: int, tipo: str, motivo: str, datos_nuevos: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         import json
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            datos_json = json.dumps(datos_nuevos) if datos_nuevos else None
-            cur = conn.execute(
-                """
-                INSERT INTO solicitudes_mascota (usuario_id, mascota_id, tipo, datos_nuevos, motivo, estado)
-                VALUES (?, ?, ?, ?, ?, 'pendiente')
-                """,
-                (usuario_id, mascota_id, tipo, datos_json, motivo.strip()),
-            )
-            conn.commit()
-            solicitud_id = cur.lastrowid
-            cur = conn.execute("SELECT * FROM solicitudes_mascota WHERE id = ?", (solicitud_id,))
-            return dict(cur.fetchone())
-        finally:
-            self._close_if_file(conn)
+            owner=self._owner_id_for_user(conn,usuario_id,create=False)
+            pet=conn.execute("SELECT id_dueno,solicitud_estado FROM Paciente WHERE id_paciente=?",(mascota_id,)).fetchone()
+            if not pet or int(pet["id_dueno"])!=int(owner or -1):raise LookupError("Mascota no encontrada para este usuario.")
+            if pet["solicitud_estado"]=="pendiente":raise ValueError("La mascota ya tiene una solicitud pendiente.")
+            conn.execute("UPDATE Paciente SET solicitud_tipo=?,solicitud_datos_nuevos=?,solicitud_motivo=?,solicitud_estado='pendiente',solicitud_creado_en=datetime('now','localtime') WHERE id_paciente=?",(tipo,json.dumps(datos_nuevos,ensure_ascii=False) if datos_nuevos else None,motivo.strip(),mascota_id))
+            conn.commit(); return next(item for item in self.listar_solicitudes_mascota(usuario_id) if item["id"]==mascota_id)
+        finally:self._close_if_file(conn)
 
     def listar_solicitudes_mascota(self, usuario_id: Optional[int] = None) -> List[Dict[str, Any]]:
         import json
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            query = """
-                SELECT s.*, u.nombre AS propietario_nombre, u.email AS propietario_email,
-                       m.nombre AS mascota_nombre, m.especie AS mascota_especie, m.raza AS mascota_raza
-                FROM solicitudes_mascota s
-                JOIN usuarios u ON u.id = s.usuario_id
-                LEFT JOIN mascotas m ON m.id = s.mascota_id
-            """
-            params = ()
-            if usuario_id is not None:
-                query += " WHERE s.usuario_id = ?"
-                params = (usuario_id,)
-            query += " ORDER BY s.id DESC"
-            cur = conn.execute(query, params)
-            filas = [dict(r) for r in cur.fetchall()]
-            for f in filas:
-                if f.get("datos_nuevos"):
-                    try:
-                        f["datos_nuevos"] = json.loads(f["datos_nuevos"])
-                    except Exception:
-                        pass
-            return filas
-        finally:
-            self._close_if_file(conn)
+            query="SELECT p.id_paciente AS id,p.id_paciente AS mascota_id,d.usuario_id,p.solicitud_tipo AS tipo,p.solicitud_datos_nuevos AS datos_nuevos,p.solicitud_motivo AS motivo,p.solicitud_estado AS estado,p.solicitud_creado_en AS creado_en,u.nombre AS propietario_nombre,u.email AS propietario_email,p.nombre AS mascota_nombre,e.Nombre AS mascota_especie,r.nombre AS mascota_raza FROM Paciente p JOIN Dueno d ON d.id_dueno=p.id_dueno LEFT JOIN usuarios u ON u.id=d.usuario_id JOIN Razas r ON r.Id_raza=p.Id_raza JOIN Especie e ON e.Id_especie=r.Id_especie WHERE p.solicitud_tipo IS NOT NULL"
+            params=()
+            if usuario_id is not None:query+=" AND d.usuario_id=?";params=(usuario_id,)
+            query+=" ORDER BY p.solicitud_creado_en DESC,p.id_paciente DESC"
+            result=[dict(r) for r in conn.execute(query,params).fetchall()]
+            for item in result:
+                if item.get("datos_nuevos"):
+                    try:item["datos_nuevos"]=json.loads(item["datos_nuevos"])
+                    except (ValueError,TypeError):pass
+            return result
+        finally:self._close_if_file(conn)
 
     def resolver_solicitud_mascota(self, solicitud_id: int, accion: str) -> Dict[str, Any]:
         import json
-        conn = self._get_connection()
+        from datetime import date
+        conn=self._get_connection()
         try:
-            cur = conn.execute("SELECT * FROM solicitudes_mascota WHERE id = ?", (solicitud_id,))
-            solicitud = cur.fetchone()
-            if not solicitud:
-                raise LookupError("Solicitud no encontrada.")
-            solicitud = dict(solicitud)
-            if solicitud["estado"] != "pendiente":
-                raise ValueError("Esta solicitud ya fue resuelta previamente.")
-
-            accion_limpia = accion.lower().strip()
-            if accion_limpia not in ("aprobar", "rechazar"):
-                raise ValueError("La acción debe ser 'aprobar' o 'rechazar'.")
-
-            nuevo_estado = "aprobada" if accion_limpia == "aprobar" else "rechazada"
-
-            if accion_limpia == "aprobar":
-                if solicitud["tipo"] == "eliminar":
-                    conn.execute("DELETE FROM mascotas WHERE id = ?", (solicitud["mascota_id"],))
-                elif solicitud["tipo"] == "editar" and solicitud.get("datos_nuevos"):
-                    try:
-                        nuevos = json.loads(solicitud["datos_nuevos"]) if isinstance(solicitud["datos_nuevos"], str) else solicitud["datos_nuevos"]
-                        conn.execute(
-                            """
-                            UPDATE mascotas SET nombre = ?, especie = ?, raza = ?, edad = ?, peso_kg = ?, historial_resumen = ?
-                            WHERE id = ?
-                            """,
-                            (
-                                nuevos.get("nombre", ""),
-                                nuevos.get("especie", "Perro"),
-                                nuevos.get("raza", "Mestizo"),
-                                int(nuevos.get("edad", 1)),
-                                float(nuevos.get("peso_kg", 5.0)),
-                                nuevos.get("historial_resumen", ""),
-                                solicitud["mascota_id"],
-                            ),
-                        )
-                    except Exception as e:
-                        raise ValueError(f"Error aplicando cambios de mascota: {e}")
-
-            conn.execute("UPDATE solicitudes_mascota SET estado = ? WHERE id = ?", (nuevo_estado, solicitud_id))
-            conn.commit()
-            solicitud["estado"] = nuevo_estado
-            return solicitud
-        finally:
-            self._close_if_file(conn)
-
+            row=conn.execute("SELECT * FROM Paciente WHERE id_paciente=? AND solicitud_tipo IS NOT NULL",(solicitud_id,)).fetchone()
+            if not row:raise LookupError("Solicitud no encontrada.")
+            if row["solicitud_estado"]!="pendiente":raise ValueError("Esta solicitud ya fue resuelta previamente.")
+            action=accion.lower().strip()
+            if action not in ("aprobar","rechazar"):raise ValueError("La accion debe ser 'aprobar' o 'rechazar'.")
+            status="aprobada" if action=="aprobar" else "rechazada"
+            if action=="aprobar" and row["solicitud_tipo"]=="eliminar":
+                conn.execute("UPDATE Paciente SET estado='Eliminado' WHERE id_paciente=?",(solicitud_id,))
+            elif action=="aprobar" and row["solicitud_tipo"]=="editar" and row["solicitud_datos_nuevos"]:
+                new=json.loads(row["solicitud_datos_nuevos"])
+                species=str(new.get("especie") or "Perro").strip(); breed=str(new.get("raza") or "Mestizo").strip()
+                found=conn.execute("SELECT Id_especie FROM Especie WHERE lower(Nombre)=lower(?) LIMIT 1",(species,)).fetchone()
+                if found:species_id=int(found[0])
+                else:species_id=int(conn.execute("INSERT INTO Especie (Nombre,Descripcion) VALUES (?,?)",(species,"Registrada desde solicitud")).lastrowid)
+                found=conn.execute("SELECT Id_raza FROM Razas WHERE Id_especie=? AND lower(nombre)=lower(?)",(species_id,breed)).fetchone()
+                if found:race_id=int(found[0])
+                else:race_id=int(conn.execute("INSERT INTO Razas (Id_especie,nombre,Descripcion) VALUES (?,?,?)",(species_id,breed,"Registrada desde solicitud")).lastrowid)
+                age=max(0,int(new.get("edad",row["edad"] or 1)))
+                conn.execute("UPDATE Paciente SET Id_raza=?,nombre=?,edad=?,fecha_nacimiento=?,peso_kg=?,historial_resumen=? WHERE id_paciente=?",(race_id,str(new.get("nombre",row["nombre"])).strip(),age,f"{max(1900,date.today().year-age):04d}-01-01",float(new.get("peso_kg",row["peso_kg"] or 5)),new.get("historial_resumen",row["historial_resumen"]),solicitud_id))
+            conn.execute("UPDATE Paciente SET solicitud_estado=? WHERE id_paciente=?",(status,solicitud_id));conn.commit()
+            return next(item for item in self.listar_solicitudes_mascota() if item["id"]==solicitud_id)
+        finally:self._close_if_file(conn)
     def crear_doctor(self, datos: Dict[str, Any]) -> Dict[str, Any]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            cur = conn.execute(
-                """
-                INSERT INTO Veterinario (Id_especialidad, numero_colegiatura, nombres, Apellidos, Telefono, correo, Fecha_contratacion)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    datos.get("especialidad_id", 1),
-                    datos.get("cmvp", "CMVP-00000"),
-                    datos.get("nombres", datos.get("nombre", "")),
-                    datos.get("apellidos", ""),
-                    datos.get("telefono", ""),
-                    datos.get("correo", datos.get("email", "")),
-                    datos.get("fecha_contratacion", "2026-10-29"),
-                ),
-            )
-            conn.commit()
-            return {"id": cur.lastrowid, **datos}
-        finally:
-            self._close_if_file(conn)
-
+            email=str(datos.get("correo",datos.get("email",""))).strip().lower(); user=conn.execute("SELECT id FROM usuarios WHERE lower(email)=lower(?)",(email,)).fetchone()
+            specialty_id=datos.get("especialidad_id")
+            if not specialty_id and datos.get("especialidad"):
+                specialty=conn.execute("SELECT Id_especialidad FROM Especialidad WHERE lower(Nombre)=lower(?)",(datos["especialidad"],)).fetchone()
+                if specialty:specialty_id=specialty[0]
+            cur=conn.execute("INSERT INTO Veterinario (usuario_id,Id_especialidad,numero_colegiatura,nombres,Apellidos,Telefono,correo,Fecha_contratacion) VALUES (?,?,?,?,?,?,?,?)",(user[0] if user else None,specialty_id or 1,datos.get("cmvp","CMVP-00000"),datos.get("nombres",datos.get("nombre","")),datos.get("apellidos",""),datos.get("telefono",""),email,datos.get("fecha_contratacion","2026-10-29")))
+            conn.commit();return {"id":int(cur.lastrowid),**datos}
+        finally:self._close_if_file(conn)
     def obtener_usuario_por_id(self, usuario_id: int) -> Optional[Dict[str, Any]]:
         conn = self._get_connection()
         try:
@@ -736,174 +478,116 @@ class SQLiteDatabaseAdapter(IDatabaseAdapter):
         finally:
             self._close_if_file(conn)
 
+    def _cita_row(self, conn: sqlite3.Connection, cita_id: int) -> Optional[Dict[str, Any]]:
+        row=conn.execute("""
+            SELECT c.Id_cita AS id,d.usuario_id,c.id_paciente AS mascota_id,
+                   COALESCE(v.usuario_id,v.Id_veterinario) AS doctor_id,
+                   COALESCE(NULLIF(c.propietario,''),u.nombre,trim(d.nombres || ' ' || d.apellidos),'') AS propietario,
+                   COALESCE(NULLIF(c.telefono,''),u.telefono,d.telefono,'') AS telefono,
+                   COALESCE(NULLIF(c.mascota_nombre,''),p.nombre,'') AS mascota_nombre,
+                   COALESCE(NULLIF(c.servicio,''),s.Nombre,'') AS servicio,c.fecha,c.hora,c.motivo,
+                   lower(c.estado) AS estado,c.whatsapp_url,
+                   COALESCE(h.Diagnostico,'') AS diagnostico,COALESCE(h.Tratamiento,'') AS tratamiento
+            FROM Cita c JOIN Veterinario v ON v.Id_veterinario=c.Id_veterinario
+            LEFT JOIN Paciente p ON p.id_paciente=c.id_paciente LEFT JOIN Dueno d ON d.id_dueno=p.id_dueno
+            LEFT JOIN usuarios u ON u.id=d.usuario_id
+            LEFT JOIN Detalle_servicios ds ON ds.Id_cita=c.Id_cita
+            LEFT JOIN Servicios s ON s.Id_servicios=ds.Id_servicios
+            LEFT JOIN Historial_clinico h ON h.Id_historial=(SELECT MAX(h2.Id_historial) FROM Historial_clinico h2 WHERE h2.Id_cita=c.Id_cita)
+            WHERE c.Id_cita=?
+        """,(cita_id,)).fetchone()
+        if not row:return None
+        result=dict(row)
+        service_alias={"Consulta general":"consulta-general","Vacunación":"vacunacion","Desparasitación":"desparasitacion","Control y seguimiento":"control"}
+        result["servicio"]=service_alias.get(result["servicio"],result["servicio"])
+        return result
+
     def listar_mascotas(self, usuario_id: Optional[int] = None) -> List[Dict[str, Any]]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            if usuario_id is not None:
-                cur = conn.execute("SELECT m.*, u.nombre AS propietario_nombre FROM mascotas m JOIN usuarios u ON u.id = m.usuario_id WHERE m.usuario_id = ? ORDER BY m.id ASC", (usuario_id,))
-            else:
-                cur = conn.execute("SELECT m.*, u.nombre AS propietario_nombre FROM mascotas m JOIN usuarios u ON u.id = m.usuario_id ORDER BY m.id ASC")
-            return [dict(r) for r in cur.fetchall()]
-        finally:
-            self._close_if_file(conn)
-
+            query="SELECT p.id_paciente AS id,d.usuario_id,p.nombre,e.Nombre AS especie,r.nombre AS raza,p.edad,p.peso_kg,p.historial_resumen,p.sexo,p.fecha_nacimiento,p.estado,p.fecha_registro AS creado_en,COALESCE(u.nombre,d.nombres || ' ' || d.apellidos) AS propietario_nombre FROM Paciente p JOIN Dueno d ON d.id_dueno=p.id_dueno JOIN Razas r ON r.Id_raza=p.Id_raza JOIN Especie e ON e.Id_especie=r.Id_especie LEFT JOIN usuarios u ON u.id=d.usuario_id WHERE p.estado<>'Eliminado'"
+            params=()
+            if usuario_id is not None:query+=" AND d.usuario_id=?";params=(usuario_id,)
+            query+=" ORDER BY p.id_paciente ASC"
+            return [dict(r) for r in conn.execute(query,params).fetchall()]
+        finally:self._close_if_file(conn)
     def crear_mascota(self, datos: Dict[str, Any]) -> Dict[str, Any]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            cur = conn.execute(
-                """
-                INSERT INTO mascotas (usuario_id, nombre, especie, raza, edad, peso_kg, historial_resumen)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    int(datos["usuario_id"]),
-                    str(datos["nombre"]).strip(),
-                    str(datos.get("especie", "Perro")).strip(),
-                    str(datos.get("raza", "Mestizo")).strip(),
-                    int(datos.get("edad", 1)),
-                    float(datos.get("peso_kg", 5.0)),
-                    str(datos.get("historial_resumen", "")).strip(),
-                ),
-            )
-            nuevo_id = cur.lastrowid
-            # Sincronización con la tabla Paciente del modelo de 16 tablas
-            try:
-                conn.execute(
-                    """
-                    INSERT INTO Paciente (id_dueno, Id_raza, nombre, raza, sexo, fecha_nacimiento, estado)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        int(datos["usuario_id"]),
-                        1,
-                        str(datos["nombre"]).strip(),
-                        str(datos.get("raza", "Mestizo")).strip(),
-                        str(datos.get("sexo", "H")).strip()[:1].upper(),
-                        "2024-01-01",
-                        "Activo",
-                    ),
-                )
-            except Exception:
-                pass
-            conn.commit()
-            cur = conn.execute("SELECT m.*, u.nombre AS propietario_nombre FROM mascotas m JOIN usuarios u ON u.id = m.usuario_id WHERE m.id = ?", (nuevo_id,))
-            return dict(cur.fetchone())
-        finally:
-            self._close_if_file(conn)
-
+            uid=int(datos["usuario_id"]);owner_id=self._owner_id_for_user(conn,uid)
+            species=str(datos.get("especie","Perro")).strip() or "Perro";breed=str(datos.get("raza","Mestizo")).strip() or "Mestizo"
+            specie=conn.execute("SELECT Id_especie FROM Especie WHERE lower(Nombre)=lower(?) LIMIT 1",(species,)).fetchone()
+            species_id=int(specie[0]) if specie else int(conn.execute("INSERT INTO Especie (Nombre,Descripcion) VALUES (?,?)",(species,"Registrada desde perfil de cliente")).lastrowid)
+            race=conn.execute("SELECT Id_raza FROM Razas WHERE Id_especie=? AND lower(nombre)=lower(?)",(species_id,breed)).fetchone()
+            race_id=int(race[0]) if race else int(conn.execute("INSERT INTO Razas (Id_especie,nombre,Descripcion) VALUES (?,?,?)",(species_id,breed,"Registrada desde perfil de cliente")).lastrowid)
+            age=max(0,int(datos.get("edad",1)));birth=str(datos.get("fecha_nacimiento") or f"{max(1900,__import__('datetime').date.today().year-age):04d}-01-01")
+            cur=conn.execute("INSERT INTO Paciente (id_dueno,Id_raza,nombre,sexo,fecha_nacimiento,edad,peso_kg,historial_resumen,estado) VALUES (?,?,?,?,?,?,?,?,?)",(owner_id,race_id,str(datos["nombre"]).strip(),str(datos.get("sexo","H")).strip()[:1].upper(),birth,age,float(datos.get("peso_kg",5.0)),str(datos.get("historial_resumen","")).strip(),"Activo"))
+            pet_id=int(cur.lastrowid);conn.commit();return self._mascota_row(conn,pet_id) or {"id":pet_id}
+        finally:self._close_if_file(conn)
     def eliminar_mascota(self, mascota_id: int, usuario_id: Optional[int] = None) -> bool:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            if usuario_id is not None:
-                cur = conn.execute("DELETE FROM mascotas WHERE id = ? AND usuario_id = ?", (mascota_id, usuario_id))
-            else:
-                cur = conn.execute("DELETE FROM mascotas WHERE id = ?", (mascota_id,))
-            conn.commit()
-            return cur.rowcount > 0
-        finally:
-            self._close_if_file(conn)
-
+            if usuario_id is None:cur=conn.execute("UPDATE Paciente SET estado='Eliminado' WHERE id_paciente=? AND estado<>'Eliminado'",(mascota_id,))
+            else:cur=conn.execute("UPDATE Paciente SET estado='Eliminado' WHERE id_paciente=? AND id_dueno=(SELECT id_dueno FROM Dueno WHERE usuario_id=?) AND estado<>'Eliminado'",(mascota_id,usuario_id))
+            conn.commit();return cur.rowcount==1
+        finally:self._close_if_file(conn)
     def obtener_disponibilidad_horarios(self, fecha: str) -> Dict[str, Any]:
-        horarios_posibles = ["08:30", "10:00", "11:30", "13:00", "15:30", "17:00", "18:30"]
-        conn = self._get_connection()
+        horarios=["08:30","10:00","11:30","13:00","15:30","17:00","18:30"]
+        conn=self._get_connection()
         try:
-            cur = conn.execute(
-                """
-                SELECT hora, COUNT(*) AS ocupados
-                FROM citas
-                WHERE fecha = ? AND estado != 'cancelada'
-                GROUP BY hora
-                """,
-                (fecha,),
-            )
-            conteo_por_hora = {}
-            for r in cur.fetchall():
-                h_str = str(r["hora"])[:5]
-                conteo_por_hora[h_str] = int(r["ocupados"])
-
-            disponibilidad = {}
-            for h in horarios_posibles:
-                ocupados = conteo_por_hora.get(h, 0)
-                disponibilidad[h] = {
-                    "ocupados": ocupados,
-                    "capacidad_maxima": 3,
-                    "disponible": ocupados < 3,
-                }
-            return {
-                "fecha": fecha,
-                "capacidad_por_turno": 3,
-                "horarios": disponibilidad,
-            }
-        finally:
-            self._close_if_file(conn)
-
+            counts={str(r["hora"])[:5]:int(r["ocupados"]) for r in conn.execute("SELECT hora,COUNT(*) AS ocupados FROM Cita WHERE fecha=? AND lower(estado)<>'cancelada' GROUP BY hora",(fecha,)).fetchall()}
+            return {"fecha":fecha,"capacidad_por_turno":3,"horarios":{h:{"ocupados":counts.get(h,0),"capacidad_maxima":3,"disponible":counts.get(h,0)<3} for h in horarios}}
+        finally:self._close_if_file(conn)
     def crear_cita(self, datos: Dict[str, Any]) -> Dict[str, Any]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            fecha = str(datos["fecha"]).strip()
-            hora = str(datos["hora"]).strip()[:5]
-            cur_conteo = conn.execute(
-                """
-                SELECT COUNT(*) AS total
-                FROM citas
-                WHERE fecha = ? AND SUBSTR(hora, 1, 5) = ? AND estado != 'cancelada'
-                """,
-                (fecha, hora),
-            )
-            ocupados = cur_conteo.fetchone()["total"]
-            if ocupados >= 3:
-                raise ValueError(
-                    f"El horario de las {hora} para el día {fecha} ya cuenta con sus 3 cupos médicos ocupados (3 doctores en turno). Por favor selecciona otro horario."
-                )
-
-            cur = conn.execute(
-                """
-                INSERT INTO citas (
-                    usuario_id, mascota_id, doctor_id, propietario, telefono,
-                    mascota_nombre, servicio, fecha, hora, motivo, estado,
-                    diagnostico, tratamiento, whatsapp_url
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    datos.get("usuario_id"), datos.get("mascota_id"), datos.get("doctor_id", 2),
-                    datos["propietario"], datos["telefono"], datos["mascota_nombre"], datos["servicio"],
-                    datos["fecha"], datos["hora"], datos["motivo"], datos.get("estado", "pendiente"),
-                    datos.get("diagnostico", ""), datos.get("tratamiento", ""), datos.get("whatsapp_url", ""),
-                ),
-            )
-            cita_id = cur.lastrowid
-            conn.commit()
-            row = conn.execute("SELECT * FROM citas WHERE id = ?", (cita_id,)).fetchone()
-            return dict(row)
-        finally:
-            self._close_if_file(conn)
-
+            fecha=str(datos["fecha"]).strip()[:10];hora=str(datos["hora"]).strip()[:5]
+            occupied=conn.execute("SELECT COUNT(*) FROM Cita WHERE fecha=? AND substr(hora,1,5)=? AND lower(estado)<>'cancelada'",(fecha,hora)).fetchone()[0]
+            if occupied>=3:raise ValueError(f"El horario {hora} del {fecha} ya cuenta con sus 3 cupos médicos ocupados. Elige otro horario.")
+            vet_id=None;doctor=datos.get("doctor_id")
+            if doctor is not None:
+                found=conn.execute("SELECT Id_veterinario FROM Veterinario WHERE usuario_id=?",(doctor,)).fetchone()
+                if not found:found=conn.execute("SELECT Id_veterinario FROM Veterinario WHERE Id_veterinario=?",(doctor,)).fetchone()
+                if found:vet_id=int(found[0])
+            if vet_id is None:
+                found=conn.execute("SELECT Id_veterinario FROM Veterinario ORDER BY Id_veterinario LIMIT 1").fetchone()
+                if not found:raise ValueError("No hay veterinarios registrados para asignar la cita.")
+                vet_id=int(found[0])
+            pet_id=datos.get("mascota_id")
+            if pet_id is not None:
+                pet=conn.execute("SELECT p.id_paciente,d.usuario_id FROM Paciente p JOIN Dueno d ON d.id_dueno=p.id_dueno WHERE p.id_paciente=?",(int(pet_id),)).fetchone()
+                if not pet:pet_id=None
+                elif datos.get("usuario_id") is not None and int(pet["usuario_id"] or -1)!=int(datos["usuario_id"]):raise ValueError("La mascota no pertenece al usuario de la cita.")
+            service_key=str(datos.get("servicio","")).strip();aliases={"consulta-general":"Consulta general","vacunacion":"Vacunación","desparasitacion":"Desparasitación","control":"Control y seguimiento"}
+            service_name=aliases.get(service_key,service_key);service=conn.execute("SELECT Id_servicios,Precio FROM Servicios WHERE lower(Nombre)=lower(?) LIMIT 1",(service_name,)).fetchone()
+            if not service:service=conn.execute("SELECT Id_servicios,Precio FROM Servicios ORDER BY Id_servicios LIMIT 1").fetchone()
+            cur=conn.execute("INSERT INTO Cita (Id_veterinario,id_paciente,fecha,hora,motivo,estado,propietario,telefono,mascota_nombre,servicio,whatsapp_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)",(vet_id,pet_id,fecha,hora,str(datos.get("motivo","")).strip(),str(datos.get("estado","pendiente")).lower(),str(datos.get("propietario","")).strip(),str(datos.get("telefono","")).strip(),str(datos.get("mascota_nombre","")).strip(),service_key,str(datos.get("whatsapp_url","")).strip()))
+            cita_id=int(cur.lastrowid)
+            if service:conn.execute("INSERT INTO Detalle_servicios (Id_cita,Id_servicios,precio_aplicado) VALUES (?,?,?)",(cita_id,int(service[0]),float(service[1])))
+            if datos.get("diagnostico") or datos.get("tratamiento"):conn.execute("INSERT INTO Historial_clinico (Id_cita,Diagnostico,Tratamiento) VALUES (?,?,?)",(cita_id,datos.get("diagnostico","") or "",datos.get("tratamiento","") or ""))
+            conn.commit();return self._cita_row(conn,cita_id) or {"id":cita_id}
+        finally:self._close_if_file(conn)
     def listar_citas(self, usuario_id: Optional[int] = None) -> List[Dict[str, Any]]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            if usuario_id is not None:
-                cur = conn.execute("SELECT * FROM citas WHERE usuario_id = ? ORDER BY fecha ASC, hora ASC", (usuario_id,))
+            if usuario_id is None:ids=[r[0] for r in conn.execute("SELECT Id_cita FROM Cita ORDER BY fecha,hora,Id_cita").fetchall()]
+            else:ids=[r[0] for r in conn.execute("SELECT c.Id_cita FROM Cita c LEFT JOIN Paciente p ON p.id_paciente=c.id_paciente LEFT JOIN Dueno d ON d.id_dueno=p.id_dueno WHERE d.usuario_id=? ORDER BY c.fecha,c.hora,c.Id_cita",(usuario_id,)).fetchall()]
+            return [result for cid in ids if (result:=self._cita_row(conn,int(cid))) is not None]
+        finally:self._close_if_file(conn)
+    def actualizar_cita_doctor(self, cita_id: int, estado: str, diagnostico: str, tratamiento: str, doctor_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
+        conn=self._get_connection()
+        try:
+            if doctor_id is None:cur=conn.execute("UPDATE Cita SET estado=? WHERE Id_cita=?",(estado,cita_id))
             else:
-                cur = conn.execute("SELECT * FROM citas ORDER BY fecha ASC, hora ASC")
-            return [dict(r) for r in cur.fetchall()]
-        finally:
-            self._close_if_file(conn)
-
-    def actualizar_cita_doctor(
-        self, cita_id: int, estado: str, diagnostico: str, tratamiento: str, doctor_id: Optional[int] = None
-    ) -> Optional[Dict[str, Any]]:
-        conn = self._get_connection()
-        try:
-            conn.execute(
-                "UPDATE citas SET estado = ?, diagnostico = ?, tratamiento = ?, doctor_id = COALESCE(?, doctor_id) WHERE id = ?",
-                (estado, diagnostico, tratamiento, doctor_id, cita_id),
-            )
-            conn.commit()
-            row = conn.execute("SELECT * FROM citas WHERE id = ?", (cita_id,)).fetchone()
-            return dict(row) if row else None
-        finally:
-            self._close_if_file(conn)
-
+                vet=conn.execute("SELECT Id_veterinario FROM Veterinario WHERE usuario_id=?",(doctor_id,)).fetchone()
+                if not vet:vet=conn.execute("SELECT Id_veterinario FROM Veterinario WHERE Id_veterinario=?",(doctor_id,)).fetchone()
+                cur=conn.execute("UPDATE Cita SET estado=?,Id_veterinario=COALESCE(?,Id_veterinario) WHERE Id_cita=?",(estado,int(vet[0]) if vet else None,cita_id))
+            if cur.rowcount==0:return None
+            hist=conn.execute("SELECT Id_historial FROM Historial_clinico WHERE Id_cita=? ORDER BY Id_historial DESC LIMIT 1",(cita_id,)).fetchone()
+            if hist:conn.execute("UPDATE Historial_clinico SET Diagnostico=?,Tratamiento=? WHERE Id_historial=?",(diagnostico,tratamiento,hist[0]))
+            elif diagnostico or tratamiento:conn.execute("INSERT INTO Historial_clinico (Id_cita,Diagnostico,Tratamiento) VALUES (?,?,?)",(cita_id,diagnostico,tratamiento))
+            conn.commit();return self._cita_row(conn,cita_id)
+        finally:self._close_if_file(conn)
     def listar_productos(self, solo_activos: bool = True) -> List[Dict[str, Any]]:
         conn = self._get_connection()
         try:
@@ -930,48 +614,31 @@ class SQLiteDatabaseAdapter(IDatabaseAdapter):
             self._close_if_file(conn)
 
     def registrar_venta_y_detalles(self, cabecera: Dict[str, Any], detalles: List[Dict[str, Any]]) -> Dict[str, Any]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            cur = conn.execute(
-                """
-                INSERT INTO ventas (numero_boleta, usuario_id, cliente_nombre, cliente_documento, subtotal, igv, total, metodo_pago, estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    cabecera["numero_boleta"], cabecera["usuario_id"], cabecera["cliente_nombre"],
-                    cabecera["cliente_documento"], cabecera["subtotal"], cabecera["igv"],
-                    cabecera["total"], cabecera.get("metodo_pago", "Tarjeta / Yape"), cabecera.get("estado", "pagado"),
-                ),
-            )
-            venta_id = cur.lastrowid
-            for d in detalles:
-                conn.execute(
-                    "INSERT INTO detalle_ventas (venta_id, producto_id, producto_nombre, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?, ?)",
-                    (venta_id, d["producto_id"], d["producto_nombre"], d["cantidad"], d["precio_unitario"], d["subtotal"]),
-                )
-            conn.commit()
-            venta_row = conn.execute("SELECT * FROM ventas WHERE id = ?", (venta_id,)).fetchone()
-            detalles_rows = conn.execute("SELECT * FROM detalle_ventas WHERE venta_id = ?", (venta_id,)).fetchall()
-            resultado = dict(venta_row)
-            resultado["detalles"] = [dict(d) for d in detalles_rows]
-            return resultado
-        finally:
-            self._close_if_file(conn)
+            uid=int(cabecera["usuario_id"]);owner_id=self._owner_id_for_user(conn,uid)
+            number_text=str(cabecera["numero_boleta"]);series,_,suffix=number_text.partition("-");series=series or "B001";number=int(suffix or "1")
+            exists=conn.execute("SELECT 1 FROM Factura WHERE serie=? AND numero=?",(series,number)).fetchone()
+            if exists:raise ValueError(f"El numero de boleta {number_text} ya existe.")
+            cur=conn.execute("INSERT INTO Factura (id_dueno,tipo,serie,numero,numero_boleta,cliente_nombre,cliente_documento,subtotal,igv,total,metodo_pago,estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",(owner_id,"Boleta",series,number,number_text,cabecera["cliente_nombre"],cabecera["cliente_documento"],cabecera["subtotal"],cabecera["igv"],cabecera["total"],cabecera.get("metodo_pago","Tarjeta / Yape"),str(cabecera.get("estado","pagado")).capitalize()))
+            invoice_id=int(cur.lastrowid)
+            for detail in detalles:
+                conn.execute("INSERT INTO detalle_ventas (id_factura,producto_id,producto_nombre,cantidad,precio_unitario,subtotal) VALUES (?,?,?,?,?,?)",(invoice_id,detail["producto_id"],detail["producto_nombre"],detail["cantidad"],detail["precio_unitario"],detail["subtotal"]))
+            conn.execute("INSERT INTO Pago (id_factura,metodo_pago,monto,estado) VALUES (?,?,?,?)",(invoice_id,cabecera.get("metodo_pago","Tarjeta / Yape"),cabecera["total"],str(cabecera.get("estado","pagado")).capitalize()))
+            conn.commit();return self._factura_row(conn,invoice_id) or {"id":invoice_id}
+        finally:self._close_if_file(conn)
 
+    def _factura_row(self, conn: sqlite3.Connection, invoice_id: int) -> Optional[Dict[str, Any]]:
+        row=conn.execute("SELECT f.*,f.id_factura AS id,d.usuario_id,f.fecha_emision AS creado_en FROM Factura f LEFT JOIN Dueno d ON d.id_dueno=f.id_dueno WHERE f.id_factura=?",(invoice_id,)).fetchone()
+        if not row:return None
+        result=dict(row);result["detalles"]=[dict(d) for d in conn.execute("SELECT * FROM detalle_ventas WHERE id_factura=? ORDER BY id",(invoice_id,)).fetchall()]
+        return result
     def listar_ventas(self) -> List[Dict[str, Any]]:
-        conn = self._get_connection()
+        conn=self._get_connection()
         try:
-            ventas_rows = conn.execute("SELECT * FROM ventas ORDER BY id DESC").fetchall()
-            resultado = []
-            for v in ventas_rows:
-                v_dict = dict(v)
-                d_rows = conn.execute("SELECT * FROM detalle_ventas WHERE venta_id = ?", (v_dict["id"],)).fetchall()
-                v_dict["detalles"] = [dict(d) for d in d_rows]
-                resultado.append(v_dict)
-            return resultado
-        finally:
-            self._close_if_file(conn)
-
+            ids=[r[0] for r in conn.execute("SELECT id_factura FROM Factura ORDER BY id_factura DESC").fetchall()]
+            return [sale for invoice_id in ids if (sale:=self._factura_row(conn,int(invoice_id))) is not None]
+        finally:self._close_if_file(conn)
     def obtener_todas_las_16_tablas(self) -> Dict[str, List[Dict[str, Any]]]:
         conn = self._get_connection()
         try:
@@ -1070,12 +737,26 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             "rol": datos.get("rol", "cliente"),
             "estado": datos.get("estado", "activo"),
             "telefono": datos.get("telefono", "").strip(),
+            "tipo_documento": datos.get("tipo_documento", "DNI"),
+            "documento": datos.get("documento"),
         }
         try:
             resp = self._client.post(self._url("usuarios"), json=payload)
             if resp.status_code in (200, 201):
                 data = resp.json()
                 creado = data[0] if isinstance(data, list) and data else payload
+                if creado.get("id") and creado.get("rol") == "cliente":
+                    parts = str(creado.get("nombre", "Cliente")).strip().split(" ", 1)
+                    owner_payload = {
+                        "usuario_id": creado["id"],
+                        "dni": creado.get("documento") or f"CLI{int(creado['id']):05d}",
+                        "tipo_documento": creado.get("tipo_documento", "DNI"),
+                        "correo": creado["email"],
+                        "nombres": parts[0],
+                        "apellidos": parts[1] if len(parts) > 1 else "",
+                        "telefono": creado.get("telefono") or "",
+                    }
+                    self._client.post(self._url("Dueno"), json=owner_payload)
                 if creado.get("id"):
                     self._user_cache[int(creado["id"])] = (time.monotonic(), dict(creado))
                 return creado
@@ -1086,17 +767,32 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
     def crear_doctor(self, datos: Dict[str, Any]) -> Dict[str, Any]:
         if not self._configurado:
             return self._local_sqlite.crear_doctor(datos)
+        correo = str(datos.get("correo", datos.get("email", ""))).strip().lower()
+        usuario_id = datos.get("usuario_id")
+        if usuario_id is None and correo:
+            user = self.obtener_usuario_por_email(correo)
+            usuario_id = user.get("id") if user else None
+        especialidad_id = datos.get("especialidad_id")
+        if especialidad_id is None:
+            nombre_especialidad = str(datos.get("especialidad", "Medicina General e Interna"))
+            try:
+                spec = self._client.get(f"{self._url('Especialidad')}?select=Id_especialidad&Nombre=eq.{quote(nombre_especialidad, safe='')}&limit=1")
+                if spec.status_code == 200 and spec.json():
+                    especialidad_id = spec.json()[0]["Id_especialidad"]
+            except Exception:
+                pass
         payload = {
             "usuario_id": datos.get("usuario_id"),
             "numero_colegiatura": datos.get("cmvp", "CMVP-00000"),
             "nombres": datos.get("nombres", datos.get("nombre", "")),
-            "apellidos": datos.get("apellidos", ""),
-            "telefono": datos.get("telefono", ""),
-            "correo": datos.get("correo", datos.get("email", "")),
-            "especialidad": datos.get("especialidad", "Medicina General"),
+            "Apellidos": datos.get("apellidos", ""),
+            "Telefono": datos.get("telefono", ""),
+            "correo": correo,
+            "Id_especialidad": especialidad_id or 1,
+            "Fecha_contratacion": datos.get("fecha_contratacion", "2026-10-29"),
         }
         try:
-            resp = self._client.post(self._url("doctores"), json=payload)
+            resp = self._client.post(self._url("Veterinario"), json=payload)
             if resp.status_code in (200, 201):
                 data = resp.json()
                 return data[0] if isinstance(data, list) and data else payload
@@ -1132,6 +828,10 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             self._client.patch(
                 f"{self._url('usuarios')}?id=eq.{usuario_id}",
                 json={"tipo_documento": tipo_documento, "documento": documento},
+            )
+            self._client.patch(
+                f"{self._url('Dueno')}?usuario_id=eq.{usuario_id}",
+                json={"tipo_documento": tipo_documento, "dni": documento},
             )
         except Exception:
             pass
@@ -1196,6 +896,7 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             "edad": int(datos.get("edad", 1)),
             "peso_kg": float(datos.get("peso_kg", 5.0)),
             "historial_resumen": str(datos.get("historial_resumen", "")).strip(),
+            "sexo": str(datos.get("sexo", "H")).strip()[:1].upper(),
         }
         try:
             resp = self._client.post(self._url("mascotas"), json=payload)
@@ -1396,7 +1097,7 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             items_payload = []
             for d in detalles:
                 items_payload.append({
-                    "venta_id": venta_id,
+                    "id_factura": venta_id,
                     "producto_id": d["producto_id"],
                     "producto_nombre": d["producto_nombre"],
                     "cantidad": d["cantidad"],
@@ -1406,6 +1107,12 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
 
             resp_d = self._client.post(self._url("detalle_ventas"), json=items_payload)
             detalles_creados = resp_d.json() if resp_d.status_code in (200, 201) else []
+            self._client.post(self._url("Pago"), json={
+                "id_factura": venta_id,
+                "metodo_pago": cabecera.get("metodo_pago", "Tarjeta / Yape"),
+                "monto": cabecera["total"],
+                "estado": str(cabecera.get("estado", "pagado")).capitalize(),
+            })
             venta_creada["detalles"] = detalles_creados
             return venta_creada
         except Exception:
@@ -1425,7 +1132,7 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
 
             detalles_por_venta: Dict[int, List[Dict[str, Any]]] = {}
             for d in todos_detalles:
-                detalles_por_venta.setdefault(d["venta_id"], []).append(d)
+                detalles_por_venta.setdefault(d["id_factura"], []).append(d)
 
             for v in ventas:
                 v["detalles"] = detalles_por_venta.get(v["id"], [])
@@ -1436,7 +1143,7 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
     def obtener_todas_las_16_tablas(self) -> Dict[str, List[Dict[str, Any]]]:
         if not self._configurado:
             return self._local_sqlite.obtener_todas_las_16_tablas()
-        tablas_principales = ["usuarios", "mascotas", "citas", "productos", "ventas", "detalle_ventas"]
+        tablas_principales = list(SQLiteDatabaseAdapter.NOMBRES_16_TABLAS)
         resultado: Dict[str, List[Dict[str, Any]]] = {}
         try:
             for t in tablas_principales:
@@ -1477,7 +1184,7 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
             todos_detalles = resp_d.json() if resp_d.status_code == 200 else []
             detalles_por_venta: Dict[int, List[Dict[str, Any]]] = {}
             for d in todos_detalles:
-                detalles_por_venta.setdefault(d["venta_id"], []).append(d)
+                detalles_por_venta.setdefault(d["id_factura"], []).append(d)
             for v in ventas:
                 v["detalles"] = detalles_por_venta.get(v["id"], [])
             return ventas
@@ -1487,33 +1194,67 @@ class SupabasePostgresAdapter(IDatabaseAdapter):
     def crear_solicitud_mascota(
         self, usuario_id: int, mascota_id: int, tipo: str, motivo: str, datos_nuevos: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        return self._local_sqlite.crear_solicitud_mascota(usuario_id, mascota_id, tipo, motivo, datos_nuevos)
+        if not self._configurado:
+            return self._local_sqlite.crear_solicitud_mascota(usuario_id, mascota_id, tipo, motivo, datos_nuevos)
+        try:
+            pet_resp = self._client.get(f"{self._url('mascotas')}?id=eq.{mascota_id}&usuario_id=eq.{usuario_id}&limit=1")
+            if pet_resp.status_code != 200 or not pet_resp.json():
+                raise LookupError("Mascota no encontrada para este usuario.")
+            previous = self._client.get(f"{self._url('solicitudes_mascota')}?mascota_id=eq.{mascota_id}&limit=1")
+            if previous.status_code == 200 and previous.json() and previous.json()[0].get("estado") == "pendiente":
+                raise ValueError("La mascota ya tiene una solicitud pendiente.")
+            payload = {
+                "solicitud_tipo": tipo,
+                "solicitud_datos_nuevos": datos_nuevos,
+                "solicitud_motivo": motivo.strip(),
+                "solicitud_estado": "pendiente",
+                "solicitud_creado_en": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            }
+            saved = self._client.patch(f"{self._url('Paciente')}?id_paciente=eq.{mascota_id}", json=payload)
+            if saved.status_code not in (200, 204):
+                raise RuntimeError(saved.text)
+            data = self._client.get(f"{self._url('solicitudes_mascota')}?id=eq.{mascota_id}&limit=1")
+            return data.json()[0] if data.status_code == 200 and data.json() else {"id": mascota_id, "mascota_id": mascota_id, **payload}
+        except (ValueError, LookupError):
+            raise
+        except Exception:
+            return self._local_sqlite.crear_solicitud_mascota(usuario_id, mascota_id, tipo, motivo, datos_nuevos)
 
     def listar_solicitudes_mascota(self, usuario_id: Optional[int] = None) -> List[Dict[str, Any]]:
+        if not self._configurado:
+            return self._local_sqlite.listar_solicitudes_mascota(usuario_id)
+        try:
+            query = f"{self._url('solicitudes_mascota')}?select=*&order=creado_en.desc"
+            if usuario_id is not None:
+                query += f"&usuario_id=eq.{usuario_id}"
+            response = self._client.get(query)
+            if response.status_code == 200:
+                return response.json()
+        except Exception:
+            pass
         return self._local_sqlite.listar_solicitudes_mascota(usuario_id)
 
     def resolver_solicitud_mascota(self, solicitud_id: int, accion: str) -> Dict[str, Any]:
-        sol = self._local_sqlite.resolver_solicitud_mascota(solicitud_id, accion)
-        if accion.lower() == "aprobar":
+        if not self._configurado:
+            return self._local_sqlite.resolver_solicitud_mascota(solicitud_id, accion)
+        current = self._client.get(f"{self._url('solicitudes_mascota')}?id=eq.{solicitud_id}&limit=1")
+        if current.status_code != 200 or not current.json():
+            raise LookupError("Solicitud no encontrada.")
+        sol = current.json()[0]
+        if sol.get("estado") != "pendiente":
+            raise ValueError("Esta solicitud ya fue resuelta previamente.")
+        if accion.lower().strip() not in ("aprobar", "rechazar"):
+            raise ValueError("La accion debe ser 'aprobar' o 'rechazar'.")
+        if accion.lower().strip() == "aprobar":
             if sol["tipo"] == "eliminar":
-                self.eliminar_mascota(sol["mascota_id"])
-            elif sol["tipo"] == "editar" and sol.get("datos_nuevos"):
-                nuevos = sol["datos_nuevos"]
-                try:
-                    self._client.patch(
-                        f"{self._url('mascotas')}?id=eq.{sol['mascota_id']}",
-                        json={
-                            "nombre": nuevos.get("nombre"),
-                            "especie": nuevos.get("especie"),
-                            "raza": nuevos.get("raza"),
-                            "edad": int(nuevos.get("edad", 1)),
-                            "peso_kg": float(nuevos.get("peso_kg", 5.0)),
-                            "historial_resumen": nuevos.get("historial_resumen"),
-                        },
-                    )
-                except Exception:
-                    pass
-        return sol
+                self._client.delete(f"{self._url('mascotas')}?id=eq.{sol['mascota_id']}")
+            elif sol.get("datos_nuevos"):
+                self._client.patch(f"{self._url('mascotas')}?id=eq.{sol['mascota_id']}", json=sol["datos_nuevos"])
+        status = "aprobada" if accion.lower().strip() == "aprobar" else "rechazada"
+        updated = self._client.patch(f"{self._url('Paciente')}?id_paciente=eq.{sol['mascota_id']}", json={"solicitud_estado": status})
+        if updated.status_code not in (200, 204):
+            raise RuntimeError(updated.text)
+        return {**sol, "estado": status}
 
 
 # =============================================================================

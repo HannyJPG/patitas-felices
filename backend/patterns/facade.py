@@ -118,7 +118,12 @@ class SubsistemaCRMTransacciones:
     ) -> Dict[str, Any]:
         totales = self.calcular_totales_boleta(items_validados)
         ventas_existentes = self.db.listar_ventas()
-        correlativo = len(ventas_existentes) + 1
+        correlativos = []
+        for venta in ventas_existentes:
+            serie, separator, numero = str(venta.get("numero_boleta", "")).partition("-")
+            if separator and serie == "B001" and numero.isdigit():
+                correlativos.append(int(numero))
+        correlativo = max(correlativos, default=0) + 1
         numero_boleta = f"B001-{correlativo:06d}"
 
         cabecera = {

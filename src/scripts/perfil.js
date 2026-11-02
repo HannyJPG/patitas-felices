@@ -511,7 +511,7 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
             const solicitudes = Array.isArray(data?.solicitudes) ? data.solicitudes : [];
 
             if (!solicitudes.length) {
-                contenedorMisSolicitudes.innerHTML = "<p class='small text-muted mb-0'>No tienes solicitudes pendientes en este momento.</p>";
+                contenedorMisSolicitudes.innerHTML = "<p class='small text-muted mb-0'>No hay solicitudes registradas en tus mascotas.</p>";
                 return;
             }
 

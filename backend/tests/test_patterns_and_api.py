@@ -766,4 +766,50 @@ def test_usuarios_eliminados_no_inician_sesion_en_bd_sincronizada() -> None:
         assert res.status_code == 401
 
 
+def test_concordancia_estricta_16_tablas_sqlite_y_erd() -> None:
+    """Verifica que SQLite, prueba_1.erd.json y schema_sqlite.sql contengan exactamente las 16 tablas canónicas en 3FN sin tablas paralelas."""
+    import json
+    from pathlib import Path
+
+    db = SQLiteDatabaseAdapter(":memory:")
+
+    root_dir = Path(__file__).resolve().parents[2]
+    erd_path = root_dir / "database" / "prueba_1.erd.json"
+    sql_path = root_dir / "database" / "schema_sqlite.sql"
+
+    assert erd_path.exists(), "Debe existir database/prueba_1.erd.json"
+    assert sql_path.exists(), "Debe existir database/schema_sqlite.sql"
+    assert not (root_dir / "database" / "schema_mysql.sql").exists()
+    assert not (root_dir / "database" / "schema_supabase_postgres.sql").exists()
+
+    # 1. Verificar tablas físicas reales en sqlite_master
+    conn = db._get_connection()
+    tablas_sqlite = {
+        r[0]
+        for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        ).fetchall()
+    }
+    assert len(tablas_sqlite) == 16
+    assert tablas_sqlite == set(SQLiteDatabaseAdapter.NOMBRES_16_TABLAS)
+    for tabla_obsoleta in ("mascotas", "citas", "ventas", "solicitudes_mascota"):
+        assert tabla_obsoleta not in tablas_sqlite
+
+    # 2. Verificar concordancia con prueba_1.erd.json
+    erd_data = json.loads(erd_path.read_text(encoding="utf-8"))
+    tablas_erd = {
+        erd_data["collections"]["tableEntities"][tid]["name"]
+        for tid in erd_data["doc"]["tableIds"]
+    }
+    assert len(tablas_erd) == 16
+    assert tablas_erd == tablas_sqlite
+
+    # 3. Verificar que las 16 tablas tengan datos reales (>= 1 fila)
+    datos_16 = db.obtener_todas_las_16_tablas()
+    assert len(datos_16) == 16
+    for nombre_tabla, filas in datos_16.items():
+        assert len(filas) >= 1, f"La tabla {nombre_tabla} debe tener al menos 1 registro"
+
+
+
 
