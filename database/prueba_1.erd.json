@@ -4,10 +4,10 @@
   "settings": {
     "originX": 0,
     "originY": 0,
-    "zoomLevel": 1,
+    "zoomLevel": 0.85,
     "show": 495,
-    "database": 16,
-    "databaseName": "",
+    "database": 64,
+    "databaseName": "patitas_felices_sqlite_3fn",
     "canvasType": "ERD",
     "language": 1,
     "tableNameCase": 4,
@@ -72,7 +72,7 @@
       "tbl_usuarios_rbac": {
         "id": "tbl_usuarios_rbac",
         "name": "usuarios",
-        "comment": "Seguridad Proxy JWT y Roles RBAC",
+        "comment": "Cuentas de acceso, credenciales PBKDF2-SHA256 y rol RBAC (Proxy + Strategy)",
         "columnIds": [
           "col_usuarios_01",
           "col_usuarios_02",
@@ -86,15 +86,15 @@
           "col_usuarios_10"
         ],
         "ui": {
-          "x": 80,
-          "y": -260,
-          "color": "#4CAF50"
+          "x": 60,
+          "y": 60,
+          "color": "#2E7D32"
         }
       },
       "U9QD_HE3u0jZW67JMeOEP": {
         "id": "U9QD_HE3u0jZW67JMeOEP",
         "name": "Dueno",
-        "comment": "",
+        "comment": "Ficha civil y documento de identidad (DNI/RUC) del propietario (1:1 con usuarios)",
         "columnIds": [
           "col_dueno_01",
           "col_dueno_02",
@@ -107,30 +107,30 @@
           "col_dueno_09"
         ],
         "ui": {
-          "x": 83.3048,
-          "y": 73.0436,
-          "color": ""
+          "x": 60,
+          "y": 480,
+          "color": "#2E7D32"
         }
       },
       "03h1od5bygzsaitsf7qmwt5l3": {
         "id": "03h1od5bygzsaitsf7qmwt5l3",
         "name": "Especie",
-        "comment": "",
+        "comment": "Catalogo maestro de especies biologicas (Canino, Felino, etc.)",
         "columnIds": [
           "col_especie_01",
           "col_especie_02",
           "col_especie_03"
         ],
         "ui": {
-          "x": -1068.4578,
-          "y": 169.7922,
-          "color": ""
+          "x": 560,
+          "y": 60,
+          "color": "#0277BD"
         }
       },
       "03h2kdzymh2erxfrx5hoip71r": {
         "id": "03h2kdzymh2erxfrx5hoip71r",
         "name": "Razas",
-        "comment": "",
+        "comment": "Catalogo normalizado de razas vinculadas a su especie (3FN)",
         "columnIds": [
           "col_razas_01",
           "col_razas_02",
@@ -138,15 +138,15 @@
           "col_razas_04"
         ],
         "ui": {
-          "x": -1033,
-          "y": -195,
-          "color": ""
+          "x": 560,
+          "y": 280,
+          "color": "#0277BD"
         }
       },
       "Sbwd4cPvC31gUY6dtMPUZ": {
         "id": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "Paciente",
-        "comment": "Mascota y estado de su solicitud mas reciente.",
+        "comment": "Expediente clinico de la mascota y estado de solicitudes de alta/baja",
         "columnIds": [
           "col_paciente_01",
           "col_paciente_02",
@@ -166,30 +166,30 @@
           "col_paciente_16"
         ],
         "ui": {
-          "x": -569.502,
-          "y": 79.3596,
-          "color": ""
+          "x": 560,
+          "y": 520,
+          "color": "#0277BD"
         }
       },
       "FWO8l6QJzJV9OsiSKtEk6": {
         "id": "FWO8l6QJzJV9OsiSKtEk6",
         "name": "Especialidad",
-        "comment": "",
+        "comment": "Catalogo de especialidades medicas veterinarias",
         "columnIds": [
           "col_especialidad_01",
           "col_especialidad_02",
           "col_especialidad_03"
         ],
         "ui": {
-          "x": 1066.06,
-          "y": -51.5937,
-          "color": ""
+          "x": 1080,
+          "y": 60,
+          "color": "#6A1B9A"
         }
       },
       "KNHznS0dHAkEkdA8ZevJd": {
         "id": "KNHznS0dHAkEkdA8ZevJd",
         "name": "Veterinario",
-        "comment": "",
+        "comment": "Personal medico colegiado (CMVP) vinculado a su cuenta de doctor",
         "columnIds": [
           "col_veterinario_01",
           "col_veterinario_02",
@@ -202,15 +202,15 @@
           "col_veterinario_09"
         ],
         "ui": {
-          "x": 1054.9063,
-          "y": 425.0932,
-          "color": ""
+          "x": 1080,
+          "y": 280,
+          "color": "#6A1B9A"
         }
       },
       "AhsfDOEQdlNkfs1kaAJy3": {
         "id": "AhsfDOEQdlNkfs1kaAJy3",
         "name": "Servicios",
-        "comment": "",
+        "comment": "Catalogo tarifario de prestaciones clinicas veterinarias",
         "columnIds": [
           "col_servicios_01",
           "col_servicios_02",
@@ -218,15 +218,15 @@
           "col_servicios_04"
         ],
         "ui": {
-          "x": 772.224,
-          "y": 1390.4278,
-          "color": ""
+          "x": 1600,
+          "y": 60,
+          "color": "#6A1B9A"
         }
       },
       "pIE2EIMsSZKETgu_WGVZC": {
         "id": "pIE2EIMsSZKETgu_WGVZC",
         "name": "Cita",
-        "comment": "",
+        "comment": "Agenda medica con control de 3 cupos por turno y recordatorio WhatsApp",
         "columnIds": [
           "col_cita_01",
           "col_cita_02",
@@ -243,30 +243,30 @@
           "col_cita_13"
         ],
         "ui": {
-          "x": 473.9407,
-          "y": 721.3426,
-          "color": ""
+          "x": 1080,
+          "y": 640,
+          "color": "#6A1B9A"
         }
       },
       "SPIErIz8afsZYyy6IvdhT": {
         "id": "SPIErIz8afsZYyy6IvdhT",
         "name": "Detalle_servicios",
-        "comment": "",
+        "comment": "Entidad asociativa de servicios aplicados en cada cita medica",
         "columnIds": [
           "col_detalle_servicios_01",
           "col_detalle_servicios_02",
           "col_detalle_servicios_03"
         ],
         "ui": {
-          "x": 771.2146,
-          "y": 1225.3047,
-          "color": ""
+          "x": 1600,
+          "y": 300,
+          "color": "#6A1B9A"
         }
       },
       "03h1obbj8s79m9z0by164wyec": {
         "id": "03h1obbj8s79m9z0by164wyec",
         "name": "Historial_clinico",
-        "comment": "",
+        "comment": "Registro medico de consulta: diagnostico, tratamiento y observaciones",
         "columnIds": [
           "col_historial_clinico_01",
           "col_historial_clinico_02",
@@ -276,15 +276,15 @@
           "col_historial_clinico_06"
         ],
         "ui": {
-          "x": -534.5327,
-          "y": 427.7775,
-          "color": ""
+          "x": 1600,
+          "y": 540,
+          "color": "#6A1B9A"
         }
       },
       "03h1okp27micq4os9l9ka33wv": {
         "id": "03h1okp27micq4os9l9ka33wv",
         "name": "Receta",
-        "comment": "",
+        "comment": "Prescripcion farmacologica emitida a partir del historial clinico",
         "columnIds": [
           "col_receta_01",
           "col_receta_02",
@@ -294,15 +294,15 @@
           "col_receta_06"
         ],
         "ui": {
-          "x": 65.7296,
-          "y": 1177.1496,
-          "color": ""
+          "x": 1600,
+          "y": 820,
+          "color": "#6A1B9A"
         }
       },
       "03h2kk4nd0u5tt6dq00p2kymz": {
         "id": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "Factura",
-        "comment": "Comprobante clinico o de tienda. serie identifica punto emisor; numero es su correlativo.",
+        "comment": "Comprobante electronico (Boleta B001 / Factura F001) con Subtotal e IGV 18%",
         "columnIds": [
           "col_factura_01",
           "col_factura_02",
@@ -322,15 +322,15 @@
           "col_factura_16"
         ],
         "ui": {
-          "x": 1379,
-          "y": 847,
-          "color": ""
+          "x": 2120,
+          "y": 60,
+          "color": "#EF6C00"
         }
       },
       "03h2kjuukb1rfa09penr2oahf": {
         "id": "03h2kjuukb1rfa09penr2oahf",
         "name": "Pago",
-        "comment": "",
+        "comment": "Movimientos de caja y conciliacion de pagos por comprobante",
         "columnIds": [
           "col_pago_01",
           "col_pago_02",
@@ -341,15 +341,15 @@
           "col_pago_07"
         ],
         "ui": {
-          "x": 1368,
-          "y": 1377,
-          "color": ""
+          "x": 2120,
+          "y": 600,
+          "color": "#EF6C00"
         }
       },
       "tbl_productos_tienda": {
         "id": "tbl_productos_tienda",
         "name": "productos",
-        "comment": "Catalogo Tienda y Stock (TiendaFacade)",
+        "comment": "Catalogo de inventario de la tienda veterinaria con stock en tiempo real",
         "columnIds": [
           "col_productos_01",
           "col_productos_02",
@@ -361,15 +361,15 @@
           "col_productos_08"
         ],
         "ui": {
-          "x": 1750,
-          "y": 847,
-          "color": "#FF9800"
+          "x": 2640,
+          "y": 60,
+          "color": "#EF6C00"
         }
       },
       "tbl_detalle_ventas": {
         "id": "tbl_detalle_ventas",
         "name": "detalle_ventas",
-        "comment": "Items de Boleta PDF generada por TiendaFacade",
+        "comment": "Lineas de productos vendidos por cada comprobante electronico",
         "columnIds": [
           "col_detalle_ventas_01",
           "col_detalle_ventas_02",
@@ -380,9 +380,9 @@
           "col_detalle_ventas_07"
         ],
         "ui": {
-          "x": 1750,
-          "y": 1150,
-          "color": "#2196F3"
+          "x": 2640,
+          "y": 420,
+          "color": "#EF6C00"
         }
       }
     },
@@ -392,7 +392,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "id",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -401,7 +401,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(100)",
         "default": "",
         "options": 8
       },
@@ -410,7 +410,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "email",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 12
       },
@@ -419,7 +419,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "password_hash",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(255)",
         "default": "",
         "options": 8
       },
@@ -428,7 +428,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "rol",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 8
       },
@@ -437,7 +437,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "estado",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "'activo'",
         "options": 8
       },
@@ -446,7 +446,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "telefono",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 0
       },
@@ -455,7 +455,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "tipo_documento",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(15)",
         "default": "'DNI'",
         "options": 0
       },
@@ -464,7 +464,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "documento",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 4
       },
@@ -473,7 +473,7 @@
         "tableId": "tbl_usuarios_rbac",
         "name": "creado_en",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "DATETIME",
         "default": "datetime('now', 'localtime')",
         "options": 8
       },
@@ -482,7 +482,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "id_dueno",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -491,7 +491,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "usuario_id",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 4
       },
@@ -500,7 +500,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "dni",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 12
       },
@@ -509,7 +509,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "tipo_documento",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(15)",
         "default": "'DNI'",
         "options": 8
       },
@@ -518,7 +518,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "correo",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 12
       },
@@ -527,7 +527,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "nombres",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 8
       },
@@ -536,7 +536,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "apellidos",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 8
       },
@@ -545,7 +545,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "telefono",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 8
       },
@@ -554,7 +554,7 @@
         "tableId": "U9QD_HE3u0jZW67JMeOEP",
         "name": "fecha_registro",
         "comment": "",
-        "dataType": "TIMESTAMPTZ",
+        "dataType": "DATETIME",
         "default": "datetime('now', 'localtime')",
         "options": 8
       },
@@ -563,7 +563,7 @@
         "tableId": "03h1od5bygzsaitsf7qmwt5l3",
         "name": "Id_especie",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -572,7 +572,7 @@
         "tableId": "03h1od5bygzsaitsf7qmwt5l3",
         "name": "Nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(60)",
         "default": "",
         "options": 12
       },
@@ -581,7 +581,7 @@
         "tableId": "03h1od5bygzsaitsf7qmwt5l3",
         "name": "Descripcion",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 8
       },
@@ -590,7 +590,7 @@
         "tableId": "03h2kdzymh2erxfrx5hoip71r",
         "name": "Id_raza",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -599,7 +599,7 @@
         "tableId": "03h2kdzymh2erxfrx5hoip71r",
         "name": "Id_especie",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -608,7 +608,7 @@
         "tableId": "03h2kdzymh2erxfrx5hoip71r",
         "name": "nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 8
       },
@@ -617,7 +617,7 @@
         "tableId": "03h2kdzymh2erxfrx5hoip71r",
         "name": "Descripcion",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 0
       },
@@ -626,7 +626,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "id_paciente",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -635,7 +635,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "id_dueno",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -644,7 +644,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "Id_raza",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -653,7 +653,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(60)",
         "default": "",
         "options": 8
       },
@@ -680,7 +680,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "edad",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "INTEGER",
         "default": "1",
         "options": 8
       },
@@ -689,7 +689,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "peso_kg",
         "comment": "",
-        "dataType": "NUMERIC(5,2)",
+        "dataType": "DECIMAL(5,2)",
         "default": "5.0",
         "options": 8
       },
@@ -698,7 +698,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "historial_resumen",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 0
       },
@@ -707,7 +707,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "estado",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(25)",
         "default": "'Activo'",
         "options": 8
       },
@@ -716,7 +716,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "fecha_registro",
         "comment": "",
-        "dataType": "TIMESTAMPTZ",
+        "dataType": "DATETIME",
         "default": "datetime('now', 'localtime')",
         "options": 8
       },
@@ -725,7 +725,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "solicitud_tipo",
         "comment": "Estado y datos de la ultima solicitud de esta mascota.",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(30)",
         "default": "",
         "options": 0
       },
@@ -734,7 +734,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "solicitud_datos_nuevos",
         "comment": "Estado y datos de la ultima solicitud de esta mascota.",
-        "dataType": "JSONB",
+        "dataType": "TEXT",
         "default": "",
         "options": 0
       },
@@ -743,7 +743,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "solicitud_motivo",
         "comment": "Estado y datos de la ultima solicitud de esta mascota.",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 0
       },
@@ -752,7 +752,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "solicitud_estado",
         "comment": "Estado y datos de la ultima solicitud de esta mascota.",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(25)",
         "default": "",
         "options": 0
       },
@@ -761,7 +761,7 @@
         "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
         "name": "solicitud_creado_en",
         "comment": "Estado y datos de la ultima solicitud de esta mascota.",
-        "dataType": "TIMESTAMPTZ",
+        "dataType": "DATETIME",
         "default": "",
         "options": 0
       },
@@ -770,7 +770,7 @@
         "tableId": "FWO8l6QJzJV9OsiSKtEk6",
         "name": "Id_especialidad",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -779,7 +779,7 @@
         "tableId": "FWO8l6QJzJV9OsiSKtEk6",
         "name": "Nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 12
       },
@@ -788,7 +788,7 @@
         "tableId": "FWO8l6QJzJV9OsiSKtEk6",
         "name": "Descripcion",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 8
       },
@@ -797,7 +797,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "Id_veterinario",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -806,7 +806,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "usuario_id",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 4
       },
@@ -815,7 +815,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "Id_especialidad",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -824,7 +824,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "numero_colegiatura",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(30)",
         "default": "",
         "options": 12
       },
@@ -833,7 +833,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "nombres",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 8
       },
@@ -842,7 +842,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "Apellidos",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 8
       },
@@ -851,7 +851,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "Telefono",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 8
       },
@@ -860,7 +860,7 @@
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
         "name": "correo",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 12
       },
@@ -878,7 +878,7 @@
         "tableId": "AhsfDOEQdlNkfs1kaAJy3",
         "name": "Id_servicios",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -887,7 +887,7 @@
         "tableId": "AhsfDOEQdlNkfs1kaAJy3",
         "name": "Nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 12
       },
@@ -896,7 +896,7 @@
         "tableId": "AhsfDOEQdlNkfs1kaAJy3",
         "name": "Precio",
         "comment": "",
-        "dataType": "NUMERIC(10,2)",
+        "dataType": "DECIMAL(10,2)",
         "default": "",
         "options": 8
       },
@@ -905,7 +905,7 @@
         "tableId": "AhsfDOEQdlNkfs1kaAJy3",
         "name": "Estado",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "'Activo'",
         "options": 8
       },
@@ -914,7 +914,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "Id_cita",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -923,7 +923,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "Id_veterinario",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -932,7 +932,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "id_paciente",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 0
       },
@@ -959,7 +959,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "motivo",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 8
       },
@@ -968,7 +968,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "estado",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(25)",
         "default": "'Pendiente'",
         "options": 8
       },
@@ -977,7 +977,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "propietario",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(100)",
         "default": "''",
         "options": 8
       },
@@ -986,7 +986,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "telefono",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "''",
         "options": 8
       },
@@ -995,7 +995,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "mascota_nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(60)",
         "default": "''",
         "options": 8
       },
@@ -1004,7 +1004,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "servicio",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(60)",
         "default": "''",
         "options": 8
       },
@@ -1013,7 +1013,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "whatsapp_url",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "''",
         "options": 8
       },
@@ -1022,7 +1022,7 @@
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
         "name": "fecha_registro",
         "comment": "",
-        "dataType": "TIMESTAMPTZ",
+        "dataType": "DATETIME",
         "default": "datetime('now', 'localtime')",
         "options": 8
       },
@@ -1031,7 +1031,7 @@
         "tableId": "SPIErIz8afsZYyy6IvdhT",
         "name": "Id_cita",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1040,7 +1040,7 @@
         "tableId": "SPIErIz8afsZYyy6IvdhT",
         "name": "Id_servicios",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1049,7 +1049,7 @@
         "tableId": "SPIErIz8afsZYyy6IvdhT",
         "name": "precio_aplicado",
         "comment": "",
-        "dataType": "NUMERIC(10,2)",
+        "dataType": "DECIMAL(10,2)",
         "default": "",
         "options": 8
       },
@@ -1058,7 +1058,7 @@
         "tableId": "03h1obbj8s79m9z0by164wyec",
         "name": "Id_historial",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1067,7 +1067,7 @@
         "tableId": "03h1obbj8s79m9z0by164wyec",
         "name": "Id_cita",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -1076,7 +1076,7 @@
         "tableId": "03h1obbj8s79m9z0by164wyec",
         "name": "Fecha",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "DATE",
         "default": "datetime('now', 'localtime')",
         "options": 8
       },
@@ -1085,7 +1085,7 @@
         "tableId": "03h1obbj8s79m9z0by164wyec",
         "name": "Diagnostico",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "''",
         "options": 8
       },
@@ -1094,7 +1094,7 @@
         "tableId": "03h1obbj8s79m9z0by164wyec",
         "name": "Tratamiento",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "''",
         "options": 8
       },
@@ -1103,7 +1103,7 @@
         "tableId": "03h1obbj8s79m9z0by164wyec",
         "name": "Observaciones",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "''",
         "options": 8
       },
@@ -1112,7 +1112,7 @@
         "tableId": "03h1okp27micq4os9l9ka33wv",
         "name": "Id_receta",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1121,7 +1121,7 @@
         "tableId": "03h1okp27micq4os9l9ka33wv",
         "name": "Id_historial",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -1130,7 +1130,7 @@
         "tableId": "03h1okp27micq4os9l9ka33wv",
         "name": "medicamento",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 8
       },
@@ -1139,7 +1139,7 @@
         "tableId": "03h1okp27micq4os9l9ka33wv",
         "name": "Dosis",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 8
       },
@@ -1148,7 +1148,7 @@
         "tableId": "03h1okp27micq4os9l9ka33wv",
         "name": "duracion_dias",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -1157,7 +1157,7 @@
         "tableId": "03h1okp27micq4os9l9ka33wv",
         "name": "indicaciones",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 8
       },
@@ -1166,7 +1166,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "id_factura",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1175,7 +1175,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "Id_cita",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 0
       },
@@ -1184,7 +1184,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "id_dueno",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 0
       },
@@ -1193,7 +1193,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "tipo",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "'Boleta'",
         "options": 8
       },
@@ -1211,7 +1211,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "numero",
         "comment": "Correlativo secuencial dentro de la serie.",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -1229,7 +1229,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "fecha_emision",
         "comment": "",
-        "dataType": "TIMESTAMPTZ",
+        "dataType": "DATETIME",
         "default": "datetime('now', 'localtime')",
         "options": 8
       },
@@ -1238,7 +1238,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "cliente_nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 8
       },
@@ -1247,7 +1247,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "cliente_documento",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 8
       },
@@ -1274,7 +1274,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "total",
         "comment": "",
-        "dataType": "NUMERIC(12,2)",
+        "dataType": "DECIMAL(12,2)",
         "default": "",
         "options": 8
       },
@@ -1283,7 +1283,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "metodo_pago",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(40)",
         "default": "'Tarjeta / Yape'",
         "options": 8
       },
@@ -1292,7 +1292,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "estado",
         "comment": "",
-        "dataType": "VARCHAR(30)",
+        "dataType": "VARCHAR(25)",
         "default": "'Pagado'",
         "options": 8
       },
@@ -1301,7 +1301,7 @@
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
         "name": "pdf_url",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 0
       },
@@ -1310,7 +1310,7 @@
         "tableId": "03h2kjuukb1rfa09penr2oahf",
         "name": "id_pago",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1319,7 +1319,7 @@
         "tableId": "03h2kjuukb1rfa09penr2oahf",
         "name": "id_factura",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 0
       },
@@ -1328,7 +1328,7 @@
         "tableId": "03h2kjuukb1rfa09penr2oahf",
         "name": "metodo_pago",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(40)",
         "default": "",
         "options": 8
       },
@@ -1337,7 +1337,7 @@
         "tableId": "03h2kjuukb1rfa09penr2oahf",
         "name": "monto",
         "comment": "",
-        "dataType": "NUMERIC(12,2)",
+        "dataType": "DECIMAL(12,2)",
         "default": "0",
         "options": 8
       },
@@ -1346,7 +1346,7 @@
         "tableId": "03h2kjuukb1rfa09penr2oahf",
         "name": "estado",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(25)",
         "default": "'Pagado'",
         "options": 8
       },
@@ -1355,7 +1355,7 @@
         "tableId": "03h2kjuukb1rfa09penr2oahf",
         "name": "fecha_pago",
         "comment": "",
-        "dataType": "TIMESTAMPTZ",
+        "dataType": "DATETIME",
         "default": "datetime('now', 'localtime')",
         "options": 8
       },
@@ -1364,7 +1364,7 @@
         "tableId": "03h2kjuukb1rfa09penr2oahf",
         "name": "referencia",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(80)",
         "default": "",
         "options": 0
       },
@@ -1373,7 +1373,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "id",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1382,7 +1382,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "codigo",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(20)",
         "default": "",
         "options": 12
       },
@@ -1391,7 +1391,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 8
       },
@@ -1400,7 +1400,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "categoria",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(50)",
         "default": "",
         "options": 8
       },
@@ -1409,7 +1409,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "descripcion",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "TEXT",
         "default": "",
         "options": 8
       },
@@ -1418,7 +1418,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "precio",
         "comment": "",
-        "dataType": "NUMERIC(10,2)",
+        "dataType": "DECIMAL(10,2)",
         "default": "",
         "options": 8
       },
@@ -1427,7 +1427,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "stock",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "INTEGER",
         "default": "0",
         "options": 8
       },
@@ -1436,7 +1436,7 @@
         "tableId": "tbl_productos_tienda",
         "name": "activo",
         "comment": "",
-        "dataType": "BOOLEAN",
+        "dataType": "INTEGER",
         "default": "1",
         "options": 8
       },
@@ -1445,7 +1445,7 @@
         "tableId": "tbl_detalle_ventas",
         "name": "id",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "AI",
         "options": 10
       },
@@ -1454,7 +1454,7 @@
         "tableId": "tbl_detalle_ventas",
         "name": "id_factura",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -1463,7 +1463,7 @@
         "tableId": "tbl_detalle_ventas",
         "name": "producto_id",
         "comment": "",
-        "dataType": "BIGINT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -1472,7 +1472,7 @@
         "tableId": "tbl_detalle_ventas",
         "name": "producto_nombre",
         "comment": "",
-        "dataType": "VARCHAR(500)",
+        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 8
       },
@@ -1481,7 +1481,7 @@
         "tableId": "tbl_detalle_ventas",
         "name": "cantidad",
         "comment": "",
-        "dataType": "INT",
+        "dataType": "INTEGER",
         "default": "",
         "options": 8
       },
@@ -1490,7 +1490,7 @@
         "tableId": "tbl_detalle_ventas",
         "name": "precio_unitario",
         "comment": "",
-        "dataType": "NUMERIC(10,2)",
+        "dataType": "DECIMAL(10,2)",
         "default": "",
         "options": 8
       },
@@ -1499,7 +1499,7 @@
         "tableId": "tbl_detalle_ventas",
         "name": "subtotal",
         "comment": "",
-        "dataType": "NUMERIC(12,2)",
+        "dataType": "DECIMAL(12,2)",
         "default": "",
         "options": 8
       }
@@ -1507,7 +1507,7 @@
     "relationshipEntities": {
       "rel_01": {
         "id": "rel_01",
-        "relationshipType": 16,
+        "relationshipType": 2,
         "onDelete": 8,
         "onUpdate": 1,
         "start": {
@@ -1597,7 +1597,7 @@
       },
       "rel_06": {
         "id": "rel_06",
-        "relationshipType": 16,
+        "relationshipType": 2,
         "onDelete": 8,
         "onUpdate": 1,
         "start": {
@@ -1615,7 +1615,7 @@
       },
       "rel_07": {
         "id": "rel_07",
-        "relationshipType": 16,
+        "relationshipType": 4,
         "onDelete": 8,
         "onUpdate": 1,
         "start": {
@@ -1741,7 +1741,7 @@
       },
       "rel_14": {
         "id": "rel_14",
-        "relationshipType": 16,
+        "relationshipType": 2,
         "onDelete": 8,
         "onUpdate": 1,
         "start": {
