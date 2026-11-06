@@ -1124,6 +1124,28 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
         }
     }
 
+    const selectPersonalRol = document.getElementById("personal-input-rol");
+    const wrapPersonalCmvp = document.getElementById("wrap-personal-cmvp");
+    const wrapPersonalEspecialidad = document.getElementById("wrap-personal-especialidad");
+    const inputPersonalCmvp = document.getElementById("personal-input-cmvp");
+    const inputPersonalEspecialidad = document.getElementById("personal-input-especialidad");
+
+    function sincronizarCamposPersonalPorRol() {
+        const esDoctor = (selectPersonalRol?.value || "doctor") === "doctor";
+        wrapPersonalCmvp?.classList.toggle("d-none", !esDoctor);
+        wrapPersonalEspecialidad?.classList.toggle("d-none", !esDoctor);
+        if (inputPersonalCmvp) {
+            inputPersonalCmvp.required = esDoctor;
+            if (!esDoctor) inputPersonalCmvp.value = "";
+        }
+        if (inputPersonalEspecialidad) {
+            inputPersonalEspecialidad.required = esDoctor;
+        }
+    }
+
+    selectPersonalRol?.addEventListener("change", sincronizarCamposPersonalPorRol);
+    sincronizarCamposPersonalPorRol();
+
     formAltaPersonal?.addEventListener("submit", async ev => {
         ev.preventDefault();
         alertaAltaPersonal?.classList.add("d-none");
@@ -1131,10 +1153,19 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
         const nombre = document.getElementById("personal-input-nombre").value.trim();
         const email = document.getElementById("personal-input-email").value.trim().toLowerCase();
         const rol = document.getElementById("personal-input-rol").value;
-        const cmvp = document.getElementById("personal-input-cmvp").value.trim();
-        const especialidad = document.getElementById("personal-input-especialidad").value.trim();
+        const cmvp = rol === "doctor" ? document.getElementById("personal-input-cmvp").value.trim() : "";
+        const especialidad = rol === "doctor" ? document.getElementById("personal-input-especialidad").value.trim() : "";
         const telefono = document.getElementById("personal-input-telefono").value.trim();
         const password = document.getElementById("personal-input-password").value;
+
+        if (rol === "doctor" && !cmvp) {
+            if (alertaAltaPersonal) {
+                alertaAltaPersonal.textContent = "El número de colegiatura CMVP es obligatorio para registrar un Médico Veterinario.";
+                alertaAltaPersonal.classList.remove("d-none");
+            }
+            inputPersonalCmvp?.focus();
+            return;
+        }
 
         try {
             await peticionApi("/api/admin/usuarios", {
@@ -1142,7 +1173,10 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
                 body: JSON.stringify({ nombre, email, rol, cmvp, especialidad, telefono, password }),
             });
             formAltaPersonal.reset();
+            sincronizarCamposPersonalPorRol();
             mostrarAlertaGlobal(`Personal '${nombre}' (${rol}) registrado exitosamente.`, "success");
+            await cargarUsuariosAdmin();
+            await cargarVisorBDResumen();
         } catch (err) {
             alertaAltaPersonal.textContent = err.message || "Error al registrar el personal.";
             alertaAltaPersonal.classList.remove("d-none");

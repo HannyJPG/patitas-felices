@@ -486,13 +486,13 @@ import Layout from "../layouts/Layout.astro";
                 <option value="admin">Administrador de Clínica</option>
               </select>
             </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label small mb-1 fw-semibold" for="personal-input-cmvp">Colegiatura CMVP</label>
-              <input type="text" class="form-control form-control-sm" id="personal-input-cmvp" placeholder="CMVP-12345" />
+            <div class="col-12 col-md-4" id="wrap-personal-cmvp">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-cmvp">Colegiatura CMVP *</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-cmvp" required placeholder="CMVP-12345" />
             </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label small mb-1 fw-semibold" for="personal-input-especialidad">Especialidad médica</label>
-              <input type="text" class="form-control form-control-sm" id="personal-input-especialidad" value="Medicina General" />
+            <div class="col-12 col-md-4" id="wrap-personal-especialidad">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-especialidad">Especialidad médica *</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-especialidad" required value="Medicina General" />
             </div>
             <div class="col-12 col-md-6">
               <label class="form-label small mb-1 fw-semibold" for="personal-input-telefono">Teléfono</label>

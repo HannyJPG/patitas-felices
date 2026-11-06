@@ -260,7 +260,14 @@ class RealClinicController(ISecureController):
             email = str(params.get("email", "")).strip().lower()
             if self.db.obtener_usuario_por_email(email):
                 raise ValueError("Ya existe una cuenta registrada con este correo electrónico.")
-            
+
+            cmvp = str(params.get("cmvp") or "").strip()
+            if rol == "doctor":
+                if not cmvp:
+                    raise ValueError("El número de colegiatura CMVP es obligatorio para registrar un médico veterinario.")
+                if hasattr(self.db, "existe_colegiatura_veterinario") and self.db.existe_colegiatura_veterinario(cmvp):
+                    raise ValueError(f"El número de colegiatura '{cmvp}' ya está registrado para otro profesional veterinario.")
+
             nuevo_usuario = self.db.crear_usuario({
                 "nombre": params["nombre"].strip(),
                 "email": email,
@@ -272,11 +279,11 @@ class RealClinicController(ISecureController):
             if rol == "doctor":
                 self.db.crear_doctor({
                     "usuario_id": nuevo_usuario.get("id"),
-                    "cmvp": params.get("cmvp", "CMVP-00000"),
+                    "cmvp": cmvp,
                     "nombre": params["nombre"].strip(),
                     "telefono": params.get("telefono", "").strip(),
                     "email": email,
-                    "especialidad": params.get("especialidad", "Medicina General"),
+                    "especialidad": params.get("especialidad") or "Medicina General",
                 })
             return {"usuario": nuevo_usuario}
 

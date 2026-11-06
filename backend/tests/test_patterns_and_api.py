@@ -358,6 +358,41 @@ def test_admin_alta_personal_doctor_y_admin(db_memoria: SQLiteDatabaseAdapter) -
     assert res_login_doc.json()["rbac"]["rol"] == "doctor"
     assert res_login_doc.json()["rbac"]["ruta_espacio"] == "/doctor"
 
+    # 1.b Intento de registrar otro doctor con la MISMA colegiatura CMVP -> Debe ser rechazado (400)
+    res_doc_duplicado = client.post(
+        "/api/admin/usuarios",
+        headers={"Authorization": f"Bearer {token_admin}"},
+        json={
+            "nombre": "Dr. Otro Médico",
+            "email": "otro.medico@patitasfelices.pe",
+            "password": "doctoraClave2026",
+            "rol": "doctor",
+            "telefono": "981234599",
+            "cmvp": "CMVP-18942",
+            "especialidad": "Medicina General",
+        },
+    )
+    assert res_doc_duplicado.status_code == 400
+    assert "colegiatura" in res_doc_duplicado.json()["detail"].lower()
+    assert db_memoria.obtener_usuario_por_email("otro.medico@patitasfelices.pe") is None
+
+    # 1.c Alta de un Administrador sin colegiatura -> Debe crearse sin pedir CMVP
+    res_nuevo_admin = client.post(
+        "/api/admin/usuarios",
+        headers={"Authorization": f"Bearer {token_admin}"},
+        json={
+            "nombre": "Admin General",
+            "email": "admin2@patitasfelices.pe",
+            "password": "adminClave2026",
+            "rol": "admin",
+            "telefono": "981000111",
+            "cmvp": "",
+            "especialidad": "",
+        },
+    )
+    assert res_nuevo_admin.status_code == 200
+    assert res_nuevo_admin.json()["usuario"]["rol"] == "admin"
+
     # 2. Intento de crear personal sin token o con rol de cliente -> 401 o 403
     res_sin_auth = client.post("/api/admin/usuarios", json=payload_doctor)
     assert res_sin_auth.status_code in (401, 403)

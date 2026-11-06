@@ -439,15 +439,40 @@ class SQLiteDatabaseAdapter(IDatabaseAdapter):
             conn.execute("UPDATE Paciente SET solicitud_estado=? WHERE id_paciente=?",(status,solicitud_id));conn.commit()
             return next(item for item in self.listar_solicitudes_mascota() if item["id"]==solicitud_id)
         finally:self._close_if_file(conn)
+    def existe_colegiatura_veterinario(self, cmvp: str) -> bool:
+        codigo = str(cmvp or "").strip()
+        if not codigo:
+            return False
+        conn = self._get_connection()
+        try:
+            row = conn.execute(
+                "SELECT 1 FROM Veterinario WHERE lower(numero_colegiatura) = lower(?) LIMIT 1",
+                (codigo,),
+            ).fetchone()
+            return row is not None
+        finally:
+            self._close_if_file(conn)
+
     def crear_doctor(self, datos: Dict[str, Any]) -> Dict[str, Any]:
         conn=self._get_connection()
         try:
+            cmvp = str(datos.get("cmvp") or "").strip()
+            if not cmvp:
+                raise ValueError("El número de colegiatura CMVP es obligatorio para registrar un médico veterinario.")
+            dup = conn.execute(
+                "SELECT 1 FROM Veterinario WHERE lower(numero_colegiatura) = lower(?) LIMIT 1",
+                (cmvp,),
+            ).fetchone()
+            if dup:
+                raise ValueError(f"El número de colegiatura '{cmvp}' ya está registrado para otro profesional veterinario.")
             email=str(datos.get("correo",datos.get("email",""))).strip().lower(); user=conn.execute("SELECT id FROM usuarios WHERE lower(email)=lower(?)",(email,)).fetchone()
             specialty_id=datos.get("especialidad_id")
             if not specialty_id and datos.get("especialidad"):
                 specialty=conn.execute("SELECT Id_especialidad FROM Especialidad WHERE lower(Nombre)=lower(?)",(datos["especialidad"],)).fetchone()
                 if specialty:specialty_id=specialty[0]
-            cur=conn.execute("INSERT INTO Veterinario (usuario_id,Id_especialidad,numero_colegiatura,nombres,Apellidos,Telefono,correo,Fecha_contratacion) VALUES (?,?,?,?,?,?,?,?)",(user[0] if user else None,specialty_id or 1,datos.get("cmvp","CMVP-00000"),datos.get("nombres",datos.get("nombre","")),datos.get("apellidos",""),datos.get("telefono",""),email,datos.get("fecha_contratacion","2026-10-29")))
+                else:
+                    specialty_id=int(conn.execute("INSERT INTO Especialidad (Nombre,Descripcion) VALUES (?,?)",(str(datos["especialidad"]).strip(),"Especialidad registrada desde panel administrativo")).lastrowid)
+            cur=conn.execute("INSERT INTO Veterinario (usuario_id,Id_especialidad,numero_colegiatura,nombres,Apellidos,Telefono,correo,Fecha_contratacion) VALUES (?,?,?,?,?,?,?,?)",(user[0] if user else None,specialty_id or 1,cmvp,datos.get("nombres",datos.get("nombre","")),datos.get("apellidos",""),datos.get("telefono",""),email,datos.get("fecha_contratacion","2026-10-29")))
             conn.commit();return {"id":int(cur.lastrowid),**datos}
         finally:self._close_if_file(conn)
     def obtener_usuario_por_id(self, usuario_id: int) -> Optional[Dict[str, Any]]:
