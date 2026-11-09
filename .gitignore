@@ -11,3 +11,6 @@ test-results/
 *.bat
 scratch/
 Clinca veterinaria.md
+database/*.db
+database/*.db-journal
+database/*.db-wal

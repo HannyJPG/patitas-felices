@@ -9,6 +9,7 @@ Valida:
 """
 
 import base64
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
@@ -775,9 +776,10 @@ def test_catalogo_productos_y_crm_finanzas_estructurados(client: TestClient) -> 
     assert len(crm["ultimas_ventas"]) >= 1
 
 
-def test_usuarios_eliminados_no_inician_sesion_en_bd_sincronizada() -> None:
-    """Verifica que en la base de datos sincronizada (Supabase / SQLite en disco) los usuarios eliminados no puedan iniciar sesión."""
-    db_real = SQLiteDatabaseAdapter()
+def test_usuarios_eliminados_no_inician_sesion_en_bd_sincronizada(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verifica que en una base de datos en disco inicializada desde cero solo exista el admin base y cuentas demo eliminadas reciban 401."""
+    monkeypatch.setenv("DISABLE_SQLSERVER_SYNC", "1")
+    db_real = SQLiteDatabaseAdapter(str(tmp_path / "patitas_sync.db"))
     app = crear_app(db_adapter=db_real)
     client_real = TestClient(app)
 
@@ -802,7 +804,7 @@ def test_usuarios_eliminados_no_inician_sesion_en_bd_sincronizada() -> None:
 
 
 def test_concordancia_estricta_16_tablas_sqlite_y_erd() -> None:
-    """Verifica que SQLite, prueba_1.erd.json y schema_sqlite.sql contengan exactamente las 16 tablas canónicas en 3FN sin tablas paralelas."""
+    """Verifica que SQLite, SQL Server, prueba_1.erd.json y schema_sqlite.sql contengan exactamente las 16 tablas canónicas en 3FN sin redundancias."""
     import json
     from pathlib import Path
 
@@ -811,9 +813,11 @@ def test_concordancia_estricta_16_tablas_sqlite_y_erd() -> None:
     root_dir = Path(__file__).resolve().parents[2]
     erd_path = root_dir / "database" / "prueba_1.erd.json"
     sql_path = root_dir / "database" / "schema_sqlite.sql"
+    sqlserver_path = root_dir / "database" / "schema_sqlserver.sql"
 
     assert erd_path.exists(), "Debe existir database/prueba_1.erd.json"
     assert sql_path.exists(), "Debe existir database/schema_sqlite.sql"
+    assert sqlserver_path.exists(), "Debe existir database/schema_sqlserver.sql"
     assert not (root_dir / "database" / "schema_mysql.sql").exists()
     assert not (root_dir / "database" / "schema_supabase_postgres.sql").exists()
 
@@ -830,20 +834,41 @@ def test_concordancia_estricta_16_tablas_sqlite_y_erd() -> None:
     for tabla_obsoleta in ("mascotas", "citas", "ventas", "solicitudes_mascota"):
         assert tabla_obsoleta not in tablas_sqlite
 
-    # 2. Verificar concordancia con prueba_1.erd.json
-    erd_data = json.loads(erd_path.read_text(encoding="utf-8"))
-    tablas_erd = {
-        erd_data["collections"]["tableEntities"][tid]["name"]
-        for tid in erd_data["doc"]["tableIds"]
+    # 2. Verificar eliminación estricta de columnas redundantes (3FN pura)
+    columnas_prohibidas = {
+        "usuarios": {"tipo_documento", "documento"},
+        "Dueno": {"correo"},
+        "Paciente": {"edad"},
+        "Veterinario": {"correo"},
+        "Cita": {"propietario", "telefono", "mascota_nombre", "servicio"},
+        "Factura": {"numero_boleta", "cliente_nombre", "cliente_documento", "metodo_pago"},
+        "detalle_ventas": {"producto_nombre"},
     }
+    for tabla, cols_redundantes in columnas_prohibidas.items():
+        cols_actuales = {r[1] for r in conn.execute(f'PRAGMA table_info("{tabla}")').fetchall()}
+        assert cols_actuales.isdisjoint(cols_redundantes), f"La tabla {tabla} aún tiene columnas redundantes: {cols_actuales & cols_redundantes}"
+
+    # 3. Verificar concordancia exacta de tablas y columnas con prueba_1.erd.json
+    erd_data = json.loads(erd_path.read_text(encoding="utf-8"))
+    erd_tables = erd_data["collections"]["tableEntities"]
+    erd_cols = erd_data["collections"]["tableColumnEntities"]
+    tablas_erd = {erd_tables[tid]["name"] for tid in erd_data["doc"]["tableIds"]}
     assert len(tablas_erd) == 16
     assert tablas_erd == tablas_sqlite
 
-    # 3. Verificar que las 16 tablas tengan datos reales (>= 1 fila)
+    for tid in erd_data["doc"]["tableIds"]:
+        t_entity = erd_tables[tid]
+        t_name = t_entity["name"]
+        cols_erd = {erd_cols[cid]["name"] for cid in t_entity["columnIds"]}
+        cols_sql = {r[1] for r in conn.execute(f'PRAGMA table_info("{t_name}")').fetchall()}
+        assert cols_erd == cols_sql, f"Diferencia de columnas en {t_name}: ERD={cols_erd} vs SQL={cols_sql}"
+
+    # 4. Verificar que las 16 tablas tengan datos reales (>= 1 fila)
     datos_16 = db.obtener_todas_las_16_tablas()
     assert len(datos_16) == 16
     for nombre_tabla, filas in datos_16.items():
         assert len(filas) >= 1, f"La tabla {nombre_tabla} debe tener al menos 1 registro"
+
 
 
 

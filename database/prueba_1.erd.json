@@ -81,15 +81,23 @@
           "col_usuarios_05",
           "col_usuarios_06",
           "col_usuarios_07",
-          "col_usuarios_08",
-          "col_usuarios_09",
           "col_usuarios_10"
         ],
         "ui": {
           "x": 60,
           "y": 60,
           "color": "#2E7D32"
-        }
+        },
+        "seqColumnIds": [
+          "col_usuarios_01",
+          "col_usuarios_02",
+          "col_usuarios_03",
+          "col_usuarios_04",
+          "col_usuarios_05",
+          "col_usuarios_06",
+          "col_usuarios_07",
+          "col_usuarios_10"
+        ]
       },
       "U9QD_HE3u0jZW67JMeOEP": {
         "id": "U9QD_HE3u0jZW67JMeOEP",
@@ -100,7 +108,6 @@
           "col_dueno_02",
           "col_dueno_03",
           "col_dueno_04",
-          "col_dueno_05",
           "col_dueno_06",
           "col_dueno_07",
           "col_dueno_08",
@@ -110,7 +117,17 @@
           "x": 60,
           "y": 480,
           "color": "#2E7D32"
-        }
+        },
+        "seqColumnIds": [
+          "col_dueno_01",
+          "col_dueno_02",
+          "col_dueno_03",
+          "col_dueno_04",
+          "col_dueno_06",
+          "col_dueno_07",
+          "col_dueno_08",
+          "col_dueno_09"
+        ]
       },
       "03h1od5bygzsaitsf7qmwt5l3": {
         "id": "03h1od5bygzsaitsf7qmwt5l3",
@@ -125,7 +142,12 @@
           "x": 560,
           "y": 60,
           "color": "#0277BD"
-        }
+        },
+        "seqColumnIds": [
+          "col_especie_01",
+          "col_especie_02",
+          "col_especie_03"
+        ]
       },
       "03h2kdzymh2erxfrx5hoip71r": {
         "id": "03h2kdzymh2erxfrx5hoip71r",
@@ -141,7 +163,13 @@
           "x": 560,
           "y": 280,
           "color": "#0277BD"
-        }
+        },
+        "seqColumnIds": [
+          "col_razas_01",
+          "col_razas_02",
+          "col_razas_03",
+          "col_razas_04"
+        ]
       },
       "Sbwd4cPvC31gUY6dtMPUZ": {
         "id": "Sbwd4cPvC31gUY6dtMPUZ",
@@ -154,7 +182,6 @@
           "col_paciente_04",
           "col_paciente_05",
           "col_paciente_06",
-          "col_paciente_07",
           "col_paciente_08",
           "col_paciente_09",
           "col_paciente_10",
@@ -169,7 +196,24 @@
           "x": 560,
           "y": 520,
           "color": "#0277BD"
-        }
+        },
+        "seqColumnIds": [
+          "col_paciente_01",
+          "col_paciente_02",
+          "col_paciente_03",
+          "col_paciente_04",
+          "col_paciente_05",
+          "col_paciente_06",
+          "col_paciente_08",
+          "col_paciente_09",
+          "col_paciente_10",
+          "col_paciente_11",
+          "col_paciente_12",
+          "col_paciente_13",
+          "col_paciente_14",
+          "col_paciente_15",
+          "col_paciente_16"
+        ]
       },
       "FWO8l6QJzJV9OsiSKtEk6": {
         "id": "FWO8l6QJzJV9OsiSKtEk6",
@@ -184,7 +228,12 @@
           "x": 1080,
           "y": 60,
           "color": "#6A1B9A"
-        }
+        },
+        "seqColumnIds": [
+          "col_especialidad_01",
+          "col_especialidad_02",
+          "col_especialidad_03"
+        ]
       },
       "KNHznS0dHAkEkdA8ZevJd": {
         "id": "KNHznS0dHAkEkdA8ZevJd",
@@ -198,14 +247,23 @@
           "col_veterinario_05",
           "col_veterinario_06",
           "col_veterinario_07",
-          "col_veterinario_08",
           "col_veterinario_09"
         ],
         "ui": {
           "x": 1080,
           "y": 280,
           "color": "#6A1B9A"
-        }
+        },
+        "seqColumnIds": [
+          "col_veterinario_01",
+          "col_veterinario_02",
+          "col_veterinario_03",
+          "col_veterinario_04",
+          "col_veterinario_05",
+          "col_veterinario_06",
+          "col_veterinario_07",
+          "col_veterinario_09"
+        ]
       },
       "AhsfDOEQdlNkfs1kaAJy3": {
         "id": "AhsfDOEQdlNkfs1kaAJy3",
@@ -221,7 +279,13 @@
           "x": 1600,
           "y": 60,
           "color": "#6A1B9A"
-        }
+        },
+        "seqColumnIds": [
+          "col_servicios_01",
+          "col_servicios_02",
+          "col_servicios_03",
+          "col_servicios_04"
+        ]
       },
       "pIE2EIMsSZKETgu_WGVZC": {
         "id": "pIE2EIMsSZKETgu_WGVZC",
@@ -235,10 +299,6 @@
           "col_cita_05",
           "col_cita_06",
           "col_cita_07",
-          "col_cita_08",
-          "col_cita_09",
-          "col_cita_10",
-          "col_cita_11",
           "col_cita_12",
           "col_cita_13"
         ],
@@ -246,7 +306,18 @@
           "x": 1080,
           "y": 640,
           "color": "#6A1B9A"
-        }
+        },
+        "seqColumnIds": [
+          "col_cita_01",
+          "col_cita_02",
+          "col_cita_03",
+          "col_cita_04",
+          "col_cita_05",
+          "col_cita_06",
+          "col_cita_07",
+          "col_cita_12",
+          "col_cita_13"
+        ]
       },
       "SPIErIz8afsZYyy6IvdhT": {
         "id": "SPIErIz8afsZYyy6IvdhT",
@@ -261,7 +332,12 @@
           "x": 1600,
           "y": 300,
           "color": "#6A1B9A"
-        }
+        },
+        "seqColumnIds": [
+          "col_detalle_servicios_01",
+          "col_detalle_servicios_02",
+          "col_detalle_servicios_03"
+        ]
       },
       "03h1obbj8s79m9z0by164wyec": {
         "id": "03h1obbj8s79m9z0by164wyec",
@@ -279,7 +355,15 @@
           "x": 1600,
           "y": 540,
           "color": "#6A1B9A"
-        }
+        },
+        "seqColumnIds": [
+          "col_historial_clinico_01",
+          "col_historial_clinico_02",
+          "col_historial_clinico_03",
+          "col_historial_clinico_04",
+          "col_historial_clinico_05",
+          "col_historial_clinico_06"
+        ]
       },
       "03h1okp27micq4os9l9ka33wv": {
         "id": "03h1okp27micq4os9l9ka33wv",
@@ -297,7 +381,15 @@
           "x": 1600,
           "y": 820,
           "color": "#6A1B9A"
-        }
+        },
+        "seqColumnIds": [
+          "col_receta_01",
+          "col_receta_02",
+          "col_receta_03",
+          "col_receta_04",
+          "col_receta_05",
+          "col_receta_06"
+        ]
       },
       "03h2kk4nd0u5tt6dq00p2kymz": {
         "id": "03h2kk4nd0u5tt6dq00p2kymz",
@@ -310,14 +402,10 @@
           "col_factura_04",
           "col_factura_05",
           "col_factura_06",
-          "col_factura_07",
           "col_factura_08",
-          "col_factura_09",
-          "col_factura_10",
           "col_factura_11",
           "col_factura_12",
           "col_factura_13",
-          "col_factura_14",
           "col_factura_15",
           "col_factura_16"
         ],
@@ -325,7 +413,21 @@
           "x": 2120,
           "y": 60,
           "color": "#EF6C00"
-        }
+        },
+        "seqColumnIds": [
+          "col_factura_01",
+          "col_factura_02",
+          "col_factura_03",
+          "col_factura_04",
+          "col_factura_05",
+          "col_factura_06",
+          "col_factura_08",
+          "col_factura_11",
+          "col_factura_12",
+          "col_factura_13",
+          "col_factura_15",
+          "col_factura_16"
+        ]
       },
       "03h2kjuukb1rfa09penr2oahf": {
         "id": "03h2kjuukb1rfa09penr2oahf",
@@ -344,7 +446,16 @@
           "x": 2120,
           "y": 600,
           "color": "#EF6C00"
-        }
+        },
+        "seqColumnIds": [
+          "col_pago_01",
+          "col_pago_02",
+          "col_pago_03",
+          "col_pago_04",
+          "col_pago_05",
+          "col_pago_06",
+          "col_pago_07"
+        ]
       },
       "tbl_productos_tienda": {
         "id": "tbl_productos_tienda",
@@ -364,7 +475,17 @@
           "x": 2640,
           "y": 60,
           "color": "#EF6C00"
-        }
+        },
+        "seqColumnIds": [
+          "col_productos_01",
+          "col_productos_02",
+          "col_productos_03",
+          "col_productos_04",
+          "col_productos_05",
+          "col_productos_06",
+          "col_productos_07",
+          "col_productos_08"
+        ]
       },
       "tbl_detalle_ventas": {
         "id": "tbl_detalle_ventas",
@@ -374,7 +495,6 @@
           "col_detalle_ventas_01",
           "col_detalle_ventas_02",
           "col_detalle_ventas_03",
-          "col_detalle_ventas_04",
           "col_detalle_ventas_05",
           "col_detalle_ventas_06",
           "col_detalle_ventas_07"
@@ -383,7 +503,15 @@
           "x": 2640,
           "y": 420,
           "color": "#EF6C00"
-        }
+        },
+        "seqColumnIds": [
+          "col_detalle_ventas_01",
+          "col_detalle_ventas_02",
+          "col_detalle_ventas_03",
+          "col_detalle_ventas_05",
+          "col_detalle_ventas_06",
+          "col_detalle_ventas_07"
+        ]
       }
     },
     "tableColumnEntities": {
@@ -450,24 +578,6 @@
         "default": "",
         "options": 0
       },
-      "col_usuarios_08": {
-        "id": "col_usuarios_08",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "tipo_documento",
-        "comment": "",
-        "dataType": "VARCHAR(15)",
-        "default": "'DNI'",
-        "options": 0
-      },
-      "col_usuarios_09": {
-        "id": "col_usuarios_09",
-        "tableId": "tbl_usuarios_rbac",
-        "name": "documento",
-        "comment": "",
-        "dataType": "VARCHAR(20)",
-        "default": "",
-        "options": 4
-      },
       "col_usuarios_10": {
         "id": "col_usuarios_10",
         "tableId": "tbl_usuarios_rbac",
@@ -512,15 +622,6 @@
         "dataType": "VARCHAR(15)",
         "default": "'DNI'",
         "options": 8
-      },
-      "col_dueno_05": {
-        "id": "col_dueno_05",
-        "tableId": "U9QD_HE3u0jZW67JMeOEP",
-        "name": "correo",
-        "comment": "",
-        "dataType": "VARCHAR(120)",
-        "default": "",
-        "options": 12
       },
       "col_dueno_06": {
         "id": "col_dueno_06",
@@ -673,15 +774,6 @@
         "comment": "",
         "dataType": "DATE",
         "default": "'2023-05-10'",
-        "options": 8
-      },
-      "col_paciente_07": {
-        "id": "col_paciente_07",
-        "tableId": "Sbwd4cPvC31gUY6dtMPUZ",
-        "name": "edad",
-        "comment": "",
-        "dataType": "INTEGER",
-        "default": "1",
         "options": 8
       },
       "col_paciente_08": {
@@ -855,15 +947,6 @@
         "default": "",
         "options": 8
       },
-      "col_veterinario_08": {
-        "id": "col_veterinario_08",
-        "tableId": "KNHznS0dHAkEkdA8ZevJd",
-        "name": "correo",
-        "comment": "",
-        "dataType": "VARCHAR(120)",
-        "default": "",
-        "options": 12
-      },
       "col_veterinario_09": {
         "id": "col_veterinario_09",
         "tableId": "KNHznS0dHAkEkdA8ZevJd",
@@ -972,42 +1055,6 @@
         "default": "'Pendiente'",
         "options": 8
       },
-      "col_cita_08": {
-        "id": "col_cita_08",
-        "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "propietario",
-        "comment": "",
-        "dataType": "VARCHAR(100)",
-        "default": "''",
-        "options": 8
-      },
-      "col_cita_09": {
-        "id": "col_cita_09",
-        "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "telefono",
-        "comment": "",
-        "dataType": "VARCHAR(20)",
-        "default": "''",
-        "options": 8
-      },
-      "col_cita_10": {
-        "id": "col_cita_10",
-        "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "mascota_nombre",
-        "comment": "",
-        "dataType": "VARCHAR(60)",
-        "default": "''",
-        "options": 8
-      },
-      "col_cita_11": {
-        "id": "col_cita_11",
-        "tableId": "pIE2EIMsSZKETgu_WGVZC",
-        "name": "servicio",
-        "comment": "",
-        "dataType": "VARCHAR(60)",
-        "default": "''",
-        "options": 8
-      },
       "col_cita_12": {
         "id": "col_cita_12",
         "tableId": "pIE2EIMsSZKETgu_WGVZC",
@@ -1032,8 +1079,8 @@
         "name": "Id_cita",
         "comment": "",
         "dataType": "INTEGER",
-        "default": "AI",
-        "options": 10
+        "default": "",
+        "options": 8
       },
       "col_detalle_servicios_02": {
         "id": "col_detalle_servicios_02",
@@ -1041,8 +1088,8 @@
         "name": "Id_servicios",
         "comment": "",
         "dataType": "INTEGER",
-        "default": "AI",
-        "options": 10
+        "default": "",
+        "options": 8
       },
       "col_detalle_servicios_03": {
         "id": "col_detalle_servicios_03",
@@ -1215,15 +1262,6 @@
         "default": "",
         "options": 8
       },
-      "col_factura_07": {
-        "id": "col_factura_07",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "numero_boleta",
-        "comment": "Numero completo visible, por ejemplo B001-000001.",
-        "dataType": "VARCHAR(30)",
-        "default": "",
-        "options": 12
-      },
       "col_factura_08": {
         "id": "col_factura_08",
         "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
@@ -1231,24 +1269,6 @@
         "comment": "",
         "dataType": "DATETIME",
         "default": "datetime('now', 'localtime')",
-        "options": 8
-      },
-      "col_factura_09": {
-        "id": "col_factura_09",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "cliente_nombre",
-        "comment": "",
-        "dataType": "VARCHAR(120)",
-        "default": "",
-        "options": 8
-      },
-      "col_factura_10": {
-        "id": "col_factura_10",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "cliente_documento",
-        "comment": "",
-        "dataType": "VARCHAR(20)",
-        "default": "",
         "options": 8
       },
       "col_factura_11": {
@@ -1276,15 +1296,6 @@
         "comment": "",
         "dataType": "DECIMAL(12,2)",
         "default": "",
-        "options": 8
-      },
-      "col_factura_14": {
-        "id": "col_factura_14",
-        "tableId": "03h2kk4nd0u5tt6dq00p2kymz",
-        "name": "metodo_pago",
-        "comment": "",
-        "dataType": "VARCHAR(40)",
-        "default": "'Tarjeta / Yape'",
         "options": 8
       },
       "col_factura_15": {
@@ -1464,15 +1475,6 @@
         "name": "producto_id",
         "comment": "",
         "dataType": "INTEGER",
-        "default": "",
-        "options": 8
-      },
-      "col_detalle_ventas_04": {
-        "id": "col_detalle_ventas_04",
-        "tableId": "tbl_detalle_ventas",
-        "name": "producto_nombre",
-        "comment": "",
-        "dataType": "VARCHAR(120)",
         "default": "",
         "options": 8
       },
