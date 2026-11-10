@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tabRegistro = document.getElementById("tab-modal-registro");
     const vistaLogin = document.getElementById("vista-login");
     const vistaRegistro = document.getElementById("vista-registro");
-    const modalSubtituloTag = document.getElementById("modal-subtitulo-tag");
 
     const formLogin = document.getElementById("form-modal-login");
     const inputEmail = document.getElementById("modal-input-email");
@@ -73,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
             tabLogin?.setAttribute("aria-selected", "false");
             vistaRegistro?.classList.remove("d-none");
             vistaLogin?.classList.add("d-none");
-            if (modalSubtituloTag) modalSubtituloTag.textContent = "Crear Cuenta";
             if (alertRegError) alertRegError.classList.add("d-none");
             if (alertRegSuccess) alertRegSuccess.classList.add("d-none");
             inputRegNombre?.focus();
@@ -84,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
             tabRegistro?.setAttribute("aria-selected", "false");
             vistaLogin?.classList.remove("d-none");
             vistaRegistro?.classList.add("d-none");
-            if (modalSubtituloTag) modalSubtituloTag.textContent = "Iniciar Sesión";
             if (alertError) alertError.classList.add("d-none");
             if (alertSuccess) alertSuccess.classList.add("d-none");
             inputEmail?.focus();
@@ -161,8 +158,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Inicializar estado del Header
+    // Inicializar estado del Header y sincronizar sesión real con SQL Server
     actualizarEstadoHeader();
+    const sesionInicial = obtenerSesion();
+    if (sesionInicial?.token) {
+        peticionApi("/api/auth/sesion")
+            .then(data => {
+                if (data?.usuario) {
+                    guardarSesion({
+                        ...sesionInicial,
+                        usuario: data.usuario,
+                        rbac: data.rbac || sesionInicial.rbac,
+                    });
+                    actualizarEstadoHeader();
+                }
+            })
+            .catch(err => {
+                if (err?.status === 401 || err?.status === 403) {
+                    cerrarSesion();
+                    actualizarEstadoHeader();
+                }
+            });
+    }
 
     // Eventos para abrir el modal desde cualquier botón con data-abrir-login
     document.querySelectorAll("[data-abrir-login]").forEach(elem => {
@@ -312,6 +329,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            if (nombre.length < 2) {
+                if (alertRegError) {
+                    alertRegError.textContent = "El nombre y apellido deben tener al menos 2 caracteres.";
+                    alertRegError.classList.remove("d-none");
+                }
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                if (alertRegError) {
+                    alertRegError.textContent = "Por favor, ingresa un correo electrónico con formato válido.";
+                    alertRegError.classList.remove("d-none");
+                }
+                return;
+            }
+
             if (password.length < 6) {
                 if (alertRegError) {
                     alertRegError.textContent = "La contraseña debe tener al menos 6 caracteres.";
@@ -331,8 +364,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({ nombre, telefono, email, password })
                 });
 
-                // Guardar sesión activa
+                if (!respuesta?.token || !respuesta?.usuario?.id) {
+                    throw new Error("No se pudo confirmar el registro de la cuenta en SQL Server.");
+                }
+
+                // Guardar sesión activa verificada desde SQL Server
                 guardarSesion(respuesta);
+                window.dispatchEvent(new CustomEvent("sesion_actualizada"));
 
                 // Actualizar Header en tiempo real en la página actual
                 actualizarEstadoHeader();

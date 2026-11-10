@@ -584,26 +584,38 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
 
     async function asegurarSesionAdmin() {
         const sesion = obtenerSesion();
-        if (sesion?.token && sesion?.usuario?.rol && sesion.usuario.rol !== "admin") {
-            const rutaRol = "/perfil";
-            estadoConexion.textContent = `Acceso reservado para administración. Redirigiendo a tu espacio (${rutaRol})...`;
+        if (!sesion?.token) {
+            estadoConexion.textContent = "Debes iniciar sesión como Administrador para acceder a este panel. Redirigiendo...";
             setTimeout(() => {
-                window.location.href = rutaRol;
+                window.location.href = "/?abrir_login=1";
             }, 900);
             return null;
         }
-        if (sesion?.token && sesion?.usuario?.rol === "admin") {
-            return sesion;
+        try {
+            const verificada = await peticionApi("/api/auth/sesion");
+            const rolReal = (verificada?.usuario?.rol || "").toLowerCase();
+            const sesionSincronizada = {
+                ...sesion,
+                usuario: verificada.usuario,
+                rbac: verificada.rbac || sesion.rbac,
+            };
+            guardarSesion(sesionSincronizada);
+            if (rolReal !== "admin") {
+                const rutaRol = "/perfil";
+                estadoConexion.textContent = `Acceso reservado para administración. Redirigiendo a tu espacio (${rutaRol})...`;
+                setTimeout(() => {
+                    window.location.href = rutaRol;
+                }, 900);
+                return null;
+            }
+            return sesionSincronizada;
+        } catch (err) {
+            estadoConexion.textContent = `Sesión inválida o expirada (${err.message}). Redirigiendo al inicio de sesión...`;
+            setTimeout(() => {
+                window.location.href = "/?abrir_login=1";
+            }, 900);
+            return null;
         }
-        const loginAdmin = await peticionApi("/api/auth/login", {
-            method: "POST",
-            body: JSON.stringify({
-                email: "admin@patitasfelices.pe",
-                password: "admin123"
-            })
-        });
-        guardarSesion(loginAdmin);
-        return loginAdmin;
     }
 
     async function cargarDatosPanel() {

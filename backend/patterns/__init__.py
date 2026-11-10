@@ -1,11 +1,12 @@
 """Exportación de los 4 Patrones de Diseño GoF implementados en Python."""
 
 from .adapter import (
+    ErrorConexionSQLServer,
+    ErrorConsultaSQLServer,
+    ErrorRegistroDuplicadoSQLServer,
     IDatabaseAdapter,
     IWhatsAppNotificationAdapter,
-    SQLiteDatabaseAdapter,
     SQLServerDatabaseAdapter,
-    SupabasePostgresAdapter,
     WhatsAppAdapter,
     hashear_password,
     obtener_adaptador_bd,
@@ -35,11 +36,12 @@ from .strategy import (
 )
 
 __all__ = [
+    "ErrorConexionSQLServer",
+    "ErrorConsultaSQLServer",
+    "ErrorRegistroDuplicadoSQLServer",
     "IDatabaseAdapter",
     "IWhatsAppNotificationAdapter",
-    "SQLiteDatabaseAdapter",
     "SQLServerDatabaseAdapter",
-    "SupabasePostgresAdapter",
     "WhatsAppAdapter",
     "hashear_password",
     "obtener_adaptador_bd",

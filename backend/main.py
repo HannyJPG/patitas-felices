@@ -26,7 +26,10 @@ if env_file.is_file():
 
 from .patterns import (
     AuthSessionProxy,
+    ErrorConexionSQLServer,
+    ErrorConsultaSQLServer,
     ErrorProcesoVenta,
+    ErrorRegistroDuplicadoSQLServer,
     ErrorSeguridadProxy,
     IDatabaseAdapter,
     RBACContext,
@@ -181,10 +184,14 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
             return proxy_seguridad.ejecutar_accion(token, accion, params)
         except ErrorSeguridadProxy as exc:
             raise HTTPException(status_code=exc.codigo_http, detail=str(exc)) from exc
+        except ErrorConexionSQLServer as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
         except LookupError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
+        except (ValueError, ErrorRegistroDuplicadoSQLServer) as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except ErrorConsultaSQLServer as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     @app.get("/api/health", tags=["Sistema"])
     def verificar_estado() -> Dict[str, Any]:
@@ -200,7 +207,14 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
     # -------------------------------------------------------------------------
     @app.post("/api/auth/login", tags=["Autenticación y RBAC (Proxy + Strategy)"])
     def iniciar_sesion(credenciales: LoginRequest) -> Dict[str, Any]:
-        usuario = adaptador_bd.obtener_usuario_por_email(credenciales.email)
+        email_limpio = credenciales.email.strip().lower()
+        try:
+            usuario = adaptador_bd.obtener_usuario_por_email(email_limpio)
+        except ErrorConexionSQLServer as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except ErrorConsultaSQLServer as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
         if not usuario or not verificar_password(credenciales.password, str(usuario.get("password_hash", ""))):
             raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos.")
 
@@ -248,30 +262,56 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
 
     @app.post("/api/auth/register", tags=["Autenticación y RBAC (Proxy + Strategy)"])
     def registrar_cliente(datos: RegistroRequest) -> Dict[str, Any]:
+        nombre_limpio = datos.nombre.strip()
         email_limpio = datos.email.strip().lower()
-        existente = adaptador_bd.obtener_usuario_por_email(email_limpio)
-        if existente:
+        telefono_limpio = datos.telefono.strip() if datos.telefono else ""
+
+        if len(nombre_limpio) < 2:
+            raise HTTPException(status_code=400, detail="El nombre y apellido deben tener al menos 2 caracteres.")
+        if "@" not in email_limpio or "." not in email_limpio.split("@")[-1] or " " in email_limpio:
+            raise HTTPException(status_code=400, detail="Por favor, ingresa un correo electrónico válido.")
+        if len(datos.password) < 6:
+            raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres.")
+
+        try:
+            existente = adaptador_bd.obtener_usuario_por_email(email_limpio)
+            if existente:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Ya existe una cuenta registrada con este correo electrónico.",
+                )
+
+            nuevo = adaptador_bd.crear_usuario({
+                "nombre": nombre_limpio,
+                "email": email_limpio,
+                "password_hash": datos.password,
+                "rol": "cliente",
+                "estado": "activo",
+                "telefono": telefono_limpio,
+            })
+        except HTTPException:
+            raise
+        except ErrorConexionSQLServer as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except (ValueError, ErrorRegistroDuplicadoSQLServer) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except ErrorConsultaSQLServer as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        if not nuevo or not nuevo.get("id"):
             raise HTTPException(
-                status_code=400,
-                detail="Ya existe una cuenta registrada con este correo electrónico.",
+                status_code=500,
+                detail="No se pudo confirmar el almacenamiento del usuario en SQL Server.",
             )
 
-        nuevo = adaptador_bd.crear_usuario({
-            "nombre": datos.nombre.strip(),
-            "email": email_limpio,
-            "password_hash": datos.password,
-            "rol": "cliente",
-            "estado": "activo",
-            "telefono": datos.telefono.strip() if datos.telefono else "",
-        })
-
-        contexto_rbac = RBACContext("cliente")
+        rol_real = str(nuevo.get("rol") or "cliente").lower()
+        contexto_rbac = RBACContext(rol_real)
         config_vista = contexto_rbac.obtener_vista_y_permisos()
         token = generar_token_jwt(
             {
-                "sub": nuevo.get("id", 0),
+                "sub": nuevo["id"],
                 "email": nuevo["email"],
-                "rol": "cliente",
+                "rol": rol_real,
                 "nombre": nuevo["nombre"],
             }
         )
@@ -280,17 +320,17 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
             "mensaje": f"Bienvenido(a), {nuevo['nombre']}. Tu cuenta ha sido creada exitosamente.",
             "token": token,
             "usuario": {
-                "id": nuevo.get("id"),
+                "id": nuevo["id"],
                 "nombre": nuevo["nombre"],
                 "email": nuevo["email"],
-                "rol": "cliente",
-                "estado": "activo",
+                "rol": rol_real,
+                "estado": nuevo.get("estado", "activo"),
                 "telefono": nuevo.get("telefono", ""),
                 "tipo_documento": nuevo.get("tipo_documento", "DNI"),
                 "documento": nuevo.get("documento"),
             },
             "rbac": {
-                "rol": "cliente",
+                "rol": rol_real,
                 "etiqueta": config_vista["etiqueta"],
                 "ruta_principal": config_vista["ruta_principal"],
                 "ruta_espacio": config_vista["ruta_espacio"],
@@ -304,19 +344,28 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
         if not authorization:
             raise HTTPException(status_code=401, detail="Token no suministrado.")
         token = authorization.replace("Bearer ", "").strip()
-        sesion = proxy_seguridad.validar_sesion(token)
-        usuario_db = adaptador_bd.obtener_usuario_por_id(sesion["id"]) if sesion.get("id") else {}
+        try:
+            sesion = proxy_seguridad.validar_sesion(token)
+            usuario_db = adaptador_bd.obtener_usuario_por_id(sesion["id"]) if sesion.get("id") else {}
+        except ErrorSeguridadProxy as exc:
+            raise HTTPException(status_code=exc.codigo_http, detail=str(exc)) from exc
+        except ErrorConexionSQLServer as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except ErrorConsultaSQLServer as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        sesion_limpia = {k: v for k, v in sesion.items() if k != "password_hash"}
         sesion_actualizada = {
-            **sesion,
+            **sesion_limpia,
             "tipo_documento": (usuario_db or {}).get("tipo_documento") or ("RUC" if len(str((usuario_db or {}).get("documento") or "")) == 11 else "DNI"),
             "documento": (usuario_db or {}).get("documento"),
         }
-        contexto_rbac = RBACContext(sesion["rol"])
+        contexto_rbac = RBACContext(sesion_actualizada["rol"])
         config_vista = contexto_rbac.obtener_vista_y_permisos()
         return {
             "usuario": sesion_actualizada,
             "rbac": {
-                "rol": sesion["rol"],
+                "rol": sesion_actualizada["rol"],
                 "etiqueta": config_vista["etiqueta"],
                 "ruta_principal": config_vista["ruta_principal"],
                 "ruta_espacio": config_vista["ruta_espacio"],
@@ -612,9 +661,11 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
     @app.get("/api/bd/tablas", tags=["Base de Datos (16 Tablas)"])
     def obtener_tablas_completas() -> Dict[str, Any]:
         tablas = adaptador_bd.obtener_todas_las_16_tablas()
+        srv = getattr(adaptador_bd, "server", "localhost")
+        db_name = getattr(adaptador_bd, "database", "PatitasFelices_DB")
         return {
             "total_tablas": len(tablas),
-            "archivo_sqlite": getattr(adaptador_bd, "db_path", "Supabase PostgreSQL (Nube)"),
+            "motor_bd": f"Microsoft SQL Server ({srv} / {db_name})",
             "tablas": tablas,
         }
 
@@ -717,7 +768,7 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
       const data = await res.json();
       cacheTablas = data.tablas || {};
       document.getElementById('meta-bd').textContent =
-        'Total tablas activas: ' + data.total_tablas + ' | Base de datos: ' + data.archivo_sqlite;
+        'Total tablas activas: ' + data.total_tablas + ' | Base de datos: ' + data.motor_bd;
 
       const filtros = document.getElementById('barra-filtros');
       filtros.innerHTML = '';

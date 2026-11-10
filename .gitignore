@@ -9,8 +9,12 @@ playwright-report/
 test-results/
 .env
 *.bat
+!iniciar-todo.bat
 scratch/
 Clinca veterinaria.md
+Dockerfile
+render.yaml
+docs/
 database/*.db
 database/*.db-journal
 database/*.db-wal

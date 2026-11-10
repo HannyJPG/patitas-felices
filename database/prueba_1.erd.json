@@ -7,7 +7,7 @@
     "zoomLevel": 0.85,
     "show": 495,
     "database": 64,
-    "databaseName": "patitas_felices_sqlite_3fn",
+    "databaseName": "PatitasFelices_DB",
     "canvasType": "ERD",
     "language": 1,
     "tableNameCase": 4,

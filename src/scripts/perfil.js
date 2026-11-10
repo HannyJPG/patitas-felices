@@ -163,6 +163,37 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
     // =========================================================================
     // INICIALIZACIÓN DE LA SESIÓN Y CONTROL DE ACCESO
     // =========================================================================
+    function renderizarCabeceraYMenuPorRol(u) {
+        const nombre = u.nombre || "Usuario Patitas Felices";
+        const email = u.email || "";
+        const rol = (u.rol || "cliente").toLowerCase();
+        const telefono = u.telefono || "Sin teléfono registrado";
+
+        if (bannerNombre) bannerNombre.textContent = nombre;
+        if (bannerDetalle) bannerDetalle.textContent = `${email} · Teléfono: ${telefono}`;
+        if (bannerAvatar) {
+            const partes = nombre.split(" ");
+            const iniciales = (partes[0]?.[0] || "P") + (partes[1]?.[0] || "F");
+            bannerAvatar.textContent = iniciales.toUpperCase();
+        }
+
+        let etiquetaRol = "Cliente / Propietario";
+        if (rol === "doctor") etiquetaRol = "Médico Veterinario";
+        if (rol === "admin") etiquetaRol = "Administrador de la Clínica";
+        if (bannerRol) bannerRol.textContent = etiquetaRol;
+
+        // Filtrar Pestañas del Menú Lateral exclusivamente por el Rol validado en SQL Server
+        const tabBotones = menuTabs?.querySelectorAll("[data-role-filter]") || [];
+        tabBotones.forEach(btn => {
+            const rolFiltro = btn.getAttribute("data-role-filter");
+            if (rolFiltro === rol || (rol === "admin" && (rolFiltro === "doctor" || rolFiltro === "cliente"))) {
+                btn.classList.remove("d-none");
+            } else {
+                btn.classList.add("d-none");
+            }
+        });
+    }
+
     async function inicializarSesion() {
         const sesion = obtenerSesion();
         if (!sesion?.token) {
@@ -179,42 +210,15 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
             return;
         }
 
-        usuarioActual = sesion.usuario || {};
-
-        // 1. Renderizar Banner Superior
-        const nombre = usuarioActual.nombre || "Usuario Patitas Felices";
-        const email = usuarioActual.email || "";
-        const rol = (usuarioActual.rol || "cliente").toLowerCase();
-        const telefono = usuarioActual.telefono || "Sin teléfono registrado";
-
-        if (bannerNombre) bannerNombre.textContent = nombre;
-        if (bannerDetalle) bannerDetalle.textContent = `${email} · Teléfono: ${telefono}`;
-        if (bannerAvatar) {
-            const partes = nombre.split(" ");
-            const iniciales = (partes[0]?.[0] || "P") + (partes[1]?.[0] || "F");
-            bannerAvatar.textContent = iniciales.toUpperCase();
+        // Validar primero contra SQL Server (/api/auth/sesion) antes de habilitar permisos/pestañas
+        const sesionValida = await cargarMiPerfil();
+        if (!sesionValida) {
+            return;
         }
 
-        let etiquetaRol = "Cliente / Propietario";
-        if (rol === "doctor") etiquetaRol = "Médico Veterinario";
-        if (rol === "admin") etiquetaRol = "Administrador de la Clínica";
-        if (bannerRol) bannerRol.textContent = etiquetaRol;
+        const rol = (usuarioActual?.rol || "cliente").toLowerCase();
 
-        // 2. Filtrar Pestañas del Menú Lateral por Rol
-        const tabBotones = menuTabs?.querySelectorAll("[data-role-filter]") || [];
-        tabBotones.forEach(btn => {
-            const rolFiltro = btn.getAttribute("data-role-filter");
-            if (rolFiltro === rol || (rol === "admin" && (rolFiltro === "doctor" || rolFiltro === "cliente"))) {
-                btn.classList.remove("d-none");
-            } else {
-                btn.classList.add("d-none");
-            }
-        });
-
-        // 3. Cargar Mi Perfil
-        await cargarMiPerfil();
-
-        // 4. Si hay hash en la URL (ej. #mascotas desde el modal de citas), activar esa pestaña
+        // Si hay hash en la URL (ej. #mascotas desde el modal de citas), activar esa pestaña si el rol tiene permiso
         const hashLimpio = (window.location.hash || "").replace(/^#/, "").replace(/^panel-/, "").replace(/^tab-/, "");
         if (hashLimpio) {
             const tabObjetivo = `tab-${hashLimpio}`;
@@ -236,8 +240,20 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
     async function cargarMiPerfil() {
         try {
             const data = await peticionApi("/api/auth/sesion");
-            const u = data.usuario || usuarioActual || {};
+            const u = data.usuario || {};
             usuarioActual = u;
+
+            // Sincronizar sesión local con la verdad de SQL Server (evita manipulación de rol en localStorage)
+            const sesionActual = obtenerSesion();
+            if (sesionActual) {
+                guardarSesion({
+                    ...sesionActual,
+                    usuario: u,
+                    rbac: data.rbac || sesionActual.rbac,
+                });
+            }
+
+            renderizarCabeceraYMenuPorRol(u);
 
             if (campoNombre) campoNombre.textContent = u.nombre || "-";
             if (campoEmail) campoEmail.textContent = u.email || "-";
@@ -291,8 +307,20 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
                     contenedorDoc.append(wrapSinDoc);
                 }
             }
-        } catch {
-            // Usar datos locales si falla la consulta
+            return true;
+        } catch (err) {
+            if (err?.status === 401 || err?.status === 403) {
+                cerrarSesion();
+                if (bannerNombre) bannerNombre.textContent = "Sesión expirada o inválida";
+                if (bannerDetalle) bannerDetalle.textContent = err.message || "Inicia sesión nuevamente.";
+                mostrarAlertaGlobal(err.message || "Tu sesión ya no es válida. Inicia sesión nuevamente.", "danger");
+                setTimeout(() => {
+                    window.location.href = "/?abrir_login=1";
+                }, 1200);
+                return false;
+            }
+            mostrarAlertaGlobal(err?.message || "No se pudo verificar la sesión con SQL Server.", "danger");
+            return false;
         }
     }
 

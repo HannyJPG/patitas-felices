@@ -19,18 +19,23 @@ import { peticionApi, obtenerSesion, guardarSesion } from "./api-client.js";
 
     async function asegurarSesionDoctor() {
         const sesion = obtenerSesion();
-        if (sesion?.token && (sesion?.usuario?.rol === "doctor" || sesion?.usuario?.rol === "admin")) {
-            return sesion;
+        if (!sesion?.token) {
+            window.location.href = "/?abrir_login=1";
+            throw new Error("Debes iniciar sesión como Médico Veterinario o Administrador.");
         }
-        const loginDoctor = await peticionApi("/api/auth/login", {
-            method: "POST",
-            body: JSON.stringify({
-                email: "doctor@patitasfelices.pe",
-                password: "doctor123"
-            })
-        });
-        guardarSesion(loginDoctor);
-        return loginDoctor;
+        const verificada = await peticionApi("/api/auth/sesion");
+        const rolReal = (verificada?.usuario?.rol || "").toLowerCase();
+        const sesionSincronizada = {
+            ...sesion,
+            usuario: verificada.usuario,
+            rbac: verificada.rbac || sesion.rbac,
+        };
+        guardarSesion(sesionSincronizada);
+        if (rolReal !== "doctor" && rolReal !== "admin") {
+            window.location.href = "/perfil";
+            throw new Error("Acceso reservado para personal médico veterinario.");
+        }
+        return sesionSincronizada;
     }
 
     function renderizarCitas(citas) {
