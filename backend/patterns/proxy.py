@@ -206,10 +206,12 @@ class RealClinicController(ISecureController):
             ingresos_mostrados = round(sum(float(v["total"]) for v in ventas_mostradas), 2)
             total_tx = len(ventas_mostradas)
             ticket_promedio = round(ingresos_mostrados / total_tx, 2) if total_tx > 0 else 0.0
+            personal = self.db.listar_personal() if hasattr(self.db, "listar_personal") else []
             return {
                 "resumen": {
                     "total_usuarios": len(usuarios),
                     "usuarios_activos": sum(1 for u in usuarios if u["estado"] == "activo"),
+                    "total_personal": len(personal),
                     "total_pacientes": len(mascotas),
                     "total_citas": len(citas),
                     "citas_pendientes": sum(1 for c in citas if c["estado"] == "pendiente"),
@@ -227,6 +229,7 @@ class RealClinicController(ISecureController):
                 },
                 "ultimas_ventas": ventas_mostradas,
                 "usuarios": usuarios,
+                "personal": personal,
                 "mascotas": mascotas,
                 "ventas": ventas,
                 "ventas_referencia_demo": ventas_referencia_demo,
@@ -243,6 +246,10 @@ class RealClinicController(ISecureController):
                 ],
             }
 
+        if accion == "listar_personal_admin":
+            personal = self.db.listar_personal() if hasattr(self.db, "listar_personal") else []
+            return {"personal": personal, "total": len(personal)}
+
         if accion == "cambiar_estado_usuario":
             usuario_id = int(params["usuario_id"])
             nuevo_estado = str(params["estado"]).lower()
@@ -258,47 +265,78 @@ class RealClinicController(ISecureController):
             if rol not in ("doctor", "admin"):
                 raise ValueError("El rol asignado debe ser 'doctor' o 'admin'.")
             email = str(params.get("email", "")).strip().lower()
-            if self.db.obtener_usuario_por_email(email):
-                raise ValueError("Ya existe una cuenta registrada con este correo electrónico.")
-
             cmvp = str(params.get("cmvp") or "").strip()
-            if rol == "doctor":
-                if not cmvp:
-                    raise ValueError("El número de colegiatura CMVP es obligatorio para registrar un médico veterinario.")
-                if hasattr(self.db, "existe_colegiatura_veterinario") and self.db.existe_colegiatura_veterinario(cmvp):
-                    raise ValueError(f"El número de colegiatura '{cmvp}' ya está registrado para otro profesional veterinario.")
+            especialidad = str(params.get("especialidad") or "Medicina General").strip() or "Medicina General"
 
-            nuevo_usuario = self.db.crear_usuario({
-                "nombre": params["nombre"].strip(),
-                "email": email,
-                "password_hash": params["password"],
-                "rol": rol,
-                "estado": "activo",
-                "telefono": params.get("telefono", "").strip(),
-            })
-            if rol == "doctor":
-                self.db.crear_doctor({
-                    "usuario_id": nuevo_usuario.get("id"),
-                    "cmvp": cmvp,
-                    "nombre": params["nombre"].strip(),
-                    "telefono": params.get("telefono", "").strip(),
-                    "email": email,
-                    "especialidad": params.get("especialidad") or "Medicina General",
-                })
-            return {"usuario": nuevo_usuario}
+            if hasattr(self.db, "crear_personal"):
+                nuevo_usuario = self.db.crear_personal(
+                    {
+                        "nombre": str(params.get("nombre", "")).strip(),
+                        "email": email,
+                        "password_hash": params.get("password"),
+                        "rol": rol,
+                        "estado": "activo",
+                        "telefono": str(params.get("telefono", "")).strip(),
+                        "cmvp": cmvp,
+                        "especialidad": especialidad,
+                    }
+                )
+            else:
+                if self.db.obtener_usuario_por_email(email):
+                    raise ValueError("Ya existe una cuenta registrada con este correo electrónico.")
+                if rol == "doctor":
+                    if not cmvp:
+                        raise ValueError(
+                            "El número de colegiatura CMVP es obligatorio para registrar un médico veterinario."
+                        )
+                    if hasattr(self.db, "existe_colegiatura_veterinario") and self.db.existe_colegiatura_veterinario(cmvp):
+                        raise ValueError(
+                            f"El número de colegiatura '{cmvp}' ya está registrado para otro profesional veterinario."
+                        )
+                nuevo_usuario = self.db.crear_usuario(
+                    {
+                        "nombre": str(params.get("nombre", "")).strip(),
+                        "email": email,
+                        "password_hash": params.get("password"),
+                        "rol": rol,
+                        "estado": "activo",
+                        "telefono": str(params.get("telefono", "")).strip(),
+                    }
+                )
+                if rol == "doctor":
+                    self.db.crear_doctor(
+                        {
+                            "usuario_id": nuevo_usuario.get("id"),
+                            "cmvp": cmvp,
+                            "nombre": str(params.get("nombre", "")).strip(),
+                            "telefono": str(params.get("telefono", "")).strip(),
+                            "email": email,
+                            "especialidad": especialidad,
+                        }
+                    )
+
+            personal = self.db.listar_personal() if hasattr(self.db, "listar_personal") else []
+            return {
+                "creado": True,
+                "usuario": nuevo_usuario,
+                "personal": personal,
+            }
 
         if accion == "ver_agenda_doctor":
             citas = self.db.listar_citas()
             mascotas = self.db.listar_mascotas()
-            perfil_profesional = {
-                "id": usuario_actual.get("id", 2),
-                "nombre": usuario_actual.get("nombre", "Dr. Carlos Mendoza"),
-                "email": usuario_actual.get("email", "doctor@patitasfelices.pe"),
-                "telefono": usuario_actual.get("telefono", "987654321"),
-                "colegiatura": "CMVP-10452",
-                "especialidad": "Medicina General, Preventiva y Dermatología",
-                "horario_turno": "Lunes a Sábado · 09:00 a 18:00 (Lima)",
-            }
+            if hasattr(self.db, "obtener_perfil_doctor"):
+                perfil_profesional = self.db.obtener_perfil_doctor(usuario_actual)
+            else:
+                perfil_profesional = {
+                    "id": usuario_actual.get("id", 2),
+                    "nombre": usuario_actual.get("nombre", "Dr. Carlos Mendoza"),
+                    "email": usuario_actual.get("email", "doctor@patitasfelices.pe"),
+                    "telefono": usuario_actual.get("telefono", "987654321"),
+                    "colegiatura": usuario_actual.get("cmvp") or "CMVP-10452",
+                    "especialidad": usuario_actual.get("especialidad") or "Medicina General, Preventiva y Dermatología",
+                    "horario_turno": "Lunes a Sábado · 09:00 a 18:00 (Lima)",
+                }
             return {
                 "perfil_profesional": perfil_profesional,
                 "citas": citas,

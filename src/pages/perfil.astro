@@ -508,6 +508,19 @@ import Layout from "../layouts/Layout.astro";
               </button>
             </div>
           </form>
+
+          <div class="border-top pt-3 mt-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+              <div>
+                <h3 class="h6 fw-bold mb-0 text-dark">Personal Médico y Administrativo Registrado</h3>
+                <small class="text-muted">Datos persistentes consultados en tiempo real desde Microsoft SQL Server (<code>dbo.usuarios</code> y <code>dbo.Veterinario</code>).</small>
+              </div>
+              <span class="badge bg-light text-secondary border small" id="badge-total-personal">Consultando...</span>
+            </div>
+            <div id="contenedor-personal-admin">
+              <p class="small text-muted mb-0">Cargando personal registrado desde SQL Server...</p>
+            </div>
+          </div>
         </article>
 
         <!-- ===================================================================

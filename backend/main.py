@@ -249,6 +249,9 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
                 "telefono": usuario.get("telefono"),
                 "tipo_documento": usuario.get("tipo_documento") or ("RUC" if len(str(usuario.get("documento") or "")) == 11 else "DNI"),
                 "documento": usuario.get("documento"),
+                "id_veterinario": usuario.get("id_veterinario"),
+                "cmvp": usuario.get("cmvp"),
+                "especialidad": usuario.get("especialidad"),
             },
             "rbac": {
                 "rol": usuario["rol"],
@@ -359,6 +362,9 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
             **sesion_limpia,
             "tipo_documento": (usuario_db or {}).get("tipo_documento") or ("RUC" if len(str((usuario_db or {}).get("documento") or "")) == 11 else "DNI"),
             "documento": (usuario_db or {}).get("documento"),
+            "id_veterinario": (usuario_db or {}).get("id_veterinario"),
+            "cmvp": (usuario_db or {}).get("cmvp"),
+            "especialidad": (usuario_db or {}).get("especialidad"),
         }
         contexto_rbac = RBACContext(sesion_actualizada["rol"])
         config_vista = contexto_rbac.obtener_vista_y_permisos()
@@ -620,7 +626,12 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
             {"usuario_id": usuario_id, "estado": cuerpo.estado},
         )
 
+    @app.get("/api/admin/personal", tags=["CRM y Administración"])
+    def listar_personal_admin_crm(authorization: Optional[str] = Header(default=None)) -> Dict[str, Any]:
+        return _manejar_proxy(authorization, "listar_personal_admin")
+
     @app.post("/api/admin/usuarios", tags=["CRM y Administración"])
+    @app.post("/api/admin/personal", tags=["CRM y Administración"])
     def crear_personal_admin_crm(
         cuerpo: CrearPersonalRequest,
         authorization: Optional[str] = Header(default=None),

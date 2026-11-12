@@ -125,6 +125,7 @@ class AdminRoleStrategy(RoleAuthorizationStrategy):
         "ver_crm_dashboard",
         "gestionar_usuarios",
         "crear_personal_admin",
+        "listar_personal_admin",
         "cambiar_estado_usuario",
         "gestionar_inventario",
         "ver_reporte_ventas",

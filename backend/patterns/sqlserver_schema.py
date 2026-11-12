@@ -341,6 +341,11 @@ def ensure_sqlserver_schema(
                 continue
             conn.execute(clean, raise_on_error=False)
 
+    if reset_tables and conn.database.strip().lower() == "patitasfelices_db":
+        raise RuntimeError(
+            "Operación bloqueada por seguridad: reset_tables=True está estrictamente prohibido sobre la base de datos de producción PatitasFelices_DB."
+        )
+
     if reset_tables:
         conn.execute(
             """

@@ -392,9 +392,15 @@ class SQLServerDatabaseAdapter(IDatabaseAdapter):
                 u.id, u.nombre, u.email, u.password_hash, u.rol, u.estado, u.telefono,
                 CONVERT(VARCHAR(19), u.creado_en, 120) AS creado_en,
                 COALESCE(d.tipo_documento, 'DNI') AS tipo_documento,
-                CASE WHEN d.dni LIKE 'CLI%' OR d.dni LIKE 'EXT%' THEN NULL ELSE d.dni END AS documento
+                CASE WHEN d.dni LIKE 'CLI%' OR d.dni LIKE 'EXT%' THEN NULL ELSE d.dni END AS documento,
+                v.Id_veterinario AS id_veterinario,
+                v.numero_colegiatura AS cmvp,
+                esp.Nombre AS especialidad,
+                CONVERT(VARCHAR(10), v.Fecha_contratacion, 23) AS fecha_contratacion
             FROM dbo.usuarios u
             LEFT JOIN dbo.Dueno d ON d.usuario_id = u.id
+            LEFT JOIN dbo.Veterinario v ON v.usuario_id = u.id
+            LEFT JOIN dbo.Especialidad esp ON esp.Id_especialidad = v.Id_especialidad
             WHERE {where_sql}
             """,
             params=params,
@@ -730,7 +736,8 @@ class SQLServerDatabaseAdapter(IDatabaseAdapter):
         if not codigo:
             return False
         row = self.conn.query_one(
-            f"SELECT TOP 1 1 AS ok FROM dbo.Veterinario WHERE LOWER(numero_colegiatura) = LOWER({sql_lit(codigo)})"
+            "SELECT TOP 1 1 AS ok FROM dbo.Veterinario WHERE LOWER(numero_colegiatura) = LOWER(@cmvp)",
+            params={"cmvp": codigo},
         )
         return row is not None
 
@@ -745,27 +752,16 @@ class SQLServerDatabaseAdapter(IDatabaseAdapter):
                 f"El número de colegiatura '{cmvp}' ya está registrado para otro profesional veterinario."
             )
         email = str(datos.get("correo", datos.get("email", ""))).strip().lower()
-        user = self.conn.query_one(
-            f"SELECT TOP 1 id FROM dbo.usuarios WHERE LOWER(email) = LOWER({sql_lit(email)})"
-        )
-        specialty_id = datos.get("especialidad_id")
-        if not specialty_id and datos.get("especialidad"):
-            spec_name = str(datos["especialidad"]).strip()
-            specialty = self.conn.query_one(
-                f"SELECT TOP 1 Id_especialidad FROM dbo.Especialidad WHERE LOWER(Nombre) = LOWER({sql_lit(spec_name)})"
+        user = (
+            self.conn.query_one(
+                "SELECT TOP 1 id FROM dbo.usuarios WHERE LOWER(email) = LOWER(@email)",
+                params={"email": email},
             )
-            if specialty:
-                specialty_id = int(specialty["Id_especialidad"])
-            else:
-                specialty_id = int(
-                    self.conn.scalar(
-                        f"""
-                        INSERT INTO dbo.Especialidad (Nombre, Descripcion)
-                        OUTPUT INSERTED.Id_especialidad
-                        VALUES ({sql_lit(spec_name)}, N'Especialidad registrada desde panel administrativo')
-                        """
-                    )
-                )
+            if email
+            else None
+        )
+        spec_name = str(datos.get("especialidad") or "Medicina General").strip() or "Medicina General"
+        spec_id_override = int(datos["especialidad_id"]) if datos.get("especialidad_id") else 0
         nombre_completo = str(datos.get("nombres") or datos.get("nombre") or "Doctor").strip()
         apellidos = str(datos.get("apellidos") or "").strip()
         if not apellidos and " " in nombre_completo:
@@ -773,16 +769,216 @@ class SQLServerDatabaseAdapter(IDatabaseAdapter):
         uid_val = datos.get("usuario_id") or (user["id"] if user else None)
         tel_val = str(datos.get("telefono", "")).strip()
         fecha_cont = str(datos.get("fecha_contratacion", date.today().isoformat()))[:10]
-        new_id = int(
-            self.conn.scalar(
-                f"""
-                INSERT INTO dbo.Veterinario (usuario_id, Id_especialidad, numero_colegiatura, nombres, Apellidos, Telefono, Fecha_contratacion)
-                OUTPUT INSERTED.Id_veterinario
-                VALUES ({sql_lit(uid_val)}, {int(specialty_id or 1)}, {sql_lit(cmvp)}, {sql_lit(nombre_completo)}, {sql_lit(apellidos)}, {sql_lit(tel_val)}, {sql_lit(fecha_cont)})
+
+        try:
+            new_id_str = self.conn.scalar(
                 """
+                SET XACT_ABORT ON;
+                BEGIN TRY
+                    BEGIN TRANSACTION;
+                    DECLARE @spec_id INT = @spec_id_override;
+                    IF @spec_id IS NULL OR @spec_id <= 0
+                    BEGIN
+                        SELECT TOP 1 @spec_id = Id_especialidad
+                        FROM dbo.Especialidad
+                        WHERE LOWER(Nombre) = LOWER(@spec_name);
+
+                        IF @spec_id IS NULL
+                        BEGIN
+                            INSERT INTO dbo.Especialidad (Nombre, Descripcion)
+                            VALUES (@spec_name, N'Especialidad registrada desde panel administrativo');
+                            SET @spec_id = CAST(SCOPE_IDENTITY() AS INT);
+                        END;
+                    END;
+
+                    INSERT INTO dbo.Veterinario (
+                        usuario_id, Id_especialidad, numero_colegiatura,
+                        nombres, Apellidos, Telefono, Fecha_contratacion
+                    )
+                    VALUES (
+                        @uid_val, @spec_id, @cmvp,
+                        @nombres, @apellidos, @tel_val, @fecha_cont
+                    );
+                    DECLARE @new_vet_id INT = CAST(SCOPE_IDENTITY() AS INT);
+
+                    COMMIT TRANSACTION;
+                    SELECT CAST(@new_vet_id AS VARCHAR(20)) AS id;
+                END TRY
+                BEGIN CATCH
+                    IF @@TRANCOUNT > 0
+                        ROLLBACK TRANSACTION;
+                    THROW;
+                END CATCH;
+                """,
+                params={
+                    "spec_id_override": spec_id_override,
+                    "spec_name": spec_name,
+                    "uid_val": int(uid_val) if uid_val is not None else None,
+                    "cmvp": cmvp,
+                    "nombres": nombre_completo,
+                    "apellidos": apellidos,
+                    "tel_val": tel_val,
+                    "fecha_cont": fecha_cont,
+                },
             )
+        except ErrorRegistroDuplicadoSQLServer as exc:
+            raise ValueError(
+                f"El número de colegiatura '{cmvp}' o el usuario asignado ya está registrado en dbo.Veterinario."
+            ) from exc
+
+        if not new_id_str or not str(new_id_str).strip().isdigit():
+            raise ErrorConsultaSQLServer(
+                "No se pudo confirmar la inserción del médico veterinario en SQL Server."
+            )
+        new_id = int(str(new_id_str).strip())
+        verificado = self.conn.query_one(
+            """
+            SELECT TOP 1
+                v.Id_veterinario AS id,
+                v.usuario_id,
+                v.Id_especialidad AS especialidad_id,
+                esp.Nombre AS especialidad,
+                v.numero_colegiatura AS cmvp,
+                v.nombres,
+                v.Apellidos AS apellidos,
+                v.Telefono AS telefono,
+                CONVERT(VARCHAR(10), v.Fecha_contratacion, 23) AS fecha_contratacion
+            FROM dbo.Veterinario v
+            JOIN dbo.Especialidad esp ON esp.Id_especialidad = v.Id_especialidad
+            WHERE v.Id_veterinario = @vid
+            """,
+            params={"vid": new_id},
         )
-        return {"id": new_id, **datos}
+        if not verificado:
+            raise ErrorConsultaSQLServer(
+                "No se pudo verificar la persistencia del médico veterinario en dbo.Veterinario."
+            )
+        return {**datos, **verificado, "id": new_id}
+
+    def crear_personal(self, datos: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Registra de forma atómica y transaccional en SQL Server a un miembro del personal
+        ('doctor' o 'admin'), insertando en dbo.usuarios y (si es doctor) en dbo.Especialidad
+        y dbo.Veterinario dentro de una única transacción con verificación posterior SELECT.
+        """
+        nombre = str(datos.get("nombre", "")).strip()
+        email = str(datos.get("email", "")).strip().lower()
+        rol = str(datos.get("rol", "")).strip().lower()
+        estado = str(datos.get("estado", "activo")).strip().lower()
+        telefono = str(datos.get("telefono", "")).strip()
+        raw_pwd = str(datos.get("password_hash") or datos.get("password") or "")
+        cmvp = str(datos.get("cmvp") or "").strip()
+        spec_name = str(datos.get("especialidad") or "Medicina General").strip() or "Medicina General"
+        fecha_cont = str(datos.get("fecha_contratacion", date.today().isoformat()))[:10]
+
+        if len(nombre) < 2:
+            raise ValueError("El nombre y apellido del personal deben tener al menos 2 caracteres.")
+        if "@" not in email or "." not in email.split("@")[-1] or " " in email:
+            raise ValueError("El correo electrónico suministrado no tiene un formato válido.")
+        if rol not in ("doctor", "admin"):
+            raise ValueError("El rol asignado debe ser 'doctor' o 'admin'.")
+        if not raw_pwd or (not raw_pwd.startswith(_PBKDF2_PREFIX) and len(raw_pwd) < 6):
+            raise ValueError("La contraseña debe tener al menos 6 caracteres.")
+
+        if self.obtener_usuario_por_email(email):
+            raise ValueError("Ya existe una cuenta registrada con este correo electrónico.")
+
+        if rol == "doctor":
+            if not cmvp:
+                raise ValueError(
+                    "El número de colegiatura CMVP es obligatorio para registrar un médico veterinario."
+                )
+            if self.existe_colegiatura_veterinario(cmvp):
+                raise ValueError(
+                    f"El número de colegiatura '{cmvp}' ya está registrado para otro profesional veterinario."
+                )
+
+        pwd_hash = hashear_password(raw_pwd)
+        parts = nombre.split(" ", 1)
+        nombres_vet = parts[0]
+        apellidos_vet = parts[1] if len(parts) > 1 else ""
+        es_doctor = 1 if rol == "doctor" else 0
+
+        try:
+            nuevo_uid_str = self.conn.scalar(
+                """
+                SET XACT_ABORT ON;
+                BEGIN TRY
+                    BEGIN TRANSACTION;
+
+                    INSERT INTO dbo.usuarios (nombre, email, password_hash, rol, estado, telefono)
+                    VALUES (@nombre, @email, @pwd_hash, @rol, @estado, @telefono);
+                    DECLARE @new_uid INT = CAST(SCOPE_IDENTITY() AS INT);
+
+                    IF @es_doctor = 1
+                    BEGIN
+                        DECLARE @spec_id INT = (
+                            SELECT TOP 1 Id_especialidad
+                            FROM dbo.Especialidad
+                            WHERE LOWER(Nombre) = LOWER(@spec_name)
+                        );
+                        IF @spec_id IS NULL
+                        BEGIN
+                            INSERT INTO dbo.Especialidad (Nombre, Descripcion)
+                            VALUES (@spec_name, N'Especialidad registrada desde panel administrativo');
+                            SET @spec_id = CAST(SCOPE_IDENTITY() AS INT);
+                        END;
+
+                        INSERT INTO dbo.Veterinario (
+                            usuario_id, Id_especialidad, numero_colegiatura,
+                            nombres, Apellidos, Telefono, Fecha_contratacion
+                        )
+                        VALUES (
+                            @new_uid, @spec_id, @cmvp,
+                            @nombres_vet, @apellidos_vet, @telefono, @fecha_cont
+                        );
+                    END;
+
+                    COMMIT TRANSACTION;
+                    SELECT CAST(@new_uid AS VARCHAR(20)) AS id;
+                END TRY
+                BEGIN CATCH
+                    IF @@TRANCOUNT > 0
+                        ROLLBACK TRANSACTION;
+                    THROW;
+                END CATCH;
+                """,
+                params={
+                    "nombre": nombre,
+                    "email": email,
+                    "pwd_hash": pwd_hash,
+                    "rol": rol,
+                    "estado": estado,
+                    "telefono": telefono,
+                    "es_doctor": es_doctor,
+                    "spec_name": spec_name,
+                    "cmvp": cmvp,
+                    "nombres_vet": nombres_vet,
+                    "apellidos_vet": apellidos_vet,
+                    "fecha_cont": fecha_cont,
+                },
+            )
+        except ErrorRegistroDuplicadoSQLServer as exc:
+            raise ValueError(
+                "Ya existe un registro en SQL Server con ese correo electrónico o número de colegiatura CMVP."
+            ) from exc
+
+        if not nuevo_uid_str or not str(nuevo_uid_str).strip().isdigit():
+            raise ErrorConsultaSQLServer(
+                "No se pudo completar el registro transaccional del personal en SQL Server."
+            )
+
+        nuevo_uid = int(str(nuevo_uid_str).strip())
+        usuario_persistido = self.obtener_usuario_por_id(nuevo_uid)
+        if not usuario_persistido or int(usuario_persistido.get("id", 0)) != nuevo_uid:
+            raise ErrorConsultaSQLServer(
+                "No se pudo verificar la persistencia del nuevo personal en dbo.usuarios de SQL Server."
+            )
+        if rol == "doctor" and not usuario_persistido.get("cmvp"):
+            raise ErrorConsultaSQLServer(
+                "No se pudo verificar la persistencia del médico veterinario en dbo.Veterinario de SQL Server."
+            )
+        return usuario_persistido
 
     def obtener_usuario_por_id(self, usuario_id: int) -> Optional[Dict[str, Any]]:
         return self._user_row(
@@ -798,12 +994,107 @@ class SQLServerDatabaseAdapter(IDatabaseAdapter):
                 u.id, u.nombre, u.email, u.rol, u.estado, u.telefono,
                 CONVERT(VARCHAR(19), u.creado_en, 120) AS creado_en,
                 COALESCE(d.tipo_documento, 'DNI') AS tipo_documento,
-                CASE WHEN d.dni LIKE 'CLI%' OR d.dni LIKE 'EXT%' THEN NULL ELSE d.dni END AS documento
+                CASE WHEN d.dni LIKE 'CLI%' OR d.dni LIKE 'EXT%' THEN NULL ELSE d.dni END AS documento,
+                v.Id_veterinario AS id_veterinario,
+                v.numero_colegiatura AS cmvp,
+                esp.Nombre AS especialidad,
+                CONVERT(VARCHAR(10), v.Fecha_contratacion, 23) AS fecha_contratacion
             FROM dbo.usuarios u
             LEFT JOIN dbo.Dueno d ON d.usuario_id = u.id
+            LEFT JOIN dbo.Veterinario v ON v.usuario_id = u.id
+            LEFT JOIN dbo.Especialidad esp ON esp.Id_especialidad = v.Id_especialidad
             ORDER BY u.id ASC
             """
         )
+
+    def listar_personal(self) -> List[Dict[str, Any]]:
+        """
+        Devuelve todo el personal médico y administrativo persistido en SQL Server,
+        combinando dbo.usuarios (rol IN ('doctor', 'admin')) con dbo.Veterinario y dbo.Especialidad,
+        incluyendo tanto los registros iniciales (SEED) como todo el personal registrado posteriormente.
+        """
+        return self.conn.query_json(
+            """
+            SELECT
+                COALESCE(u.id, 10000 + v.Id_veterinario) AS id,
+                u.id AS usuario_id,
+                v.Id_veterinario AS id_veterinario,
+                COALESCE(u.nombre, LTRIM(RTRIM(v.nombres + ' ' + v.Apellidos))) AS nombre,
+                COALESCE(u.email, 'doctor@patitasfelices.pe') AS email,
+                COALESCE(u.rol, 'doctor') AS rol,
+                COALESCE(u.estado, 'activo') AS estado,
+                COALESCE(NULLIF(u.telefono, ''), v.Telefono, '') AS telefono,
+                v.numero_colegiatura AS cmvp,
+                COALESCE(
+                    esp.Nombre,
+                    CASE WHEN u.rol = 'admin' THEN N'Dirección y Administración Clínica' ELSE N'Medicina General' END
+                ) AS especialidad,
+                COALESCE(
+                    CONVERT(VARCHAR(10), v.Fecha_contratacion, 23),
+                    CONVERT(VARCHAR(10), u.creado_en, 23)
+                ) AS fecha_contratacion,
+                COALESCE(
+                    CONVERT(VARCHAR(19), u.creado_en, 120),
+                    CONVERT(VARCHAR(10), v.Fecha_contratacion, 23) + ' 09:00:00'
+                ) AS creado_en
+            FROM dbo.usuarios u
+            FULL OUTER JOIN dbo.Veterinario v ON v.usuario_id = u.id
+            LEFT JOIN dbo.Especialidad esp ON esp.Id_especialidad = v.Id_especialidad
+            WHERE (u.rol IN ('doctor', 'admin')) OR (v.Id_veterinario IS NOT NULL)
+            ORDER BY
+                CASE WHEN u.id IS NOT NULL THEN 0 ELSE 1 END ASC,
+                COALESCE(u.id, v.Id_veterinario) ASC
+            """
+        )
+
+    def obtener_perfil_doctor(self, usuario_actual: Dict[str, Any]) -> Dict[str, Any]:
+        """Obtiene desde SQL Server (dbo.Veterinario + dbo.Especialidad) el perfil real del médico autenticado."""
+        uid = usuario_actual.get("id")
+        row = None
+        if uid is not None:
+            row = self.conn.query_one(
+                """
+                SELECT TOP 1
+                    v.Id_veterinario AS id_veterinario,
+                    v.usuario_id,
+                    v.numero_colegiatura AS colegiatura,
+                    esp.Nombre AS especialidad,
+                    LTRIM(RTRIM(v.nombres + ' ' + v.Apellidos)) AS nombre_veterinario,
+                    v.Telefono AS telefono_veterinario,
+                    CONVERT(VARCHAR(10), v.Fecha_contratacion, 23) AS fecha_contratacion
+                FROM dbo.Veterinario v
+                LEFT JOIN dbo.Especialidad esp ON esp.Id_especialidad = v.Id_especialidad
+                WHERE v.usuario_id = @uid
+                ORDER BY v.Id_veterinario ASC
+                """,
+                params={"uid": int(uid)},
+            )
+        if not row:
+            row = self.conn.query_one(
+                """
+                SELECT TOP 1
+                    v.Id_veterinario AS id_veterinario,
+                    v.usuario_id,
+                    v.numero_colegiatura AS colegiatura,
+                    esp.Nombre AS especialidad,
+                    LTRIM(RTRIM(v.nombres + ' ' + v.Apellidos)) AS nombre_veterinario,
+                    v.Telefono AS telefono_veterinario,
+                    CONVERT(VARCHAR(10), v.Fecha_contratacion, 23) AS fecha_contratacion
+                FROM dbo.Veterinario v
+                LEFT JOIN dbo.Especialidad esp ON esp.Id_especialidad = v.Id_especialidad
+                ORDER BY v.Id_veterinario ASC
+                """
+            )
+        return {
+            "id": uid or (row.get("id_veterinario") if row else 1),
+            "id_veterinario": row.get("id_veterinario") if row else None,
+            "nombre": usuario_actual.get("nombre") or (row.get("nombre_veterinario") if row else "Dr. Carlos Mendoza"),
+            "email": usuario_actual.get("email") or "doctor@patitasfelices.pe",
+            "telefono": usuario_actual.get("telefono") or (row.get("telefono_veterinario") if row else "987654321"),
+            "colegiatura": (row.get("colegiatura") if row else None) or usuario_actual.get("cmvp") or "CMVP-10452",
+            "especialidad": (row.get("especialidad") if row else None) or usuario_actual.get("especialidad") or "Medicina General e Interna",
+            "horario_turno": "Lunes a Sábado · 09:00 a 18:00 (Lima)",
+        }
 
     def actualizar_estado_usuario(
         self, usuario_id: int, nuevo_estado: str

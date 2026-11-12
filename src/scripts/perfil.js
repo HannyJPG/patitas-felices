@@ -87,6 +87,8 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
     // Referencias: Panel Personal (Admin)
     const formAltaPersonal = document.getElementById("form-alta-personal");
     const alertaAltaPersonal = document.getElementById("alerta-alta-personal");
+    const contenedorPersonalAdmin = document.getElementById("contenedor-personal-admin");
+    const badgeTotalPersonal = document.getElementById("badge-total-personal");
 
     // Referencias: Panel Usuarios (Admin)
     const contenedorUsuariosAdmin = document.getElementById("contenedor-usuarios-admin");
@@ -149,6 +151,7 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
         if (targetId === "tab-farmacia") cargarFarmaciaDoctor();
         if (targetId === "tab-crm") cargarCRMAdmin();
         if (targetId === "tab-solicitudes") cargarSolicitudesAdmin();
+        if (targetId === "tab-personal") cargarPersonalAdmin();
         if (targetId === "tab-usuarios") cargarUsuariosAdmin();
         if (targetId === "tab-bd") cargarVisorBDResumen();
     }
@@ -228,9 +231,10 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
             }
         }
 
-        // Si es admin, cargar contador de solicitudes pendientes
+        // Si es admin, cargar contador de solicitudes pendientes y listado persistente de personal
         if (rol === "admin") {
             actualizarContadorSolicitudesPendientes();
+            cargarPersonalAdmin();
         }
     }
 
@@ -1196,13 +1200,18 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
         }
 
         try {
-            await peticionApi("/api/admin/usuarios", {
+            const resp = await peticionApi("/api/admin/usuarios", {
                 method: "POST",
                 body: JSON.stringify({ nombre, email, rol, cmvp, especialidad, telefono, password }),
             });
+            const creadoId = resp?.usuario?.id ? `#${resp.usuario.id}` : "";
             formAltaPersonal.reset();
             sincronizarCamposPersonalPorRol();
-            mostrarAlertaGlobal(`Personal '${nombre}' (${rol}) registrado exitosamente.`, "success");
+            mostrarAlertaGlobal(
+                `Personal '${nombre}' (${rol.toUpperCase()} ${creadoId}) almacenado permanentemente en SQL Server.`,
+                "success"
+            );
+            await cargarPersonalAdmin();
             await cargarUsuariosAdmin();
             await cargarVisorBDResumen();
         } catch (err) {
@@ -1210,6 +1219,68 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
             alertaAltaPersonal.classList.remove("d-none");
         }
     });
+
+    async function cargarPersonalAdmin() {
+        if (!contenedorPersonalAdmin) return;
+        contenedorPersonalAdmin.replaceChildren();
+
+        try {
+            const data = await peticionApi("/api/admin/personal");
+            const personal = Array.isArray(data?.personal) ? data.personal : [];
+
+            if (badgeTotalPersonal) {
+                badgeTotalPersonal.textContent = `${personal.length} trabajador(es) en SQL Server`;
+            }
+
+            if (!personal.length) {
+                contenedorPersonalAdmin.innerHTML = "<p class='small text-muted mb-0'>No hay personal registrado en SQL Server.</p>";
+                return;
+            }
+
+            const tableWrap = document.createElement("div");
+            tableWrap.className = "table-responsive";
+            tableWrap.innerHTML = `
+                <table class="table table-hover align-middle small mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre y Teléfono</th>
+                            <th>Correo Electrónico</th>
+                            <th>Rol</th>
+                            <th>Colegiatura CMVP</th>
+                            <th>Especialidad / Área</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-personal-admin"></tbody>
+                </table>
+            `;
+            const tbody = tableWrap.querySelector("#tbody-personal-admin");
+
+            for (const p of personal) {
+                const tr = document.createElement("tr");
+                const badgeClase = p.estado === "activo" ? "bg-success" : "bg-danger";
+                const rolEtiqueta = p.rol === "admin" ? "ADMIN" : "DOCTOR";
+                const idEtiqueta = p.usuario_id ? `#${p.usuario_id}` : `VET-${p.id_veterinario}`;
+                const cmvpTexto = p.cmvp ? `<code>${p.cmvp}</code>` : `<span class="text-muted">N/A (Admin)</span>`;
+
+                tr.innerHTML = `
+                    <td><strong>${idEtiqueta}</strong></td>
+                    <td><strong>${p.nombre}</strong><br><small class="text-muted">${p.telefono || "Sin teléfono"}</small></td>
+                    <td>${p.email}</td>
+                    <td><span class="badge bg-light text-dark border">${rolEtiqueta}</span></td>
+                    <td>${cmvpTexto}</td>
+                    <td>${p.especialidad || "Medicina General"}</td>
+                    <td><span class="badge ${badgeClase}">${(p.estado || "activo").toUpperCase()}</span></td>
+                `;
+                tbody.append(tr);
+            }
+
+            contenedorPersonalAdmin.append(tableWrap);
+        } catch (err) {
+            contenedorPersonalAdmin.innerHTML = `<p class="small text-danger mb-0">Error al consultar personal en SQL Server: ${err.message}</p>`;
+        }
+    }
 
     async function cargarUsuariosAdmin() {
         if (!contenedorUsuariosAdmin) return;
@@ -1228,7 +1299,7 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Email</th>
-                            <th>Rol</th>
+                            <th>Rol / CMVP</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -1241,12 +1312,13 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
             for (const u of usuarios) {
                 const tr = document.createElement("tr");
                 const badgeClase = u.estado === "activo" ? "bg-success" : "bg-danger";
+                const extraCredencial = u.cmvp ? `<br><small class="text-muted"><code>${u.cmvp}</code> · ${u.especialidad || "Medicina General"}</small>` : "";
 
                 tr.innerHTML = `
                     <td>${u.id}</td>
                     <td><strong>${u.nombre}</strong></td>
                     <td>${u.email}</td>
-                    <td><span class="badge bg-light text-dark border">${u.rol}</span></td>
+                    <td><span class="badge bg-light text-dark border">${u.rol}</span>${extraCredencial}</td>
                     <td><span class="badge ${badgeClase}">${u.estado.toUpperCase()}</span></td>
                     <td>
                         <button type="button" class="btn btn-outline-${u.estado === 'activo' ? 'danger' : 'success'} btn-sm py-0 px-2 btn-toggle-estado" data-id="${u.id}" data-estado="${u.estado}" style="font-size: 0.75rem;">
@@ -1263,6 +1335,7 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion, descargarPdfDe
                     });
                     mostrarAlertaGlobal(`Estado del usuario #${u.id} actualizado a ${nuevo}.`, "info");
                     await cargarUsuariosAdmin();
+                    await cargarPersonalAdmin();
                 });
 
                 tbody.append(tr);
