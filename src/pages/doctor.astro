@@ -10,8 +10,8 @@ import Layout from "../layouts/Layout.astro";
 
     <section class="profile-banner mb-4" aria-labelledby="perfil-doctor-titulo">
       <div>
-        <h2 id="perfil-doctor-titulo" class="h4">Dr. Carlos Mendoza · CMVP-10452</h2>
-        <p id="perfil-doctor-detalle">Especialidad: Medicina General, Preventiva y Dermatología · Turno: Lunes a Sábado (09:00 a 18:00)</p>
+        <h2 id="perfil-doctor-titulo" class="h4">Cargando perfil profesional...</h2>
+        <p id="perfil-doctor-detalle">Verificando credenciales médicas en SQL Server...</p>
       </div>
       <div class="d-flex flex-wrap gap-2">
         <button id="btn-recargar-agenda" type="button" class="btn btn-light">Actualizar agenda</button>
@@ -64,12 +64,12 @@ import Layout from "../layouts/Layout.astro";
 
             <div class="mb-3">
               <label class="form-label" for="doctor-diagnostico">Diagnóstico clínico</label>
-              <textarea class="form-control" id="doctor-diagnostico" name="diagnostico" rows="3" required>Paciente estable, temperatura normal y mucosas rosadas.</textarea>
+              <textarea class="form-control" id="doctor-diagnostico" name="diagnostico" rows="3" required placeholder="Ej.: Paciente estable, temperatura normal y mucosas rosadas."></textarea>
             </div>
 
             <div class="mb-3">
               <label class="form-label" for="doctor-tratamiento">Tratamiento e indicaciones</label>
-              <textarea class="form-control" id="doctor-tratamiento" name="tratamiento" rows="3" required>Control preventivo en 15 días y suplemento nutricional.</textarea>
+              <textarea class="form-control" id="doctor-tratamiento" name="tratamiento" rows="3" required placeholder="Ej.: Control preventivo en 15 días y suplemento nutricional."></textarea>
             </div>
 
             <div class="d-grid gap-2">

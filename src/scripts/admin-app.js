@@ -3,7 +3,8 @@
    Comparte autenticación y servicios con el backend existente sin duplicar usuarios.
    ========================================================================== */
 
-import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-client.js";
+import { API_BASE_URL, cerrarSesion, obtenerSesion, guardarSesion, peticionApi } from "./api-client.js";
+import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, formatearIsoLocal } from "./ui-utils.js";
 
 (() => {
     const estadoConexion = document.getElementById("admin-estado-conexion");
@@ -45,76 +46,9 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
     const contUsuarios = document.getElementById("contenedor-usuarios-admin");
     const contInventario = document.getElementById("contenedor-inventario-admin");
 
-    const VENTAS_DEMO_INICIALES = [
-        {
-            id: 9001,
-            numero_boleta: "B001-000841",
-            creado_en: "2026-10-21 10:15:00",
-            cliente_nombre: "Lucía Fernández",
-            cliente_documento: "74859632",
-            servicio_categoria: "Consulta general",
-            concepto: "Consulta general + control de peso (Luna)",
-            metodo_pago: "Yape / Plin",
-            subtotal: 50.85,
-            igv: 9.15,
-            total: 60.00,
-            estado: "pagado",
-            es_demostracion: true
-        },
-        {
-            id: 9002,
-            numero_boleta: "B001-000842",
-            creado_en: "2026-10-22 15:40:00",
-            cliente_nombre: "Jorge Paredes",
-            cliente_documento: "41258963",
-            servicio_categoria: "Vacunación",
-            concepto: "Vacuna Quíntuple Canina + desparasitación (Max)",
-            metodo_pago: "Tarjeta Visa",
-            subtotal: 93.22,
-            igv: 16.78,
-            total: 110.00,
-            estado: "pagado",
-            es_demostracion: true
-        },
-        {
-            id: 9003,
-            numero_boleta: "B001-000843",
-            creado_en: "2026-10-24 11:20:00",
-            cliente_nombre: "Mariana Quispe",
-            cliente_documento: "70145896",
-            servicio_categoria: "Farmacia",
-            concepto: "Antipulgas Bravecto + Shampoo dermatológico",
-            metodo_pago: "Yape / Plin",
-            subtotal: 110.17,
-            igv: 19.83,
-            total: 130.00,
-            estado: "pagado",
-            es_demostracion: true
-        },
-        {
-            id: 9004,
-            numero_boleta: "B001-000844",
-            creado_en: "2026-10-25 16:05:00",
-            cliente_nombre: "Ricardo Salazar",
-            cliente_documento: "45896321",
-            servicio_categoria: "Nutrición",
-            concepto: "Alimento Premium Adultos 3kg + vitaminas",
-            metodo_pago: "Transferencia",
-            subtotal: 125.42,
-            igv: 22.58,
-            total: 148.00,
-            estado: "pagado",
-            es_demostracion: true
-        }
-    ];
-
-    const TRAFICO_DEMO_INICIAL = [
-        { fecha: "2026-10-21", visitas: 42, consultas_web: 14, citas_registradas: 3, es_demostracion: true },
-        { fecha: "2026-10-22", visitas: 51, consultas_web: 19, citas_registradas: 4, es_demostracion: true },
-        { fecha: "2026-10-23", visitas: 38, consultas_web: 11, citas_registradas: 2, es_demostracion: true },
-        { fecha: "2026-10-24", visitas: 64, consultas_web: 23, citas_registradas: 5, es_demostracion: true },
-        { fecha: "2026-10-25", visitas: 72, consultas_web: 28, citas_registradas: 6, es_demostracion: true }
-    ];
+    if (esModoDemoActivo() && selectOrigen) {
+        selectOrigen.value = "todos";
+    }
 
     let datosBrutos = {
         usuarios: [],
@@ -122,8 +56,8 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
         citas: [],
         productos: [],
         ventasReales: [],
-        ventasDemo: VENTAS_DEMO_INICIALES,
-        trafico: TRAFICO_DEMO_INICIAL
+        ventasDemo: [],
+        trafico: []
     };
 
     let columnaOrden = "fecha_iso";
@@ -131,29 +65,35 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
     let paginaActual = 1;
     let filasExportablesActuales = [];
 
-    function extraerFechaIso(fechaTexto) {
-        return String(fechaTexto || "").slice(0, 10);
-    }
-
-    function formatearFechaLatam(fechaIso) {
-        const limpia = extraerFechaIso(fechaIso);
-        const partes = limpia.split("-");
-        return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : limpia;
-    }
-
     function normalizarVentasUnificadas() {
+        const categoriasPorId = new Map();
+        const categoriasPorNombre = new Map();
+        for (const prod of (datosBrutos.productos || [])) {
+            if (prod?.id != null && prod?.categoria) {
+                categoriasPorId.set(Number(prod.id), String(prod.categoria));
+            }
+            if (prod?.nombre && prod?.categoria) {
+                categoriasPorNombre.set(String(prod.nombre).trim().toLowerCase(), String(prod.categoria));
+            }
+        }
+
         const reales = (datosBrutos.ventasReales || []).map(v => {
             const detalles = v.detalles || [];
             const concepto = detalles.length
                 ? detalles.map(d => `${d.cantidad}x ${d.producto_nombre}`).join(", ")
                 : "Compra en tienda veterinaria";
+            const primerDetalle = detalles[0] || {};
+            const categoriaReal =
+                categoriasPorId.get(Number(primerDetalle.producto_id)) ||
+                categoriasPorNombre.get(String(primerDetalle.producto_nombre || "").trim().toLowerCase()) ||
+                "Farmacia";
             return {
                 id: v.id,
                 numero_boleta: v.numero_boleta,
                 fecha_iso: extraerFechaIso(v.creado_en),
                 cliente_nombre: v.cliente_nombre,
                 cliente_documento: v.cliente_documento,
-                servicio_categoria: "Farmacia",
+                servicio_categoria: categoriaReal,
                 concepto,
                 metodo_pago: v.metodo_pago || "Yape / Plin",
                 subtotal: Number(v.subtotal || 0),
@@ -287,7 +227,7 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
             const li = document.createElement("li");
             li.className = "activity-item";
             const izq = document.createElement("div");
-            izq.innerHTML = `<strong>Cita #${c.id} · Mascota: ${c.mascota_nombre}</strong><div class="admin-topbar-meta">Propietario: ${c.propietario} · Servicio: ${c.servicio} · Fecha: ${c.fecha} ${c.hora}</div>`;
+            izq.innerHTML = `<strong>Cita #${escapeHtml(c.id)} · Mascota: ${escapeHtml(c.mascota_nombre)}</strong><div class="admin-topbar-meta">Propietario: ${escapeHtml(c.propietario)} · Servicio: ${escapeHtml(c.servicio)} · Fecha: ${escapeHtml(c.fecha)} ${escapeHtml(c.hora)}</div>`;
             const der = document.createElement("span");
             der.className = "badge-role";
             der.textContent = c.estado.toUpperCase();
@@ -521,13 +461,13 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
     function exportarAExcel() {
         const { columnas, filas } = filasExportablesActuales;
         if (!columnas?.length) return;
-        const ths = columnas.map(c => `<th style="background:#0B2545;color:#FFFFFF;padding:6px;">${c.titulo}</th>`).join("");
+        const ths = columnas.map(c => `<th style="background:#0B2545;color:#FFFFFF;padding:6px;">${escapeHtml(c.titulo)}</th>`).join("");
         const trs = filas
             .map(f => {
                 const tds = columnas
                     .map(c => {
                         const v = c.clave === "fecha_iso" ? formatearFechaLatam(f[c.clave]) : (f[c.clave] ?? "");
-                        return `<td style="border:1px solid #CBDAD2;padding:6px;">${v}</td>`;
+                        return `<td style="border:1px solid #CBDAD2;padding:6px;">${escapeHtml(v)}</td>`;
                     })
                     .join("");
                 return `<tr>${tds}</tr>`;
@@ -551,7 +491,9 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
             const item = document.createElement("div");
             item.className = "activity-item";
             const info = document.createElement("div");
-            info.innerHTML = `<strong>${u.nombre} (${u.rol.toUpperCase()})</strong><div class="admin-topbar-meta">${u.email} · Estado: ${u.estado.toUpperCase()}</div>`;
+            const extraDoc = u.cmvp ? ` · ${escapeHtml(u.cmvp)} (${escapeHtml(u.especialidad || "Medicina General")})` : "";
+            const nombreMostrar = (u.nombres || u.apellidos) ? `${u.nombres || ""} ${u.apellidos || ""}`.trim() : (u.nombre || "");
+            info.innerHTML = `<strong>${escapeHtml(nombreMostrar)} (${escapeHtml((u.rol || "").toUpperCase())})</strong><div class="admin-topbar-meta">${escapeHtml(u.email)} · Estado: ${escapeHtml((u.estado || "").toUpperCase())}${extraDoc}</div>`;
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = u.estado === "activo" ? "btn-admin btn-admin-outline" : "btn-admin btn-admin-primary";
@@ -565,6 +507,8 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
                         body: JSON.stringify({ estado: siguienteEstado })
                     });
                     await cargarDatosPanel();
+                } catch (err) {
+                    estadoConexion.textContent = `No se pudo actualizar el estado del usuario #${u.id}: ${err.message}`;
                 } finally {
                     btn.disabled = false;
                 }
@@ -577,7 +521,7 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
         for (const p of datosBrutos.productos || []) {
             const item = document.createElement("div");
             item.className = "activity-item";
-            item.innerHTML = `<div><strong>${p.nombre}</strong><div class="admin-topbar-meta">${p.codigo} · ${p.categoria} · S/ ${Number(p.precio).toFixed(2)}</div></div><span class="badge-role">${p.stock} unid.</span>`;
+            item.innerHTML = `<div><strong>${escapeHtml(p.nombre)}</strong><div class="admin-topbar-meta">${escapeHtml(p.codigo)} · ${escapeHtml(p.categoria)} · S/ ${Number(p.precio).toFixed(2)}</div></div><span class="badge-role">${Number(p.stock)} unid.</span>`;
             contInventario.append(item);
         }
     }
@@ -610,10 +554,15 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
             }
             return sesionSincronizada;
         } catch (err) {
-            estadoConexion.textContent = `Sesión inválida o expirada (${err.message}). Redirigiendo al inicio de sesión...`;
-            setTimeout(() => {
-                window.location.href = "/?abrir_login=1";
-            }, 900);
+            if (err?.status === 401 || err?.status === 403) {
+                cerrarSesion();
+                estadoConexion.textContent = `Sesión inválida o expirada (${err.message}). Redirigiendo al inicio de sesión...`;
+                setTimeout(() => {
+                    window.location.href = "/?abrir_login=1";
+                }, 900);
+                return null;
+            }
+            estadoConexion.textContent = `Error de conexión con el servidor (${err.message}). Reintenta actualizar datos.`;
             return null;
         }
     }
@@ -623,7 +572,8 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
             const sesion = await asegurarSesionAdmin();
             if (!sesion) return;
             badgeUsuario.textContent = `${sesion.usuario.nombre} · Administración`;
-            const data = await peticionApi("/api/admin/crm");
+            const incluirDemo = esModoDemoActivo() || (selectOrigen && selectOrigen.value !== "reales");
+            const data = await peticionApi(`/api/admin/crm?demo=${incluirDemo ? "1" : "0"}`);
             datosBrutos = {
                 usuarios: data.usuarios || [],
                 mascotas: data.mascotas || [],
@@ -633,15 +583,14 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
                 ventasDemo: data.ventas_referencia_demo || [],
                 trafico: data.trafico_periodo || []
             };
-            estadoConexion.textContent = "Datos sincronizados en tiempo real con la clínica.";
+            estadoConexion.textContent = incluirDemo
+                ? "Datos reales + serie de demostración sincronizados."
+                : "Datos reales sincronizados con SQL Server.";
             actualizarIndicadoresYGraficos();
             renderizarTablaExcel();
             renderizarUsuariosEInventario();
         } catch (error) {
-            estadoConexion.textContent = `Mostrando datos de demostración locales (${error.message}).`;
-            actualizarIndicadoresYGraficos();
-            renderizarTablaExcel();
-            renderizarUsuariosEInventario();
+            estadoConexion.textContent = `Error al consultar SQL Server (${error.message}). Reintenta actualizar datos.`;
         }
     }
 
@@ -654,6 +603,10 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
 
     selectOrigen.addEventListener("change", () => {
         paginaActual = 1;
+        if (selectOrigen.value !== "reales" && !(datosBrutos.ventasDemo || []).length) {
+            cargarDatosPanel();
+            return;
+        }
         actualizarIndicadoresYGraficos();
         renderizarTablaExcel();
     });
@@ -661,15 +614,19 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
     document.querySelectorAll("[data-rango-rapido]").forEach(boton => {
         boton.addEventListener("click", () => {
             const tipo = boton.getAttribute("data-rango-rapido");
+            const hoy = new Date();
+            const hoyIso = formatearIsoLocal(hoy);
             if (tipo === "todo") {
                 inputDesde.value = "2026-01-01";
-                inputHasta.value = "2026-12-31";
+                inputHasta.value = `${Math.max(hoy.getFullYear(), 2026)}-12-31`;
             } else if (tipo === "7dias") {
-                inputDesde.value = "2026-10-20";
-                inputHasta.value = "2026-10-27";
+                const hace7 = new Date(hoy);
+                hace7.setDate(hace7.getDate() - 6);
+                inputDesde.value = formatearIsoLocal(hace7);
+                inputHasta.value = hoyIso;
             } else if (tipo === "hoy") {
-                inputDesde.value = "2026-10-27";
-                inputHasta.value = "2026-10-27";
+                inputDesde.value = hoyIso;
+                inputHasta.value = hoyIso;
             }
             paginaActual = 1;
             actualizarIndicadoresYGraficos();
@@ -715,13 +672,25 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
     const selectAltaRol = document.getElementById("alta-rol");
     const campoCmvp = document.getElementById("campo-alta-cmvp");
     const campoEspecialidad = document.getElementById("campo-alta-especialidad");
+    const inputAltaCmvp = document.getElementById("alta-cmvp");
+    const inputAltaEspecialidad = document.getElementById("alta-especialidad");
+
+    function sincronizarCamposAltaRol() {
+        const esDoctor = (selectAltaRol?.value || "doctor") === "doctor";
+        if (campoCmvp) campoCmvp.style.display = esDoctor ? "block" : "none";
+        if (campoEspecialidad) campoEspecialidad.style.display = esDoctor ? "block" : "none";
+        if (inputAltaCmvp) inputAltaCmvp.required = esDoctor;
+        if (inputAltaEspecialidad) {
+            inputAltaEspecialidad.required = esDoctor;
+            if (esDoctor && !inputAltaEspecialidad.value.trim()) {
+                inputAltaEspecialidad.value = "Medicina General";
+            }
+        }
+    }
 
     if (selectAltaRol) {
-        selectAltaRol.addEventListener("change", () => {
-            const esDoctor = selectAltaRol.value === "doctor";
-            if (campoCmvp) campoCmvp.style.display = esDoctor ? "block" : "none";
-            if (campoEspecialidad) campoEspecialidad.style.display = esDoctor ? "block" : "none";
-        });
+        selectAltaRol.addEventListener("change", sincronizarCamposAltaRol);
+        sincronizarCamposAltaRol();
     }
 
     if (btnToggleAlta && panelAlta) {
@@ -729,7 +698,8 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
             const visible = panelAlta.style.display === "block";
             panelAlta.style.display = visible ? "none" : "block";
             if (!visible) {
-                document.getElementById("alta-nombre")?.focus();
+                sincronizarCamposAltaRol();
+                document.getElementById("alta-nombres")?.focus();
             }
         });
     }
@@ -738,6 +708,7 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
         btnCancelarAlta.addEventListener("click", () => {
             panelAlta.style.display = "none";
             formAlta?.reset();
+            sincronizarCamposAltaRol();
             if (alertaAltaError) alertaAltaError.style.display = "none";
             if (alertaAltaSuccess) alertaAltaSuccess.style.display = "none";
         });
@@ -749,19 +720,30 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
             if (alertaAltaError) alertaAltaError.style.display = "none";
             if (alertaAltaSuccess) alertaAltaSuccess.style.display = "none";
 
-            const nombre = document.getElementById("alta-nombre")?.value?.trim() || "";
+            const nombres = document.getElementById("alta-nombres")?.value?.trim() || "";
+            const apellidos = document.getElementById("alta-apellidos")?.value?.trim() || "";
+            const nombre = `${nombres} ${apellidos}`.trim();
             const rol = selectAltaRol?.value || "doctor";
-            const email = document.getElementById("alta-email")?.value?.trim() || "";
+            const email = document.getElementById("alta-email")?.value?.trim().toLowerCase() || "";
             const password = document.getElementById("alta-password")?.value || "";
             const telefono = document.getElementById("alta-telefono")?.value?.trim() || "";
-            const cmvp = document.getElementById("alta-cmvp")?.value?.trim() || "CMVP-00000";
-            const especialidad = document.getElementById("alta-especialidad")?.value?.trim() || "Medicina General";
+            const cmvp = rol === "doctor" ? (inputAltaCmvp?.value?.trim() || "") : "";
+            const especialidad = rol === "doctor" ? (inputAltaEspecialidad?.value?.trim() || "Medicina General") : "";
 
-            if (!nombre || !email || !password) {
+            if (nombres.length < 2 || apellidos.length < 2 || !email || !password) {
                 if (alertaAltaError) {
-                    alertaAltaError.textContent = "Por favor completa el nombre, correo corporativo y contraseña.";
+                    alertaAltaError.textContent = "Por favor completa nombres, apellidos (mínimo 2 caracteres cada uno), correo corporativo y contraseña.";
                     alertaAltaError.style.display = "block";
                 }
+                return;
+            }
+
+            if (rol === "doctor" && !cmvp) {
+                if (alertaAltaError) {
+                    alertaAltaError.textContent = "El número de colegiatura CMVP es obligatorio para registrar un Médico Veterinario.";
+                    alertaAltaError.style.display = "block";
+                }
+                inputAltaCmvp?.focus();
                 return;
             }
 
@@ -780,6 +762,8 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
                     method: "POST",
                     body: JSON.stringify({
                         nombre,
+                        nombres,
+                        apellidos,
                         rol,
                         email,
                         password,
@@ -790,11 +774,12 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
                 });
 
                 if (alertaAltaSuccess) {
-                    alertaAltaSuccess.textContent = `Cuenta creada exitosamente para ${res.usuario.nombre} (${res.usuario.rol.toUpperCase()}).`;
+                    alertaAltaSuccess.textContent = `Cuenta creada exitosamente en SQL Server para ${res.usuario.nombre} (${res.usuario.rol.toUpperCase()}).`;
                     alertaAltaSuccess.style.display = "block";
                 }
 
                 formAlta.reset();
+                sincronizarCamposAltaRol();
                 await cargarDatosPanel();
 
                 setTimeout(() => {
@@ -827,7 +812,5 @@ import { API_BASE_URL, obtenerSesion, guardarSesion, peticionApi } from "./api-c
         });
     });
 
-    actualizarIndicadoresYGraficos();
-    renderizarTablaExcel();
     cargarDatosPanel();
 })();

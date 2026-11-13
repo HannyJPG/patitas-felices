@@ -66,11 +66,10 @@ class ClientRoleStrategy(RoleAuthorizationStrategy):
             "rol": "cliente",
             "etiqueta": "Cliente / Propietario",
             "ruta_principal": "/tienda",
-            "ruta_espacio": "/cliente",
+            "ruta_espacio": "/perfil",
             "vistas_disponibles": [
-                {"nombre": "Mi perfil, mascotas y citas", "ruta": "/cliente"},
+                {"nombre": "Mi perfil, mascotas y citas", "ruta": "/perfil"},
                 {"nombre": "Tienda y farmacia", "ruta": "/tienda"},
-                {"nombre": "Agendar cita", "ruta": "/agendar-cita"},
             ],
             "acciones": sorted(self.PERMISOS),
         }

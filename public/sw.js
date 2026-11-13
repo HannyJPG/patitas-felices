@@ -1,5 +1,5 @@
-const CACHE_NAME = "patitas-felices-pwa-v2";
-const RECURSOS_BASE = ["/", "/login", "/tienda", "/doctor", "/admin", "/agendar-cita", "/img/logotipoveterinaria.jpg"];
+const CACHE_NAME = "patitas-felices-pwa-v5";
+const RECURSOS_BASE = ["/", "/login", "/tienda", "/perfil", "/doctor", "/admin", "/admin-app", "/visor-bd", "/img/logotipoveterinaria.jpg"];
 
 self.addEventListener("install", evento => {
     evento.waitUntil(

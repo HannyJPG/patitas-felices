@@ -1,0 +1,65 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="Visor en Vivo de las 16 Tablas | Patitas Felices">
+  <main class="container section-spacing" id="contenido" tabindex="-1">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-1" style="color: #0B2545;">Visor en Vivo de las 16 Tablas (DER)</h1>
+        <p class="text-muted small mb-0" id="meta-bd">Cargando base de datos...</p>
+      </div>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <label for="select-limite-bd" class="small text-muted mb-0">Filas/tabla:</label>
+        <select id="select-limite-bd" class="form-select form-select-sm" style="width: auto;">
+          <option value="50">50</option>
+          <option value="100" selected>100</option>
+          <option value="500">500</option>
+          <option value="">Todas</option>
+        </select>
+        <button type="button" id="btn-refrescar-bd" class="btn btn-primary btn-sm">
+          Actualizar
+        </button>
+        <a class="btn btn-outline-secondary btn-sm" href="/perfil">Volver al Panel</a>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4" id="barra-filtros"></div>
+    <div id="contenedor-tablas"></div>
+  </main>
+
+  <style>
+    .visor-chip {
+      background: #ffffff;
+      border: 1px solid #ced4da;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .visor-chip:hover,
+    .visor-chip.active {
+      background: #134074;
+      color: #ffffff;
+      border-color: #134074;
+    }
+    .visor-table-wrap {
+      overflow-x: auto;
+      max-height: 480px;
+    }
+    .visor-table th {
+      position: sticky;
+      top: 0;
+      background: #fafcfe;
+      z-index: 1;
+      font-weight: 600;
+    }
+    .visor-table td {
+      white-space: nowrap;
+    }
+  </style>
+
+  <script>
+    import "../scripts/visor-bd.js";
+  </script>
+</Layout>

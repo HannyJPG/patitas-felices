@@ -51,16 +51,16 @@ import Layout from "../layouts/Layout.astro";
             <button class="nav-link active text-start py-2 px-3" data-tab-target="tab-perfil" type="button" role="tab">
               Mi perfil
             </button>
-            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-mascotas" data-role-filter="cliente" type="button" role="tab">
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-mascotas" data-role-filter="cliente" type="button" role="tab">
               Mis mascotas
             </button>
-            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-compras" data-role-filter="cliente" type="button" role="tab">
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-compras" data-role-filter="cliente" type="button" role="tab">
               Mis compras y boletas
             </button>
-            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-pagos" data-role-filter="cliente" type="button" role="tab">
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-pagos" data-role-filter="cliente" data-demo-only="1" type="button" role="tab">
               Métodos de pago
             </button>
-            <button class="nav-link text-start py-2 px-3" data-tab-target="tab-citas" data-role-filter="cliente" type="button" role="tab">
+            <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-citas" data-role-filter="cliente" type="button" role="tab">
               Mis citas médicas
             </button>
 
@@ -130,6 +130,14 @@ import Layout from "../layouts/Layout.astro";
             <div class="col-12 col-sm-6">
               <label class="form-label small text-muted mb-1">Rol en el sistema</label>
               <p id="perfil-campo-rol" class="fw-semibold mb-0 text-dark">-</p>
+            </div>
+            <div class="col-12 col-sm-6 d-none" id="wrap-perfil-doctor-cmvp">
+              <label class="form-label small text-muted mb-1">Colegiatura CMVP</label>
+              <p id="perfil-campo-cmvp" class="fw-semibold mb-0 text-dark">-</p>
+            </div>
+            <div class="col-12 col-sm-6 d-none" id="wrap-perfil-doctor-especialidad">
+              <label class="form-label small text-muted mb-1">Especialidad médica</label>
+              <p id="perfil-campo-especialidad" class="fw-semibold mb-0 text-dark">-</p>
             </div>
           </div>
 
@@ -380,7 +388,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <div>
               <h2 class="h5 fw-bold mb-0 text-dark">Agenda de Pacientes</h2>
-              <small class="text-muted">Confirmación y atención médica de citas en 1 clic.</small>
+              <small id="agenda-doctor-meta" class="text-muted">Confirmación y atención médica de citas en 1 clic.</small>
             </div>
             <span class="badge bg-light text-secondary border">Turno activo</span>
           </div>
@@ -471,11 +479,15 @@ import Layout from "../layouts/Layout.astro";
           <div id="alerta-alta-personal" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
 
           <form id="form-alta-personal" class="row g-3" novalidate>
-            <div class="col-12 col-md-6">
-              <label class="form-label small mb-1 fw-semibold" for="personal-input-nombre">Nombre y apellido *</label>
-              <input type="text" class="form-control form-control-sm" id="personal-input-nombre" required placeholder="Ej. Dr. Mario Ruiz" />
+            <div class="col-12 col-md-4">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-nombres">Nombres *</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-nombres" required placeholder="Ej. Mario" />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
+              <label class="form-label small mb-1 fw-semibold" for="personal-input-apellidos">Apellidos *</label>
+              <input type="text" class="form-control form-control-sm" id="personal-input-apellidos" required placeholder="Ej. Ruiz Pérez" />
+            </div>
+            <div class="col-12 col-md-4">
               <label class="form-label small mb-1 fw-semibold" for="personal-input-email">Correo electrónico *</label>
               <input type="email" class="form-control form-control-sm" id="personal-input-email" required placeholder="doctor@patitasfelices.pe" />
             </div>

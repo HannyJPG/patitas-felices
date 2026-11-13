@@ -10,10 +10,12 @@ al controlador real (RealClinicController). Verifica:
 
 from abc import ABC, abstractmethod
 import base64
+from datetime import date, timedelta
 import hashlib
 import hmac
 import json
 import os
+import secrets
 import time
 from typing import Any, Dict, Optional
 
@@ -43,9 +45,28 @@ def _b64url_decode(texto: str) -> bytes:
     return base64.urlsafe_b64decode((texto + padding).encode("ascii"))
 
 
+_EPHEMERAL_JWT_SECRET = secrets.token_urlsafe(32)
+
+
+def _obtener_secreto_jwt() -> bytes:
+    """Obtiene el secreto HMAC para JWT exigiendo configuración explícita en producción."""
+    secreto = os.getenv("JWT_SECRET", "").strip()
+    if secreto:
+        return secreto.encode("utf-8")
+    es_produccion = (
+        os.getenv("ENV", "").strip().lower() == "production"
+        or bool(os.getenv("RENDER"))
+    )
+    if es_produccion:
+        raise RuntimeError(
+            "La variable de entorno JWT_SECRET es obligatoria en entorno de producción."
+        )
+    return _EPHEMERAL_JWT_SECRET.encode("utf-8")
+
+
 def generar_token_jwt(payload: Dict[str, Any], duracion_segundos: int = 28800) -> str:
     """Genera un token JWT firmado con HMAC-SHA256."""
-    secreto = os.getenv("JWT_SECRET", "patitas-felices-clave-secreta-2026").encode("utf-8")
+    secreto = _obtener_secreto_jwt()
     header = {"alg": "HS256", "typ": "JWT"}
     ahora = int(time.time())
     cuerpo = {
@@ -70,7 +91,7 @@ def verificar_token_jwt(token: str) -> Dict[str, Any]:
     if len(partes) != 3:
         raise ErrorSeguridadProxy("Formato de token JWT inválido.", 401)
 
-    secreto = os.getenv("JWT_SECRET", "patitas-felices-clave-secreta-2026").encode("utf-8")
+    secreto = _obtener_secreto_jwt()
     mensaje = f"{partes[0]}.{partes[1]}".encode("ascii")
     firma_esperada = _b64url_encode(hmac.new(secreto, mensaje, hashlib.sha256).digest())
 
@@ -120,112 +141,175 @@ class RealClinicController(ISecureController):
 
         if accion == "ver_crm_dashboard":
             usuarios = self.db.listar_usuarios()
-            ventas = self.db.listar_ventas()
             citas = self.db.listar_citas()
             mascotas = self.db.listar_mascotas()
             productos = self.db.listar_productos(solo_activos=False)
-            ingresos_totales = round(sum(float(v["total"]) for v in ventas), 2)
-            ventas_referencia_demo = [
-                {
-                    "id": 901,
-                    "numero_boleta": "B001-DEMO01",
-                    "cliente_nombre": "Lucía Fernández",
-                    "cliente_documento": "74859632",
-                    "servicio_categoria": "Consulta general",
-                    "concepto": "Consulta general + Control de peso (Luna)",
-                    "subtotal": 50.85,
-                    "igv": 9.15,
-                    "total": 60.00,
-                    "metodo_pago": "Yape / Plin",
-                    "estado": "pagado",
-                    "creado_en": "2026-10-20 10:15:00",
-                    "es_demostracion": True,
-                },
-                {
-                    "id": 902,
-                    "numero_boleta": "B001-DEMO02",
-                    "cliente_nombre": "Jorge Ramírez",
-                    "cliente_documento": "45896321",
-                    "servicio_categoria": "Vacunación",
-                    "concepto": "Vacuna séxtuple canina + Refuerzo anual",
-                    "subtotal": 63.56,
-                    "igv": 11.44,
-                    "total": 75.00,
-                    "metodo_pago": "Tarjeta Visa / Mastercard",
-                    "estado": "pagado",
-                    "creado_en": "2026-10-22 16:40:00",
-                    "es_demostracion": True,
-                },
-                {
-                    "id": 903,
-                    "numero_boleta": "B001-DEMO03",
-                    "cliente_nombre": "María Vargas",
-                    "cliente_documento": "10457896",
-                    "servicio_categoria": "Farmacia",
-                    "concepto": "Antipulgas Bravecto Chewable 10-20kg",
-                    "subtotal": 122.88,
-                    "igv": 22.12,
-                    "total": 145.00,
-                    "metodo_pago": "Transferencia Bancaria",
-                    "estado": "pagado",
-                    "creado_en": "2026-10-24 11:20:00",
-                    "es_demostracion": True,
-                },
-                {
-                    "id": 904,
-                    "numero_boleta": "B001-DEMO04",
-                    "cliente_nombre": "Carlos Quispe",
-                    "cliente_documento": "71239845",
-                    "servicio_categoria": "Desparasitación",
-                    "concepto": "Desparasitación interna y externa felina",
-                    "subtotal": 38.14,
-                    "igv": 6.86,
-                    "total": 45.00,
-                    "metodo_pago": "Yape / Plin",
-                    "estado": "pagado",
-                    "creado_en": "2026-10-25 15:10:00",
-                    "es_demostracion": True,
-                },
-                {
-                    "id": 905,
-                    "numero_boleta": "B001-DEMO05",
-                    "cliente_nombre": "Ana Paredes",
-                    "cliente_documento": "42987612",
-                    "servicio_categoria": "Nutrición",
-                    "concepto": "Alimento Clínico Renal Canine 2kg",
-                    "subtotal": 75.85,
-                    "igv": 13.65,
-                    "total": 89.50,
-                    "metodo_pago": "Tarjeta Visa / Mastercard",
-                    "estado": "pagado",
-                    "creado_en": "2026-10-26 18:05:00",
-                    "es_demostracion": True,
-                },
-            ]
+            page_param = params.get("page")
+            size_param = params.get("page_size")
+            paginacion_ventas: Optional[Dict[str, Any]] = None
+            if (page_param is not None or size_param is not None) and hasattr(
+                self.db, "listar_ventas_paginadas"
+            ):
+                pag = self.db.listar_ventas_paginadas(
+                    page=int(page_param or 1), page_size=int(size_param or 25)
+                )
+                ventas = pag["items"]
+                paginacion_ventas = {
+                    "page": pag["page"],
+                    "page_size": pag["page_size"],
+                    "total": pag["total"],
+                    "total_pages": pag["total_pages"],
+                }
+            else:
+                ventas = self.db.listar_ventas()
+
+            resumen_sql = (
+                self.db.obtener_resumen_crm()
+                if hasattr(self.db, "obtener_resumen_crm")
+                else None
+            )
+            ingresos_totales = (
+                resumen_sql["ingresos_totales"]
+                if resumen_sql
+                else round(sum(float(v["total"]) for v in ventas), 2)
+            )
+            total_ventas_reales = (
+                resumen_sql["total_ventas"] if resumen_sql else len(ventas)
+            )
+            incluir_demo_default = os.getenv("ENABLE_DEMO_DATA", "0").strip() == "1"
+            incluir_demo = bool(params.get("incluir_demo", incluir_demo_default))
+            ventas_referencia_demo = (
+                [
+                    {
+                        "id": 901,
+                        "numero_boleta": "B001-DEMO01",
+                        "cliente_nombre": "Lucía Fernández",
+                        "cliente_documento": "74859632",
+                        "servicio_categoria": "Consulta general",
+                        "concepto": "Consulta general + Control de peso (Luna)",
+                        "subtotal": 50.85,
+                        "igv": 9.15,
+                        "total": 60.00,
+                        "metodo_pago": "Yape / Plin",
+                        "estado": "pagado",
+                        "creado_en": "2026-10-20 10:15:00",
+                        "es_demostracion": True,
+                    },
+                    {
+                        "id": 902,
+                        "numero_boleta": "B001-DEMO02",
+                        "cliente_nombre": "Jorge Ramírez",
+                        "cliente_documento": "45896321",
+                        "servicio_categoria": "Vacunación",
+                        "concepto": "Vacuna séxtuple canina + Refuerzo anual",
+                        "subtotal": 63.56,
+                        "igv": 11.44,
+                        "total": 75.00,
+                        "metodo_pago": "Tarjeta Visa / Mastercard",
+                        "estado": "pagado",
+                        "creado_en": "2026-10-22 16:40:00",
+                        "es_demostracion": True,
+                    },
+                    {
+                        "id": 903,
+                        "numero_boleta": "B001-DEMO03",
+                        "cliente_nombre": "María Vargas",
+                        "cliente_documento": "10457896",
+                        "servicio_categoria": "Farmacia",
+                        "concepto": "Antipulgas Bravecto Chewable 10-20kg",
+                        "subtotal": 122.88,
+                        "igv": 22.12,
+                        "total": 145.00,
+                        "metodo_pago": "Transferencia Bancaria",
+                        "estado": "pagado",
+                        "creado_en": "2026-10-24 11:20:00",
+                        "es_demostracion": True,
+                    },
+                    {
+                        "id": 904,
+                        "numero_boleta": "B001-DEMO04",
+                        "cliente_nombre": "Carlos Quispe",
+                        "cliente_documento": "71239845",
+                        "servicio_categoria": "Desparasitación",
+                        "concepto": "Desparasitación interna y externa felina",
+                        "subtotal": 38.14,
+                        "igv": 6.86,
+                        "total": 45.00,
+                        "metodo_pago": "Yape / Plin",
+                        "estado": "pagado",
+                        "creado_en": "2026-10-25 15:10:00",
+                        "es_demostracion": True,
+                    },
+                    {
+                        "id": 905,
+                        "numero_boleta": "B001-DEMO05",
+                        "cliente_nombre": "Ana Paredes",
+                        "cliente_documento": "42987612",
+                        "servicio_categoria": "Nutrición",
+                        "concepto": "Alimento Clínico Renal Canine 2kg",
+                        "subtotal": 75.85,
+                        "igv": 13.65,
+                        "total": 89.50,
+                        "metodo_pago": "Tarjeta Visa / Mastercard",
+                        "estado": "pagado",
+                        "creado_en": "2026-10-26 18:05:00",
+                        "es_demostracion": True,
+                    },
+                ]
+                if incluir_demo
+                else []
+            )
             ventas_mostradas = ventas if ventas else ventas_referencia_demo
-            ingresos_mostrados = round(sum(float(v["total"]) for v in ventas_mostradas), 2)
-            total_tx = len(ventas_mostradas)
+            ingresos_mostrados = (
+                ingresos_totales
+                if ventas
+                else round(sum(float(v["total"]) for v in ventas_mostradas), 2)
+            )
+            total_tx = total_ventas_reales if ventas else len(ventas_mostradas)
             ticket_promedio = round(ingresos_mostrados / total_tx, 2) if total_tx > 0 else 0.0
             personal = self.db.listar_personal() if hasattr(self.db, "listar_personal") else []
-            return {
+            hoy = date.today()
+            offsets_visitas = [(6, 34, 8), (5, 48, 12), (4, 41, 9), (3, 62, 16), (2, 55, 14), (1, 71, 19)]
+            trafico_periodo = (
+                [
+                    {
+                        "fecha": (hoy - timedelta(days=offset)).isoformat(),
+                        "visitas": visitas,
+                        "consultas_citas": citas_demo,
+                        "es_demostracion": True,
+                    }
+                    for offset, visitas, citas_demo in offsets_visitas
+                ]
+                if incluir_demo
+                else []
+            )
+            trafico_periodo.append(
+                {
+                    "fecha": hoy.isoformat(),
+                    "visitas": len(citas) + total_ventas_reales,
+                    "consultas_citas": len(citas),
+                    "es_demostracion": False,
+                }
+            )
+            respuesta_crm: Dict[str, Any] = {
                 "resumen": {
-                    "total_usuarios": len(usuarios),
-                    "usuarios_activos": sum(1 for u in usuarios if u["estado"] == "activo"),
+                    "total_usuarios": resumen_sql["total_usuarios"] if resumen_sql else len(usuarios),
+                    "usuarios_activos": resumen_sql["usuarios_activos"] if resumen_sql else sum(1 for u in usuarios if u["estado"] == "activo"),
                     "total_personal": len(personal),
-                    "total_pacientes": len(mascotas),
-                    "total_citas": len(citas),
-                    "citas_pendientes": sum(1 for c in citas if c["estado"] == "pendiente"),
-                    "total_ventas": len(ventas),
+                    "total_pacientes": resumen_sql["total_pacientes"] if resumen_sql else len(mascotas),
+                    "total_citas": resumen_sql["total_citas"] if resumen_sql else len(citas),
+                    "citas_pendientes": resumen_sql["citas_pendientes"] if resumen_sql else sum(1 for c in citas if c["estado"] == "pendiente"),
+                    "total_ventas": total_ventas_reales,
                     "ingresos_totales": ingresos_totales,
-                    "stock_total_unidades": sum(int(p["stock"]) for p in productos),
+                    "stock_total_unidades": resumen_sql["stock_total_unidades"] if resumen_sql else sum(int(p["stock"]) for p in productos),
                 },
                 "balance_financiero": {
                     "ingresos_totales": ingresos_mostrados,
                     "ingresos_reales": ingresos_totales,
                     "total_transacciones": total_tx,
-                    "ventas_reales": len(ventas),
+                    "ventas_reales": total_ventas_reales,
                     "ticket_promedio": ticket_promedio,
-                    "modo_demostracion": len(ventas) == 0,
+                    "modo_demostracion": total_ventas_reales == 0 and bool(ventas_referencia_demo),
                 },
                 "ultimas_ventas": ventas_mostradas,
                 "usuarios": usuarios,
@@ -235,16 +319,11 @@ class RealClinicController(ISecureController):
                 "ventas_referencia_demo": ventas_referencia_demo,
                 "citas": citas,
                 "productos": productos,
-                "trafico_periodo": [
-                    {"fecha": "2026-10-21", "visitas": 34, "consultas_citas": 8, "es_demostracion": True},
-                    {"fecha": "2026-10-22", "visitas": 48, "consultas_citas": 12, "es_demostracion": True},
-                    {"fecha": "2026-10-23", "visitas": 41, "consultas_citas": 9, "es_demostracion": True},
-                    {"fecha": "2026-10-24", "visitas": 62, "consultas_citas": 16, "es_demostracion": True},
-                    {"fecha": "2026-10-25", "visitas": 55, "consultas_citas": 14, "es_demostracion": True},
-                    {"fecha": "2026-10-26", "visitas": 71, "consultas_citas": 19, "es_demostracion": True},
-                    {"fecha": "2026-10-27", "visitas": 28 + len(citas) + len(ventas), "consultas_citas": len(citas), "es_demostracion": False},
-                ],
+                "trafico_periodo": trafico_periodo,
             }
+            if paginacion_ventas is not None:
+                respuesta_crm["paginacion_ventas"] = paginacion_ventas
+            return respuesta_crm
 
         if accion == "listar_personal_admin":
             personal = self.db.listar_personal() if hasattr(self.db, "listar_personal") else []
@@ -255,6 +334,12 @@ class RealClinicController(ISecureController):
             nuevo_estado = str(params["estado"]).lower()
             if nuevo_estado not in ("activo", "inactivo"):
                 raise ValueError("El estado debe ser 'activo' o 'inactivo'.")
+            if (
+                usuario_actual
+                and int(usuario_actual.get("id", -1)) == usuario_id
+                and nuevo_estado == "inactivo"
+            ):
+                raise ValueError("No puedes suspender tu propia cuenta de administrador activa.")
             actualizado = self.db.actualizar_estado_usuario(usuario_id, nuevo_estado)
             if not actualizado:
                 raise LookupError(f"Usuario con ID {usuario_id} no encontrado.")
@@ -268,10 +353,18 @@ class RealClinicController(ISecureController):
             cmvp = str(params.get("cmvp") or "").strip()
             especialidad = str(params.get("especialidad") or "Medicina General").strip() or "Medicina General"
 
+            nombres_param = str(params.get("nombres") or "").strip()
+            apellidos_param = str(params.get("apellidos") or "").strip()
+            nombre_param = str(params.get("nombre") or "").strip()
+            if not nombre_param and (nombres_param or apellidos_param):
+                nombre_param = f"{nombres_param} {apellidos_param}".strip()
+
             if hasattr(self.db, "crear_personal"):
                 nuevo_usuario = self.db.crear_personal(
                     {
-                        "nombre": str(params.get("nombre", "")).strip(),
+                        "nombre": nombre_param,
+                        "nombres": nombres_param,
+                        "apellidos": apellidos_param,
                         "email": email,
                         "password_hash": params.get("password"),
                         "rol": rol,
@@ -295,7 +388,9 @@ class RealClinicController(ISecureController):
                         )
                 nuevo_usuario = self.db.crear_usuario(
                     {
-                        "nombre": str(params.get("nombre", "")).strip(),
+                        "nombre": nombre_param,
+                        "nombres": nombres_param,
+                        "apellidos": apellidos_param,
                         "email": email,
                         "password_hash": params.get("password"),
                         "rol": rol,
@@ -308,7 +403,9 @@ class RealClinicController(ISecureController):
                         {
                             "usuario_id": nuevo_usuario.get("id"),
                             "cmvp": cmvp,
-                            "nombre": str(params.get("nombre", "")).strip(),
+                            "nombre": nombre_param,
+                            "nombres": nombres_param,
+                            "apellidos": apellidos_param,
                             "telefono": str(params.get("telefono", "")).strip(),
                             "email": email,
                             "especialidad": especialidad,

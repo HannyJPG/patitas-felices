@@ -62,7 +62,7 @@ import "../../styles/admin-app.css";
             </div>
           </div>
           <div class="admin-user-pill">
-            <span class="badge-role" id="admin-usuario-activo">Dra. Melany Díaz · Administración</span>
+            <span class="badge-role" id="admin-usuario-activo">Verificando sesión...</span>
             <button id="btn-recargar-panel" type="button" class="btn-admin btn-admin-outline">
               Actualizar datos
             </button>
@@ -83,8 +83,8 @@ import "../../styles/admin-app.css";
               <div class="field-block">
                 <label for="filtro-origen-datos">Conjunto de datos</label>
                 <select class="admin-select" id="filtro-origen-datos">
-                  <option value="todos" selected>Reales + Serie histórica de demostración</option>
-                  <option value="reales">Solo registros guardados en base de datos</option>
+                  <option value="reales" selected>Solo registros guardados en base de datos</option>
+                  <option value="todos">Reales + Serie histórica de demostración</option>
                   <option value="demo">Solo registros de demostración</option>
                 </select>
               </div>
@@ -267,10 +267,14 @@ import "../../styles/admin-app.css";
                 <div id="alerta-alta-success" style="display: none; color: #15803d; background: #dcfce7; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.82rem; margin-bottom: 0.75rem;" role="alert"></div>
 
                 <form id="form-alta-personal" novalidate>
-                  <div class="filter-group mb-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                  <div class="filter-group mb-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                     <div class="field-block">
-                      <label for="alta-nombre">Nombre y Apellidos *</label>
-                      <input type="text" class="admin-input" id="alta-nombre" required placeholder="Ej. Dr. Mario Paredes" />
+                      <label for="alta-nombres">Nombres *</label>
+                      <input type="text" class="admin-input" id="alta-nombres" required placeholder="Ej. Mario" />
+                    </div>
+                    <div class="field-block">
+                      <label for="alta-apellidos">Apellidos *</label>
+                      <input type="text" class="admin-input" id="alta-apellidos" required placeholder="Ej. Ruiz Paredes" />
                     </div>
                     <div class="field-block">
                       <label for="alta-rol">Rol asignado *</label>
@@ -298,12 +302,12 @@ import "../../styles/admin-app.css";
                       <input type="tel" class="admin-input" id="alta-telefono" placeholder="987654321" />
                     </div>
                     <div class="field-block" id="campo-alta-cmvp">
-                      <label for="alta-cmvp">N° Colegiatura (CMVP)</label>
-                      <input type="text" class="admin-input" id="alta-cmvp" placeholder="CMVP-15420" />
+                      <label for="alta-cmvp">N° Colegiatura (CMVP) *</label>
+                      <input type="text" class="admin-input" id="alta-cmvp" required placeholder="CMVP-15420" />
                     </div>
                     <div class="field-block" id="campo-alta-especialidad">
-                      <label for="alta-especialidad">Especialidad</label>
-                      <input type="text" class="admin-input" id="alta-especialidad" placeholder="Medicina General" />
+                      <label for="alta-especialidad">Especialidad *</label>
+                      <input type="text" class="admin-input" id="alta-especialidad" required value="Medicina General" placeholder="Medicina General" />
                     </div>
                   </div>
 

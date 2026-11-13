@@ -1,4 +1,4 @@
-import { peticionApi, obtenerSesion, guardarSesion } from "./api-client.js";
+import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion } from "./api-client.js";
 
 (() => {
     const contenedorCitas = document.getElementById("contenedor-citas-doctor");
@@ -23,19 +23,27 @@ import { peticionApi, obtenerSesion, guardarSesion } from "./api-client.js";
             window.location.href = "/?abrir_login=1";
             throw new Error("Debes iniciar sesión como Médico Veterinario o Administrador.");
         }
-        const verificada = await peticionApi("/api/auth/sesion");
-        const rolReal = (verificada?.usuario?.rol || "").toLowerCase();
-        const sesionSincronizada = {
-            ...sesion,
-            usuario: verificada.usuario,
-            rbac: verificada.rbac || sesion.rbac,
-        };
-        guardarSesion(sesionSincronizada);
-        if (rolReal !== "doctor" && rolReal !== "admin") {
-            window.location.href = "/perfil";
-            throw new Error("Acceso reservado para personal médico veterinario.");
+        try {
+            const verificada = await peticionApi("/api/auth/sesion");
+            const rolReal = (verificada?.usuario?.rol || "").toLowerCase();
+            const sesionSincronizada = {
+                ...sesion,
+                usuario: verificada.usuario,
+                rbac: verificada.rbac || sesion.rbac,
+            };
+            guardarSesion(sesionSincronizada);
+            if (rolReal !== "doctor" && rolReal !== "admin") {
+                window.location.href = "/perfil";
+                throw new Error("Acceso reservado para personal médico veterinario.");
+            }
+            return sesionSincronizada;
+        } catch (err) {
+            if (err?.status === 401 || err?.status === 403) {
+                cerrarSesion();
+                window.location.href = "/?abrir_login=1";
+            }
+            throw err;
         }
-        return sesionSincronizada;
     }
 
     function renderizarCitas(citas) {
@@ -202,6 +210,13 @@ import { peticionApi, obtenerSesion, guardarSesion } from "./api-client.js";
             renderizarMascotas(data.mascotas || []);
         } catch (error) {
             if (contadorCitas) contadorCitas.textContent = "Sin conexión";
+            if (contenedorCitas) {
+                contenedorCitas.textContent = "";
+                const pErr = document.createElement("p");
+                pErr.className = "small text-danger mb-0";
+                pErr.textContent = error.message || "No se pudo consultar la agenda médica en SQL Server.";
+                contenedorCitas.append(pErr);
+            }
         }
     }
 

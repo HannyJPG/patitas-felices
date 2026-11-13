@@ -9,7 +9,7 @@
     "api": "python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload",
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
-    "test:py": "python -m pytest backend/tests/test_patterns_and_api.py -v"
+    "test:py": "python -m pytest backend/tests -v"
   },
   "dependencies": {
     "astro": "7.4.2"

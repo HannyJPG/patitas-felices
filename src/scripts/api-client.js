@@ -68,14 +68,33 @@ export async function peticionApi(ruta, opciones = {}) {
         const cuerpo = esJson ? await respuesta.json() : null;
 
         if (!respuesta.ok) {
-            const mensaje = cuerpo?.detail || `Error HTTP ${respuesta.status}`;
+            let mensaje = `Error HTTP ${respuesta.status}`;
+            if (typeof cuerpo?.detail === "string") {
+                mensaje = cuerpo.detail;
+            } else if (Array.isArray(cuerpo?.detail)) {
+                mensaje = cuerpo.detail
+                    .map(d => (typeof d === "string" ? d : (d?.msg || d?.message || JSON.stringify(d))))
+                    .join(", ");
+            } else if (cuerpo?.detail && typeof cuerpo.detail === "object") {
+                mensaje = cuerpo.detail.msg || cuerpo.detail.message || cuerpo.detail.error || JSON.stringify(cuerpo.detail);
+            } else if (typeof cuerpo?.error === "string") {
+                mensaje = cuerpo.error;
+            } else if (typeof cuerpo?.message === "string") {
+                mensaje = cuerpo.message;
+            } else if (typeof cuerpo?.mensaje === "string") {
+                mensaje = cuerpo.mensaje;
+            }
+            if (typeof mensaje !== "string" || mensaje === "[object Object]") {
+                mensaje = `Error HTTP ${respuesta.status} en la operación.`;
+            }
             const error = new Error(mensaje);
             error.status = respuesta.status;
+            error.detalles = cuerpo?.detail;
             throw error;
         }
         return cuerpo;
     } catch (err) {
-        if (err.name === "TypeError" && err.message.includes("fetch")) {
+        if (err instanceof TypeError) {
             throw new Error(`No se pudo conectar con el Backend FastAPI en ${API_BASE_URL}. Asegúrate de tenerlo encendido (puerto 8000).`);
         }
         throw err;
@@ -97,4 +116,28 @@ export function descargarPdfDesdeBase64(pdfBase64, nombreArchivo = "Boleta_Patit
     enlace.click();
     enlace.remove();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+export async function abrirPdfBoletaAutenticada(ventaId) {
+    const sesion = obtenerSesion();
+    if (!sesion?.token) {
+        throw new Error("Debes iniciar sesión para abrir esta boleta PDF.");
+    }
+    const respuesta = await fetch(`${API_BASE_URL}/api/tienda/boleta/${encodeURIComponent(ventaId)}/pdf`, {
+        headers: { Authorization: `Bearer ${sesion.token}` },
+    });
+    if (!respuesta.ok) {
+        let mensaje = `No se pudo abrir la boleta (HTTP ${respuesta.status}).`;
+        try {
+            const errJson = await respuesta.json();
+            if (typeof errJson?.detail === "string") mensaje = errJson.detail;
+        } catch {
+            /* Ignorar si la respuesta no es JSON */
+        }
+        throw new Error(mensaje);
+    }
+    const blob = await respuesta.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
 }

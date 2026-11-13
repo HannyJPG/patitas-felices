@@ -275,7 +275,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Si el usuario intentaba agendar una cita antes del login
                 if (sessionStorage.getItem("patitas_abrir_modal_cita") === "true") {
-                    const servicioPendiente = sessionStorage.getItem("patitas_servicio_pendiente");
+                    const rawServicio = sessionStorage.getItem("patitas_servicio_pendiente");
+                    const servicioPendiente = (typeof rawServicio === "string" && !rawServicio.startsWith("[object") && rawServicio !== "null" && rawServicio !== "undefined") ? rawServicio : null;
                     sessionStorage.removeItem("patitas_abrir_modal_cita");
                     sessionStorage.removeItem("patitas_servicio_pendiente");
                     setTimeout(() => {
@@ -383,7 +384,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Si el usuario intentaba agendar una cita antes de registrarse
                 if (sessionStorage.getItem("patitas_abrir_modal_cita") === "true") {
-                    const servicioPendiente = sessionStorage.getItem("patitas_servicio_pendiente");
+                    const rawServicio = sessionStorage.getItem("patitas_servicio_pendiente");
+                    const servicioPendiente = (typeof rawServicio === "string" && !rawServicio.startsWith("[object") && rawServicio !== "null" && rawServicio !== "undefined") ? rawServicio : null;
                     sessionStorage.removeItem("patitas_abrir_modal_cita");
                     sessionStorage.removeItem("patitas_servicio_pendiente");
                     setTimeout(() => {

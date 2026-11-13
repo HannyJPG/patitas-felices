@@ -13,10 +13,13 @@ Por dentro, la fachada coordina 3 subsistemas complejos:
 
 import base64
 from datetime import datetime
-from typing import Any, Dict, List
+import logging
+from typing import Any, Dict, List, Optional
 import unicodedata
 
 from .adapter import IDatabaseAdapter, IWhatsAppNotificationAdapter, WhatsAppAdapter
+
+logger = logging.getLogger("patitas_felices.facade")
 
 
 class ErrorProcesoVenta(ValueError):
@@ -74,11 +77,30 @@ class SubsistemaInventario:
         return items_validados
 
     def descontar_stock(self, items_validados: List[Dict[str, Any]]) -> None:
+        descontados: List[Dict[str, Any]] = []
         for item in items_validados:
-            exito = self.db.descontar_stock_producto(item["producto_id"], item["cantidad"])
+            try:
+                exito = self.db.descontar_stock_producto(item["producto_id"], item["cantidad"])
+            except Exception:
+                self.restaurar_stock(descontados)
+                raise
             if not exito:
+                self.restaurar_stock(descontados)
                 raise ErrorProcesoVenta(
                     f"No se pudo descontar el stock del producto '{item['producto_nombre']}'."
+                )
+            descontados.append(item)
+
+    def restaurar_stock(self, items_validados: List[Dict[str, Any]]) -> None:
+        """Compensa el stock descontado si ocurre un fallo antes de cerrar la venta."""
+        for item in reversed(items_validados):
+            try:
+                self.db.descontar_stock_producto(item["producto_id"], -int(item["cantidad"]))
+            except Exception:
+                logger.exception(
+                    "No se pudo compensar stock del producto_id=%s (cantidad=%s).",
+                    item.get("producto_id"),
+                    item.get("cantidad"),
                 )
 
 
@@ -110,34 +132,44 @@ class SubsistemaCRMTransacciones:
 
     def registrar_transaccion(
         self,
-        usuario_id: int,
+        usuario_id: Optional[int],
         cliente_nombre: str,
         cliente_documento: str,
         metodo_pago: str,
         items_validados: List[Dict[str, Any]],
+        descontar_stock: bool = False,
     ) -> Dict[str, Any]:
         totales = self.calcular_totales_boleta(items_validados)
-        ventas_existentes = self.db.listar_ventas()
-        correlativos = []
-        for venta in ventas_existentes:
-            serie, separator, numero = str(venta.get("numero_boleta", "")).partition("-")
-            if separator and serie == "B001" and numero.isdigit():
-                correlativos.append(int(numero))
-        correlativo = max(correlativos, default=0) + 1
-        numero_boleta = f"B001-{correlativo:06d}"
+        for intento in range(3):
+            if hasattr(self.db, "obtener_siguiente_numero_boleta"):
+                correlativo = int(self.db.obtener_siguiente_numero_boleta("B001")) + intento
+            else:
+                ventas_existentes = self.db.listar_ventas()
+                correlativos = []
+                for venta in ventas_existentes:
+                    serie, separator, numero = str(venta.get("numero_boleta", "")).partition("-")
+                    if separator and serie == "B001" and numero.isdigit():
+                        correlativos.append(int(numero))
+                correlativo = max(correlativos, default=0) + 1 + intento
+            numero_boleta = f"B001-{correlativo:06d}"
 
-        cabecera = {
-            "numero_boleta": numero_boleta,
-            "usuario_id": usuario_id,
-            "cliente_nombre": cliente_nombre.strip() or "Cliente Patitas Felices",
-            "cliente_documento": cliente_documento.strip() or "00000000",
-            "subtotal": totales["subtotal"],
-            "igv": totales["igv"],
-            "total": totales["total"],
-            "metodo_pago": metodo_pago,
-            "estado": "pagado",
-        }
-        return self.db.registrar_venta_y_detalles(cabecera, items_validados)
+            cabecera = {
+                "numero_boleta": numero_boleta,
+                "usuario_id": usuario_id,
+                "cliente_nombre": cliente_nombre.strip() or "Cliente Patitas Felices",
+                "cliente_documento": cliente_documento.strip() or "00000000",
+                "subtotal": totales["subtotal"],
+                "igv": totales["igv"],
+                "total": totales["total"],
+                "metodo_pago": metodo_pago,
+                "estado": "pagado",
+                "descontar_stock": descontar_stock,
+            }
+            try:
+                return self.db.registrar_venta_y_detalles(cabecera, items_validados)
+            except ValueError:
+                if intento == 2:
+                    raise
 
 
 # =============================================================================
@@ -270,24 +302,32 @@ class TiendaFacade:
 
     def procesar_venta(
         self,
-        usuario_id: int,
+        usuario_id: Optional[int],
         cliente_nombre: str,
         cliente_documento: str,
         items: List[Dict[str, Any]],
         metodo_pago: str = "Tarjeta / Yape",
     ) -> Dict[str, Any]:
-        # 1. Subsistema de Inventario: validar disponibilidad y descontar stock
+        # 1. Subsistema de Inventario: validar disponibilidad y preparar ítems
         items_validados = self.inventario.validar_y_preparar_items(items)
-        self.inventario.descontar_stock(items_validados)
+        soporta_tx = bool(getattr(self.inventario.db, "soporta_stock_en_tx", False))
+        if not soporta_tx:
+            self.inventario.descontar_stock(items_validados)
 
-        # 2. Subsistema CRM: calcular subtotal/IGV/total y guardar venta + detalles
-        venta_registrada = self.crm.registrar_transaccion(
-            usuario_id=usuario_id,
-            cliente_nombre=cliente_nombre,
-            cliente_documento=cliente_documento,
-            metodo_pago=metodo_pago,
-            items_validados=items_validados,
-        )
+        # 2. Subsistema CRM: calcular subtotal/IGV/total y guardar venta + detalles (+ stock si es atómico)
+        try:
+            venta_registrada = self.crm.registrar_transaccion(
+                usuario_id=usuario_id,
+                cliente_nombre=cliente_nombre,
+                cliente_documento=cliente_documento,
+                metodo_pago=metodo_pago,
+                items_validados=items_validados,
+                descontar_stock=soporta_tx,
+            )
+        except Exception:
+            if not soporta_tx:
+                self.inventario.restaurar_stock(items_validados)
+            raise
 
         # 3. Subsistema Generador PDF: crear la boleta PDF en memoria
         pdf_bytes = self.pdf_generator.construir_pdf_en_memoria(venta_registrada)

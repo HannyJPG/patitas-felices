@@ -6,9 +6,14 @@ from __future__ import annotations
 
 import ctypes
 import json
+import logging
 import os
+import queue
+import threading
 from pathlib import Path
 from typing import Any, Callable, Optional
+
+logger = logging.getLogger("patitas_felices.sqlserver")
 
 _SCHEMA_SQL_FILE = Path(__file__).resolve().parents[2] / "database" / "schema_sqlserver.sql"
 
@@ -42,6 +47,11 @@ class ErrorRegistroDuplicadoSQLServer(ValueError):
 
 class ErrorConsultaSQLServer(RuntimeError):
     """Excepción lanzada cuando ocurre un error de ejecución en una sentencia T-SQL."""
+
+    def __init__(self, message: str, native_err: int = 0, sqlstate: str = "") -> None:
+        super().__init__(message)
+        self.native_err = native_err
+        self.sqlstate = sqlstate
 
 
 def sql_lit(val: Any) -> str:
@@ -108,20 +118,25 @@ def _extract_odbc_diag(odbc: Any, handle_type: int, handle: Any) -> tuple[str, i
 
 
 class SQLServerConnection:
-    """Conexión nativa a Microsoft SQL Server mediante el administrador ODBC de Windows (odbc32.dll)."""
+    """Conexión nativa con pool thread-safe a Microsoft SQL Server mediante ODBC de Windows (odbc32.dll)."""
 
     def __init__(
         self,
         server: str = "localhost",
         database: str = "PatitasFelices_DB",
         driver: Optional[str] = None,
+        pool_size: Optional[int] = None,
     ) -> None:
         self.server = server.strip() or "localhost"
         self.database = database.strip() or "PatitasFelices_DB"
         self.driver = (driver or os.getenv("SQLSERVER_DRIVER", "ODBC Driver 17 for SQL Server")).strip()
-        self._odbc: Any = None
-        self._henv: Any = None
-        self._hdbc: Any = None
+        raw_pool = pool_size if pool_size is not None else int(os.getenv("SQLSERVER_POOL_SIZE", "8"))
+        self.pool_size = max(1, int(raw_pool))
+        self._lock = threading.RLock()
+        self._pool_lock = threading.Lock()
+        self._pool: queue.LifoQueue[tuple[Any, Any, Any]] = queue.LifoQueue(maxsize=self.pool_size)
+        self._active_handles = 0
+        self._epoch = 0
 
     def _build_conn_str(self, target_db: str) -> str:
         sql_user = os.getenv("SQLSERVER_USER", "").strip()
@@ -129,11 +144,11 @@ class SQLServerConnection:
         if sql_user and sql_pass:
             return (
                 f"Driver={{{self.driver}}};Server={self.server};Database={target_db};"
-                f"UID={sql_user};PWD={sql_pass};"
+                f"UID={sql_user};PWD={sql_pass};TrustServerCertificate=yes;"
             )
         return (
             f"Driver={{{self.driver}}};Server={self.server};Database={target_db};"
-            "Trusted_Connection=yes;"
+            "Trusted_Connection=yes;TrustServerCertificate=yes;"
         )
 
     def _connect(self, db_override: Optional[str] = None) -> tuple[Any, Any, Any]:
@@ -162,34 +177,99 @@ class SQLServerConnection:
             hdbc, None, conn_str, len(conn_str), out_buf, 1024, ctypes.byref(out_len), 0
         )
         if rc not in (0, 1):
+            sqlstate, native_err, _ = _extract_odbc_diag(odbc, 2, hdbc)
             odbc.SQLFreeHandle(2, hdbc)
             odbc.SQLFreeHandle(1, henv)
             raise ErrorConexionSQLServer(
-                "No se pudo conectar con Microsoft SQL Server. Verifique que el servicio de base de datos esté activo y disponible."
+                "No se pudo conectar con Microsoft SQL Server. Verifique que el servicio de base de datos esté activo y disponible "
+                f"(SQLSTATE {sqlstate or 'N/A'}, código {native_err})."
             )
         return odbc, henv, hdbc
 
-    def _ensure_open(self) -> tuple[Any, Any]:
-        if self._odbc is None or self._hdbc is None:
-            self._odbc, self._henv, self._hdbc = self._connect()
-        return self._odbc, self._hdbc
+    @staticmethod
+    def _close_handle(handle: tuple[Any, Any, Any]) -> None:
+        odbc, henv, hdbc = handle
+        try:
+            odbc.SQLDisconnect(hdbc)
+        except Exception:
+            logger.debug("Error al desconectar handle ODBC.", exc_info=True)
+        try:
+            odbc.SQLFreeHandle(2, hdbc)
+        except Exception:
+            logger.debug("Error al liberar HDBC.", exc_info=True)
+        try:
+            odbc.SQLFreeHandle(1, henv)
+        except Exception:
+            logger.debug("Error al liberar HENV.", exc_info=True)
+
+    def _acquire_handle(self) -> tuple[tuple[Any, Any, Any], int]:
+        while True:
+            try:
+                handle = self._pool.get_nowait()
+                with self._pool_lock:
+                    return handle, self._epoch
+            except queue.Empty:
+                pass
+
+            crear_nueva = False
+            with self._pool_lock:
+                epoch_actual = self._epoch
+                if self._active_handles < self.pool_size:
+                    self._active_handles += 1
+                    crear_nueva = True
+
+            if crear_nueva:
+                try:
+                    handle = self._connect()
+                    return handle, epoch_actual
+                except Exception:
+                    with self._pool_lock:
+                        self._active_handles = max(0, self._active_handles - 1)
+                    raise
+
+            try:
+                handle = self._pool.get(timeout=30.0)
+                with self._pool_lock:
+                    return handle, self._epoch
+            except queue.Empty as exc:
+                raise ErrorConexionSQLServer(
+                    "Tiempo de espera agotado esperando una conexión libre del pool de SQL Server."
+                ) from exc
+
+    def _release_handle(
+        self, handle: tuple[Any, Any, Any], epoch: int, broken: bool = False
+    ) -> None:
+        devolver = False
+        if not broken:
+            with self._pool_lock:
+                if epoch == self._epoch and not self._pool.full():
+                    try:
+                        self._pool.put_nowait(handle)
+                        devolver = True
+                    except queue.Full:
+                        devolver = False
+        if not devolver:
+            self._close_handle(handle)
+            with self._pool_lock:
+                if epoch == self._epoch:
+                    self._active_handles = max(0, self._active_handles - 1)
 
     def close(self) -> None:
-        if self._odbc and self._hdbc:
-            try:
-                self._odbc.SQLDisconnect(self._hdbc)
-                self._odbc.SQLFreeHandle(2, self._hdbc)
-                self._odbc.SQLFreeHandle(1, self._henv)
-            except Exception:
-                pass
-        self._odbc = None
-        self._henv = None
-        self._hdbc = None
+        drenados: list[tuple[Any, Any, Any]] = []
+        with self._pool_lock:
+            self._epoch += 1
+            self._active_handles = 0
+            while True:
+                try:
+                    drenados.append(self._pool.get_nowait())
+                except queue.Empty:
+                    break
+        for handle in drenados:
+            self._close_handle(handle)
 
-    def _handle_stmt_error(self, odbc: Any, hstmt: Any, raise_on_error: bool) -> None:
-        sqlstate, native_err, _ = _extract_odbc_diag(odbc, 3, hstmt)
+    def _handle_stmt_error(self, odbc: Any, hstmt: Any, raise_on_error: bool) -> bool:
+        sqlstate, native_err, msg = _extract_odbc_diag(odbc, 3, hstmt)
         if sqlstate.startswith("08") or sqlstate in ("HYT00", "HYT01"):
-            self.close()
             raise ErrorConexionSQLServer(
                 "Se perdió la conexión con Microsoft SQL Server. Verifique que el servidor de base de datos esté en ejecución."
             )
@@ -199,9 +279,13 @@ class SQLServerConnection:
                     "Ya existe un registro con ese dato único (correo electrónico o documento) en SQL Server."
                 )
         if raise_on_error:
+            detalle = f": {msg.strip()}" if msg and msg.strip() else ""
             raise ErrorConsultaSQLServer(
-                f"Error de base de datos en SQL Server (SQLSTATE {sqlstate or 'N/A'}, código {native_err})."
+                f"Error de base de datos en SQL Server (SQLSTATE {sqlstate or 'N/A'}, código {native_err}){detalle}",
+                native_err=native_err,
+                sqlstate=sqlstate,
             )
+        return False
 
     def scalar(
         self,
@@ -214,10 +298,12 @@ class SQLServerConnection:
         full_sql = "SET NOCOUNT ON;\n" + stmt_sql
 
         for attempt in range(2):
-            odbc, hdbc = self._ensure_open()
+            handle, epoch = self._acquire_handle()
+            odbc, _, hdbc = handle
+            broken = False
             hstmt = ctypes.c_void_p()
             if odbc.SQLAllocHandle(3, hdbc, ctypes.byref(hstmt)) not in (0, 1):
-                self.close()
+                self._release_handle(handle, epoch, broken=True)
                 if attempt == 0:
                     continue
                 raise ErrorConexionSQLServer(
@@ -225,23 +311,45 @@ class SQLServerConnection:
                 )
             try:
                 rc = odbc.SQLExecDirectW(hstmt, full_sql, len(full_sql))
-                if rc not in (0, 1):
+                if rc not in (0, 1, 100):
                     sqlstate, _, _ = _extract_odbc_diag(odbc, 3, hstmt)
+                    if sqlstate.startswith("08"):
+                        broken = True
                     if attempt == 0 and sqlstate.startswith("08"):
-                        self.close()
                         continue
                     self._handle_stmt_error(odbc, hstmt, raise_on_error=raise_on_error)
                     return ""
                 chunks: list[str] = []
-                while odbc.SQLFetch(hstmt) in (0, 1):
-                    buf = ctypes.create_unicode_buffer(65536)
-                    ind = ctypes.c_ssize_t()
-                    rc_data = odbc.SQLGetData(hstmt, 1, -8, buf, 65536 * 2, ctypes.byref(ind))
-                    if rc_data in (0, 1) and ind.value > 0:
-                        chunks.append(buf.value)
+                while True:
+                    while odbc.SQLFetch(hstmt) in (0, 1):
+                        while True:
+                            buf = ctypes.create_unicode_buffer(65536)
+                            ind = ctypes.c_ssize_t()
+                            rc_data = odbc.SQLGetData(hstmt, 1, -8, buf, 65536 * 2, ctypes.byref(ind))
+                            if rc_data not in (0, 1) or ind.value in (-1, 0):
+                                break
+                            if buf.value:
+                                chunks.append(buf.value)
+                            if rc_data == 0:
+                                break
+                    if chunks:
+                        break
+                    rc_more = odbc.SQLMoreResults(hstmt)
+                    if rc_more == 100:
+                        break
+                    if rc_more not in (0, 1):
+                        sqlstate_more, _, _ = _extract_odbc_diag(odbc, 3, hstmt)
+                        if sqlstate_more.startswith("08"):
+                            broken = True
+                        self._handle_stmt_error(odbc, hstmt, raise_on_error=raise_on_error)
+                        return ""
                 return "".join(chunks)
+            except ErrorConexionSQLServer:
+                broken = True
+                raise
             finally:
                 odbc.SQLFreeHandle(3, hstmt)
+                self._release_handle(handle, epoch, broken=broken)
         return ""
 
     def execute(
@@ -255,10 +363,12 @@ class SQLServerConnection:
         full_sql = "SET NOCOUNT ON;\n" + stmt_sql
 
         for attempt in range(2):
-            odbc, hdbc = self._ensure_open()
+            handle, epoch = self._acquire_handle()
+            odbc, _, hdbc = handle
+            broken = False
             hstmt = ctypes.c_void_p()
             if odbc.SQLAllocHandle(3, hdbc, ctypes.byref(hstmt)) not in (0, 1):
-                self.close()
+                self._release_handle(handle, epoch, broken=True)
                 if attempt == 0:
                     continue
                 raise ErrorConexionSQLServer(
@@ -268,14 +378,29 @@ class SQLServerConnection:
                 rc = odbc.SQLExecDirectW(hstmt, full_sql, len(full_sql))
                 if rc not in (0, 1, 100):
                     sqlstate, _, _ = _extract_odbc_diag(odbc, 3, hstmt)
+                    if sqlstate.startswith("08"):
+                        broken = True
                     if attempt == 0 and sqlstate.startswith("08"):
-                        self.close()
                         continue
                     self._handle_stmt_error(odbc, hstmt, raise_on_error=raise_on_error)
                     return False
+                while True:
+                    rc_more = odbc.SQLMoreResults(hstmt)
+                    if rc_more == 100:
+                        break
+                    if rc_more not in (0, 1):
+                        sqlstate_more, _, _ = _extract_odbc_diag(odbc, 3, hstmt)
+                        if sqlstate_more.startswith("08"):
+                            broken = True
+                        self._handle_stmt_error(odbc, hstmt, raise_on_error=raise_on_error)
+                        return False
                 return True
+            except ErrorConexionSQLServer:
+                broken = True
+                raise
             finally:
                 odbc.SQLFreeHandle(3, hstmt)
+                self._release_handle(handle, epoch, broken=broken)
         return False
 
     def query_json(
@@ -284,7 +409,8 @@ class SQLServerConnection:
         params: Optional[dict[str, Any]] = None,
     ) -> list[dict[str, Any]]:
         """Ejecuta un SELECT en SQL Server serializando las filas con FOR JSON PATH."""
-        wrapped = f"SELECT ({select_sql} FOR JSON PATH, INCLUDE_NULL_VALUES) AS j"
+        clean_sql = select_sql.strip().rstrip(";")
+        wrapped = f"SELECT ({clean_sql} FOR JSON PATH, INCLUDE_NULL_VALUES) AS j"
         raw = self.scalar(wrapped, params=params, raise_on_error=True)
         if not raw:
             return []
@@ -301,17 +427,28 @@ class SQLServerConnection:
 
     def ensure_database_exists(self) -> None:
         """Garantiza que la base de datos exista en la instancia de SQL Server."""
-        odbc, henv, hdbc = self._connect(db_override="master")
-        hstmt = ctypes.c_void_p()
-        odbc.SQLAllocHandle(3, hdbc, ctypes.byref(hstmt))
-        try:
-            sql = f"IF DB_ID(N'{self.database}') IS NULL CREATE DATABASE [{self.database}];"
-            odbc.SQLExecDirectW(hstmt, sql, len(sql))
-        finally:
-            odbc.SQLFreeHandle(3, hstmt)
-            odbc.SQLDisconnect(hdbc)
-            odbc.SQLFreeHandle(2, hdbc)
-            odbc.SQLFreeHandle(1, henv)
+        with self._lock:
+            odbc, henv, hdbc = self._connect(db_override="master")
+            hstmt = ctypes.c_void_p()
+            if odbc.SQLAllocHandle(3, hdbc, ctypes.byref(hstmt)) not in (0, 1):
+                odbc.SQLDisconnect(hdbc)
+                odbc.SQLFreeHandle(2, hdbc)
+                odbc.SQLFreeHandle(1, henv)
+                raise ErrorConexionSQLServer(
+                    "No se pudo preparar la verificación de base de datos en Microsoft SQL Server."
+                )
+            try:
+                db_lit = self.database.replace("'", "''")
+                db_ident = self.database.replace("]", "]]")
+                sql = f"IF DB_ID(N'{db_lit}') IS NULL CREATE DATABASE [{db_ident}];"
+                rc = odbc.SQLExecDirectW(hstmt, sql, len(sql))
+                if rc not in (0, 1, 100):
+                    self._handle_stmt_error(odbc, hstmt, raise_on_error=True)
+            finally:
+                odbc.SQLFreeHandle(3, hstmt)
+                odbc.SQLDisconnect(hdbc)
+                odbc.SQLFreeHandle(2, hdbc)
+                odbc.SQLFreeHandle(1, henv)
 
 
 def ensure_sqlserver_schema(
@@ -326,12 +463,13 @@ def ensure_sqlserver_schema(
     """
     conn.ensure_database_exists()
 
+    tablas_in = ", ".join(sql_lit(t) for t in NOMBRES_16_TABLAS)
     existing_count_str = conn.scalar(
-        "SELECT CAST(COUNT(*) AS VARCHAR(10)) FROM sys.tables WHERE is_ms_shipped = 0"
+        f"SELECT CAST(COUNT(*) AS VARCHAR(10)) FROM sys.tables WHERE is_ms_shipped = 0 AND name IN ({tablas_in})"
     )
     existing_count = int(existing_count_str) if existing_count_str.isdigit() else 0
 
-    if existing_count < 16 and _SCHEMA_SQL_FILE.is_file():
+    if existing_count < len(NOMBRES_16_TABLAS) and _SCHEMA_SQL_FILE.is_file():
         raw_ddl = _SCHEMA_SQL_FILE.read_text(encoding="utf-8")
         for batch in raw_ddl.split("\nGO"):
             clean = batch.strip()
@@ -339,7 +477,7 @@ def ensure_sqlserver_schema(
                 continue
             if "CREATE DATABASE" in clean or "USE [PatitasFelices_DB]" in clean:
                 continue
-            conn.execute(clean, raise_on_error=False)
+            conn.execute(clean, raise_on_error=True)
 
     if reset_tables and conn.database.strip().lower() == "patitasfelices_db":
         raise RuntimeError(
@@ -368,7 +506,89 @@ def ensure_sqlserver_schema(
             """
         )
 
+    aplicar_migraciones_versionadas(conn)
     seed_sqlserver(conn, hash_password, include_demo_users=include_demo_users)
+
+
+SCHEMA_VERSION_PROPERTY = "patitas_schema_version"
+
+MIGRACIONES_SQLSERVER: list[tuple[str, str, list[str]]] = [
+    (
+        "2026.11.12.01",
+        "Índices de rendimiento sargables en Cita, Factura y Paciente",
+        [
+            """
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = N'IX_Cita_Fecha_Estado' AND object_id = OBJECT_ID(N'dbo.Cita')
+            )
+            CREATE INDEX IX_Cita_Fecha_Estado
+                ON dbo.Cita (fecha, estado) INCLUDE (Id_veterinario, hora);
+            """,
+            """
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = N'IX_Factura_Cita_IdFactura' AND object_id = OBJECT_ID(N'dbo.Factura')
+            )
+            CREATE INDEX IX_Factura_Cita_IdFactura
+                ON dbo.Factura (Id_cita, id_factura DESC) INCLUDE (id_dueno, serie, numero, total, fecha_emision);
+            """,
+            """
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = N'IX_Paciente_Dueno_Estado' AND object_id = OBJECT_ID(N'dbo.Paciente')
+            )
+            CREATE INDEX IX_Paciente_Dueno_Estado
+                ON dbo.Paciente (id_dueno, estado);
+            """,
+        ],
+    ),
+]
+
+
+def obtener_version_esquema(conn: SQLServerConnection) -> Optional[str]:
+    """Lee la versión de esquema registrada en sys.extended_properties sin crear tablas adicionales."""
+    valor = conn.scalar(
+        """
+        SELECT TOP 1 CAST(value AS NVARCHAR(64))
+        FROM sys.extended_properties
+        WHERE class = 0 AND name = CAST(@prop AS NVARCHAR(128))
+        """,
+        params={"prop": SCHEMA_VERSION_PROPERTY},
+        raise_on_error=False,
+    )
+    limpio = str(valor or "").strip()
+    return limpio or None
+
+
+def establecer_version_esquema(conn: SQLServerConnection, version: str) -> None:
+    """Registra o actualiza la propiedad extendida patitas_schema_version en la base actual."""
+    conn.execute(
+        """
+        DECLARE @pname SYSNAME = CAST(@prop AS NVARCHAR(128));
+        DECLARE @val SQL_VARIANT = CAST(@ver AS NVARCHAR(64));
+        IF EXISTS (SELECT 1 FROM sys.extended_properties WHERE class = 0 AND name = @pname)
+            EXEC sys.sp_updateextendedproperty @name = @pname, @value = @val;
+        ELSE
+            EXEC sys.sp_addextendedproperty @name = @pname, @value = @val;
+        """,
+        params={"prop": SCHEMA_VERSION_PROPERTY, "ver": version},
+        raise_on_error=True,
+    )
+
+
+def aplicar_migraciones_versionadas(conn: SQLServerConnection) -> Optional[str]:
+    """Ejecuta migraciones idempotentes pendientes usando sys.extended_properties como bitácora."""
+    version_actual = obtener_version_esquema(conn)
+    for version, descripcion, sentencias in MIGRACIONES_SQLSERVER:
+        if version_actual is not None and version <= version_actual:
+            continue
+        for sql in sentencias:
+            conn.execute(sql, raise_on_error=True)
+        establecer_version_esquema(conn, version)
+        logger.info("Migración SQL Server aplicada (%s): %s", version, descripcion)
+        version_actual = version
+    return version_actual
 
 
 def seed_sqlserver(

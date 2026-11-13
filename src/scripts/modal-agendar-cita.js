@@ -42,18 +42,28 @@ const disponibilidadCache = new Map();
 
 function renderizarOpcionesMascotas(selectEl, lista) {
   if (!selectEl) return;
+  selectEl.replaceChildren();
   if (!lista || lista.length === 0) {
-    selectEl.innerHTML = '<option value="">No tienes mascotas registradas. Ve a tu perfil para agregar una.</option>';
+    const optVacio = document.createElement("option");
+    optVacio.value = "";
+    optVacio.textContent = "No tienes mascotas registradas. Ve a tu perfil para agregar una.";
+    selectEl.append(optVacio);
     return;
   }
 
   const valorPrevio = selectEl.value;
-  selectEl.innerHTML = '<option value="">-- Selecciona una mascota --</option>' +
-    lista.map(m => `
-      <option value="${m.id}" data-nombre="${m.nombre}">
-        ${m.nombre} (${m.especie || "Mascota"} - ${m.raza || "Mestizo"})
-      </option>
-    `).join("");
+  const optDefault = document.createElement("option");
+  optDefault.value = "";
+  optDefault.textContent = "-- Selecciona una mascota --";
+  selectEl.append(optDefault);
+
+  for (const m of lista) {
+    const opt = document.createElement("option");
+    opt.value = String(m.id ?? "");
+    opt.dataset.nombre = String(m.nombre ?? "");
+    opt.textContent = `${m.nombre || "Mascota"} (${m.especie || "Mascota"} - ${m.raza || "Mestizo"})`;
+    selectEl.append(opt);
+  }
 
   if (lista.length === 1) {
     selectEl.value = String(lista[0].id);
@@ -63,6 +73,9 @@ function renderizarOpcionesMascotas(selectEl, lista) {
 }
 
 export async function abrirModalAgendarCita(servicioId = null) {
+  if (typeof servicioId !== "string" || servicioId.startsWith("[object")) {
+    servicioId = null;
+  }
   const sesion = obtenerSesion();
 
   // Si no ha iniciado sesión, abrir de inmediato el modal de login
@@ -82,6 +95,9 @@ export async function abrirModalAgendarCita(servicioId = null) {
   // Si ya tiene sesión activa:
   const modalCitaEl = document.getElementById("modalAgendarCita");
   if (!modalCitaEl || !window.bootstrap?.Modal) return;
+
+  // Limpiar caché de mascotas previas para que siempre refleje la cuenta actual en SQL Server
+  mascotasCargadas = [];
 
   const inputPropietario = document.getElementById("modal-cita-propietario");
   const inputDocumento = document.getElementById("modal-cita-documento");
@@ -288,9 +304,10 @@ function inicializarEventosModalCita() {
       const hora = document.getElementById("modal-cita-hora")?.value;
       const motivo = document.getElementById("modal-cita-motivo")?.value.trim();
 
-      if (!telefono || telefono.length < 7) {
+      const telLimpio = telefono.replace(/\D/g, "");
+      if (!telefono || telLimpio.length < 9) {
         if (alertError) {
-          alertError.textContent = "Por favor ingresa un número de teléfono de contacto válido.";
+          alertError.textContent = "Por favor ingresa un número de teléfono de contacto válido de al menos 9 dígitos.";
           alertError.classList.remove("d-none");
         }
         return;
@@ -346,7 +363,10 @@ function inicializarEventosModalCita() {
 
       } catch (err) {
         if (alertError) {
-          alertError.textContent = err.message || "No se pudo agendar la cita. Verifica que el turno siga disponible.";
+          let msg = (err && typeof err.message === "string" && err.message !== "[object Object]")
+            ? err.message
+            : "No se pudo agendar la cita. Verifica que los datos sean correctos y el turno siga disponible.";
+          alertError.textContent = msg;
           alertError.classList.remove("d-none");
         }
         // Actualizar disponibilidad por si el cupo fue ganado
