@@ -1,7 +1,6 @@
 """
-PATRÓN PROXY (Estructural - GoF)
-Puntos de sustentación: 1 y 4.
-Propósito: Actuar como un guardián de seguridad (Protection Proxy) antes de llegar
+PATRÓN PROXY 
+Este Actua como un guardián de seguridad (Protection Proxy) antes de llegar
 al controlador real (RealClinicController). Verifica:
 1) Que el token JWT sea auténtico y no haya expirado.
 2) Que la sesión y el usuario existan en la Base de Datos con estado == 'activo'.
@@ -17,7 +16,7 @@ import json
 import os
 import secrets
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional 
 
 from .adapter import IDatabaseAdapter
 from .strategy import RBACContext
