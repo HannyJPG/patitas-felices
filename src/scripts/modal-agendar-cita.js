@@ -79,6 +79,7 @@ function renderizarOpcionesMascotas(selectEl, lista) {
   }
 }
 
+// --- Apertura del modal #modalAgendarCita y precarga paralela de mascotas/horarios ---
 export async function abrirModalAgendarCita(servicioId = null) {
   if (typeof servicioId !== "string" || servicioId.startsWith("[object")) {
     servicioId = null;
@@ -268,6 +269,7 @@ function inicializarEventosModalCita() {
 
   const formCita = document.getElementById("form-modal-cita");
   if (formCita) {
+    // --- Envío de reserva a POST /api/citas y notificación a perfil.js ---
     formCita.addEventListener("submit", async e => {
       e.preventDefault();
       const alertError = document.getElementById("modal-cita-alerta-error");

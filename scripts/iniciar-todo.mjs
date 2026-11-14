@@ -1,3 +1,9 @@
+/**
+ * iniciar-todo.mjs
+ * Orquestador de arranque local: levanta FastAPI (uvicorn :8000) y, si existe Astro en node_modules,
+ * lanza en paralelo el servidor de desarrollo (:4321). Sin Astro local, FastAPI sirve dist/ unificado.
+ */
+
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";

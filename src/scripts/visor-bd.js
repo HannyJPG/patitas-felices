@@ -106,6 +106,7 @@ function renderizarTablas() {
     }
 }
 
+// --- Consulta a /api/bd/tablas y renderizado de chips/tablas desde caché local ---
 async function cargarTablas() {
     const metaEl = document.getElementById("meta-bd");
     const contEl = document.getElementById("contenedor-tablas");

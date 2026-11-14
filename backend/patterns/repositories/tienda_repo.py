@@ -212,6 +212,7 @@ class TiendaRepositoryMixin:
         return self._factura_row(invoice_id) or {"id": invoice_id}
 
     def _query_facturas(self, where_order_sql: str) -> List[Dict[str, Any]]:
+        # Consulta cabeceras en dbo.Factura + último método de Pago y adjunta sus líneas desde dbo.detalle_ventas en una segunda consulta
         facturas = self.conn.query_json(
             f"""
             SELECT
@@ -316,6 +317,7 @@ class TiendaRepositoryMixin:
     def listar_ventas_paginadas(
         self, page: int = 1, page_size: int = 25
     ) -> Dict[str, Any]:
+        # Paginación server-side con OFFSET/FETCH NEXT para evitar cargar todo el historial en memoria
         pagina = max(1, int(page))
         tamano = max(1, min(200, int(page_size)))
         offset = (pagina - 1) * tamano

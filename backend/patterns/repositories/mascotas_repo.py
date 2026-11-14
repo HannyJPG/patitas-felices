@@ -152,6 +152,7 @@ class MascotasRepositoryMixin:
         motivo: str,
         datos_nuevos: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+        # Registra la solicitud directamente en las columnas solicitud_* de dbo.Paciente (sin crear tablas fuera del DER)
         owner = self._owner_id_for_user(usuario_id, create=False)
         pet = self.conn.query_one(
             f"SELECT TOP 1 id_dueno, solicitud_estado FROM dbo.Paciente WHERE id_paciente = {int(mascota_id)}"
@@ -214,6 +215,7 @@ class MascotasRepositoryMixin:
         return result
 
     def resolver_solicitud_mascota(self, solicitud_id: int, accion: str) -> Dict[str, Any]:
+        # Al aprobar: marca 'Eliminado' si es baja, o aplica el JSON solicitud_datos_nuevos (especie/raza/peso/nombre)
         row = self.conn.query_one(
             f"SELECT TOP 1 * FROM dbo.Paciente WHERE id_paciente = {int(solicitud_id)} AND solicitud_tipo IS NOT NULL"
         )

@@ -135,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Actualiza el estado visual del Header dinámicamente según la sesión
      */
+    // --- Sincronización visual de Header.astro según sesión activa ---
     function actualizarEstadoHeader() {
         const sesion = obtenerSesion();
 
@@ -220,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (formLogin) {
+        // --- Envío de credenciales contra POST /api/auth/login ---
         formLogin.addEventListener("submit", async evento => {
             evento.preventDefault();
             if (alertError) alertError.classList.add("d-none");
@@ -297,6 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (formRegistro) {
+        // --- Registro de nuevo cliente contra POST /api/auth/register ---
         formRegistro.addEventListener("submit", async evento => {
             evento.preventDefault();
             if (alertRegError) alertRegError.classList.add("d-none");

@@ -61,6 +61,7 @@ class CitasRepositoryMixin:
         return items[0] if items else None
 
     def obtener_disponibilidad_horarios(self, fecha: str) -> Dict[str, Any]:
+        # Agrupa citas no canceladas por turno HH:MM para calcular cupos disponibles (máx. 3 médicos por bloque)
         horarios = ["08:30", "10:00", "11:30", "13:00", "15:30", "17:00", "18:30"]
         rows = self.conn.query_json(
             f"""
@@ -85,6 +86,7 @@ class CitasRepositoryMixin:
         }
 
     def _resolve_cita_paciente(self, datos: Dict[str, Any]) -> int:
+        # Prioriza mascota_id existente verificando pertenencia; si no existe, resuelve o crea Dueño y Paciente en SQL Server
         pet_id = datos.get("mascota_id")
         if pet_id is not None:
             pet = self.conn.query_one(
@@ -333,6 +335,7 @@ class CitasRepositoryMixin:
             )
         if not updated.strip():
             return None
+        # Preserva diagnóstico/tratamiento previos si la actualización llega con campos clínicos vacíos
         diagnostico_limpio = diagnostico.strip()
         tratamiento_limpio = tratamiento.strip()
         hist = self.conn.query_one(

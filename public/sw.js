@@ -1,3 +1,9 @@
+/**
+ * sw.js
+ * Service Worker PWA: precarga rutas estáticas en caché (network-first con respaldo offline)
+ * y excluye explícitamente las peticiones /api/ para no servir datos clínicos o de sesión obsoletos.
+ */
+
 const CACHE_NAME = "patitas-felices-pwa-v5";
 const RECURSOS_BASE = ["/", "/login", "/tienda", "/perfil", "/doctor", "/admin", "/admin-app", "/visor-bd", "/img/logotipoveterinaria.jpg"];
 

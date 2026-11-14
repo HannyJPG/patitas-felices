@@ -186,6 +186,7 @@ export function crearControladorCliente({ mostrarAlertaGlobal, recargarPerfil })
         }
     });
 
+    // --- Solicitudes de edición/eliminación de mascotas (/api/cliente/solicitudes) ---
     async function cargarMisSolicitudes() {
         if (!contenedorMisSolicitudes) return;
         try {
@@ -290,6 +291,7 @@ export function crearControladorCliente({ mostrarAlertaGlobal, recargarPerfil })
         }
     });
 
+    // --- Listado y alta de mascotas del cliente (/api/cliente/mis-mascotas) ---
     async function cargarMisMascotas() {
         if (!contenedorListaMascotas) return;
         contenedorListaMascotas.replaceChildren();
@@ -358,6 +360,7 @@ export function crearControladorCliente({ mostrarAlertaGlobal, recargarPerfil })
         }
     }
 
+    // --- Historial de compras y descarga de boletas PDF (/api/cliente/mis-compras) ---
     async function cargarMisCompras() {
         if (!contenedorMisCompras) return;
         contenedorMisCompras.replaceChildren();
@@ -436,6 +439,7 @@ export function crearControladorCliente({ mostrarAlertaGlobal, recargarPerfil })
         alert("En este entorno demostrativo no se procesan tarjetas reales. Tus compras en Patitas Felices generan boleta inmediata y se coordinan en caja o vía Yape/Plin.");
     });
 
+    // --- Citas médicas del cliente (/api/cliente/mis-citas) ---
     async function cargarMisCitas() {
         if (!contenedorMisCitas) return;
         contenedorMisCitas.replaceChildren();

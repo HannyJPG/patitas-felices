@@ -249,6 +249,7 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         });
     }
 
+    // --- Tabla interactiva tipo Excel (búsqueda, agrupación, paginación y exportación CSV/XLS) ---
     function renderizarTablaExcel() {
         const ventasBase = obtenerVentasFiltradas();
         const modo = selectAgrupacion.value;
@@ -523,6 +524,7 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         }
     }
 
+    // --- Sincronización con /api/admin/crm y verificación de sesión admin ---
     async function asegurarSesionAdmin() {
         const sesion = obtenerSesion();
         if (!sesion?.token) {

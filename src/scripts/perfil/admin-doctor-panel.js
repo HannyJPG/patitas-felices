@@ -29,6 +29,7 @@ export function crearControladorDoctorYAdmin({ mostrarAlertaGlobal, badgeContado
     const contenedorUsuariosAdmin = document.getElementById("contenedor-usuarios-admin");
     const contenedorVisorTablas = document.getElementById("contenedor-visor-tablas-resumen");
 
+    // --- Agenda médica y atención clínica (GET /api/doctor/agenda, PATCH /api/doctor/citas/{id}) ---
     async function cargarAgendaDoctor() {
         if (!contenedorAgendaDoctor) return;
         contenedorAgendaDoctor.replaceChildren();
@@ -189,6 +190,7 @@ export function crearControladorDoctorYAdmin({ mostrarAlertaGlobal, badgeContado
         }
     }
 
+    // --- Panel CRM financiero, ventas y citas para Administrador (/api/admin/crm) ---
     async function cargarCRMAdmin() {
         if (!contenedorCrmAdmin) return;
         contenedorCrmAdmin.replaceChildren();
@@ -378,6 +380,7 @@ export function crearControladorDoctorYAdmin({ mostrarAlertaGlobal, badgeContado
         }
     }
 
+    // --- Aprobación/rechazo de solicitudes sobre mascotas (/api/admin/solicitudes-mascotas) ---
     async function cargarSolicitudesAdmin() {
         if (!contenedorSolicitudesAdmin) return;
         contenedorSolicitudesAdmin.replaceChildren();
@@ -545,6 +548,7 @@ export function crearControladorDoctorYAdmin({ mostrarAlertaGlobal, badgeContado
         }
     });
 
+    // --- Gestión de personal veterinario (/api/admin/personal) y cuentas (/api/admin/usuarios) ---
     async function cargarPersonalAdmin() {
         if (!contenedorPersonalAdmin) return;
         contenedorPersonalAdmin.replaceChildren();

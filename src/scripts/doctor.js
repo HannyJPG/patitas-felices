@@ -24,6 +24,7 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion } from "./api-c
     const inputTrat = document.getElementById("doctor-tratamiento");
     const infoCitaActiva = document.getElementById("doctor-cita-activa-info");
 
+    // --- Verificación de rol médico y carga de agenda desde /api/doctor/agenda ---
     async function asegurarSesionDoctor() {
         const sesion = obtenerSesion();
         if (!sesion?.token) {
@@ -223,6 +224,7 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion } from "./api-c
         }
     }
 
+    // --- Registro de atención médica y diagnóstico (PATCH /api/doctor/citas/{id}) ---
     formDiagnostico?.addEventListener("submit", async evento => {
         evento.preventDefault();
         if (!inputCitaId || !inputCitaId.value) {

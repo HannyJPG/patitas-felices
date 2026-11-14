@@ -152,6 +152,7 @@ import { peticionApi, obtenerSesion, guardarSesion, descargarPdfDesdeBase64 } fr
         elTotal.textContent = `S/ ${totalRedondeado.toFixed(2)}`;
     }
 
+    // --- Gestión del carrito y cálculo de Subtotal / IGV (18%) / Total ---
     function renderizarCarrito() {
         listaPedido.replaceChildren();
         if (carrito.size === 0) {
@@ -197,6 +198,7 @@ import { peticionApi, obtenerSesion, guardarSesion, descargarPdfDesdeBase64 } fr
         });
     }
 
+    // --- Sincronización de catálogo en vivo y envío de compra (POST /api/tienda/checkout) ---
     async function sincronizarCatalogoDesdeApi() {
         try {
             const data = await peticionApi("/api/productos");

@@ -99,6 +99,7 @@ import { crearControladorDoctorYAdmin } from "./perfil/admin-doctor-panel.js";
         activarTab(boton.getAttribute("data-tab-target"));
     });
 
+    // --- Filtrado de pestañas por rol ([data-roles]) y modo demo ([data-demo-only]) ---
     function renderizarCabeceraYMenuPorRol(u) {
         const nombre = u.nombre || "Usuario Patitas Felices";
         const email = u.email || "";
@@ -239,6 +240,7 @@ import { crearControladorDoctorYAdmin } from "./perfil/admin-doctor-panel.js";
         }
     }
 
+    // --- Verificación de sesión en /api/auth/sesion e inicialización de subcontroladores ---
     async function inicializarSesion() {
         const sesion = obtenerSesion();
         if (!sesion?.token) {

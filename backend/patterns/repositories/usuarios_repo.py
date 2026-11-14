@@ -272,6 +272,7 @@ class UsuariosRepositoryMixin:
 
     # --- Alta transaccional de médicos veterinarios y personal administrativo ---
     def crear_doctor(self, datos: Dict[str, Any]) -> Dict[str, Any]:
+        # Valida unicidad de CMVP y apellidos, resuelve o crea dbo.Especialidad e inserta en dbo.Veterinario dentro de una TX
         cmvp = str(datos.get("cmvp") or "").strip()
         if not cmvp:
             raise ValueError(
