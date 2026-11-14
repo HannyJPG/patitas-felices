@@ -1,7 +1,7 @@
 """
-PATRÓN FACADE (Estructural - GoF)
-Puntos de sustentación: 1 y 7.
-Propósito: Simplificar el proceso de Checkout de la Tienda Veterinaria.
+PATRÓN FACADE 
+
+Simplifica el proceso de Checkout de la Tienda Veterinaria.
 Cuando el cliente compra en Astro, el Frontend solo invoca a TiendaFacade.procesar_venta().
 Por dentro, la fachada coordina 3 subsistemas complejos:
 1) SubsistemaInventario: Verifica disponibilidad y descuenta el stock en la BD.
