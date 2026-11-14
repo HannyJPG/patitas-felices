@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Set
 
 
+# --- Contrato base y estrategias concretas por rol ---
 class RoleAuthorizationStrategy(ABC):
     """Interfaz Strategy: Declara las operaciones comunes a todos los roles RBAC."""
 
@@ -173,6 +174,7 @@ class AdminRoleStrategy(RoleAuthorizationStrategy):
         }
 
 
+# --- Contexto RBAC dinámico ---
 class RBACContext:
     """
     Contexto del Patrón Strategy:

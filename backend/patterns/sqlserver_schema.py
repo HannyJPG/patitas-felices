@@ -54,6 +54,7 @@ class ErrorConsultaSQLServer(RuntimeError):
         self.sqlstate = sqlstate
 
 
+# --- Utilidades T-SQL y diagnóstico ODBC ---
 def sql_lit(val: Any) -> str:
     """Formatea un valor de Python como literal seguro T-SQL para Microsoft SQL Server."""
     if val is None:
@@ -117,6 +118,7 @@ def _extract_odbc_diag(odbc: Any, handle_type: int, handle: Any) -> tuple[str, i
     return "", 0, ""
 
 
+# --- Conexión nativa con pool thread-safe ODBC ---
 class SQLServerConnection:
     """Conexión nativa con pool thread-safe a Microsoft SQL Server mediante ODBC de Windows (odbc32.dll)."""
 
@@ -451,6 +453,7 @@ class SQLServerConnection:
                 odbc.SQLFreeHandle(1, henv)
 
 
+# --- Inicialización del esquema 3FN, migraciones y datos semilla ---
 def ensure_sqlserver_schema(
     conn: SQLServerConnection,
     hash_password: Callable[[str], str],

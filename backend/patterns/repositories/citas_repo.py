@@ -14,6 +14,7 @@ class CitasRepositoryMixin:
 
     conn: SQLServerConnection
 
+    # --- Consultas de citas y disponibilidad horaria ---
     def _query_citas(self, where_order_sql: str) -> List[Dict[str, Any]]:
         rows = self.conn.query_json(
             f"""
@@ -157,6 +158,7 @@ class CitasRepositoryMixin:
             )
         )
 
+    # --- Registro transaccional de citas con control de 3 cupos y rotación médica ---
     def crear_cita(self, datos: Dict[str, Any]) -> Dict[str, Any]:
         fecha = str(datos["fecha"]).strip()[:10]
         hora = str(datos["hora"]).strip()[:5]
@@ -223,11 +225,22 @@ class CitasRepositoryMixin:
                     SET XACT_ABORT ON;
                     BEGIN TRY
                         BEGIN TRANSACTION;
+                        -- Serializa reservas simultáneas del mismo turno (fecha + hora) para evitar deadlocks (1205) en rango vacío
+                        DECLARE @lock_res NVARCHAR(128) = N'patitas_cita_' + @fecha + N'_' + @hora;
+                        DECLARE @lock_rc INT;
+                        EXEC @lock_rc = sys.sp_getapplock
+                            @Resource = @lock_res,
+                            @LockMode = N'Exclusive',
+                            @LockOwner = N'Transaction',
+                            @LockTimeout = 10000;
+                        IF @lock_rc < 0
+                            THROW 50002, N'LOCK_TIMEOUT', 1;
+
                         DECLARE @occ INT = (
                             SELECT COUNT(*)
-                            FROM dbo.Cita WITH (UPDLOCK, HOLDLOCK)
+                            FROM dbo.Cita
                             WHERE fecha = @fecha
-                              AND LEFT(hora, 5) = @hora
+                              AND (hora = @hora OR hora LIKE @hora + N'%')
                               AND LOWER(estado) <> 'cancelada'
                         );
                         IF @occ >= 3
@@ -293,6 +306,7 @@ class CitasRepositoryMixin:
             f"WHERE d.usuario_id = {int(usuario_id)} ORDER BY c.fecha, c.hora, c.Id_cita"
         )
 
+    # --- Actualización de estado e historial clínico por el médico ---
     def actualizar_cita_doctor(
         self,
         cita_id: int,

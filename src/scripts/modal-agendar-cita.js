@@ -1,4 +1,12 @@
 
+/**
+ * modal-agendar-cita.js
+ * Controlador global del modal #modalAgendarCita (ModalAgendarCita.astro).
+ * Intercepta botones [data-abrir-modal-cita] en cualquier página, exige sesión previa vía ModalLogin,
+ * precarga mascotas (/api/cliente/mis-mascotas) y cupos horarios (/api/citas/disponibilidad),
+ * envía la reserva a POST /api/citas y notifica con "patitas:cita-agendada" al panel de perfil.
+ */
+
 import { API_BASE_URL, obtenerSesion, peticionApi } from "./api-client.js";
 
 const CLINICA_WHATSAPP_NUMERO = "51990853697";

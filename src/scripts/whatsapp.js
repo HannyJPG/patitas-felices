@@ -1,3 +1,9 @@
+/**
+ * whatsapp.js
+ * Generador de enlaces wa.me y plantillas de mensaje para solicitudes de cita desde el navegador.
+ * Lee el teléfono oficial desde data/clinica.js y los nombres de servicio desde data/servicios.js.
+ */
+
 import { clinica } from "../data/clinica.js";
 import { SERVICIOS } from "../data/servicios.js";
 

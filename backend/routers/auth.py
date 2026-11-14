@@ -25,6 +25,7 @@ from .deps import manejar_proxy
 router = APIRouter()
 
 
+# --- Diagnóstico y autenticación de usuarios ---
 @router.get("/api/health", tags=["Sistema"], response_model=HealthResponse)
 def verificar_estado(request: Request) -> Dict[str, Any]:
     return {
@@ -95,6 +96,7 @@ def iniciar_sesion(credenciales: LoginRequest, request: Request) -> Dict[str, An
     }
 
 
+# --- Registro público de nuevos clientes ---
 @router.post("/api/auth/register", tags=["Autenticación y RBAC (Proxy + Strategy)"], response_model=AuthResponse)
 def registrar_cliente(datos: RegistroRequest, request: Request) -> Dict[str, Any]:
     adaptador_bd = request.app.state.db
@@ -178,6 +180,7 @@ def registrar_cliente(datos: RegistroRequest, request: Request) -> Dict[str, Any
     }
 
 
+# --- Verificación de sesión activa y cambio de contraseña ---
 @router.get("/api/auth/sesion", tags=["Autenticación y RBAC (Proxy + Strategy)"], response_model=SesionResponse)
 def consultar_sesion(
     request: Request,

@@ -15,12 +15,14 @@ _DIST_VISOR_HTML = (
 )
 
 
+# --- Inspección en vivo de las 16 tablas en SQL Server ---
 @router.get("/api/bd/tablas", tags=["Base de Datos (16 Tablas)"], response_model=TablasBDResponse)
 def obtener_tablas_completas(
     request: Request,
     limit: Optional[int] = None,
     authorization: Optional[str] = Header(default=None),
 ) -> Dict[str, Any]:
+    """Requiere rol admin (ver_crm_dashboard) y consulta filas de las 16 tablas vía Adapter."""
     manejar_proxy(request, authorization, "ver_crm_dashboard")
     adaptador_bd = request.app.state.db
     try:

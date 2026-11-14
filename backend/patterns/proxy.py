@@ -32,6 +32,7 @@ class ErrorSeguridadProxy(PermissionError):
         self.codigo_http = codigo_http
 
 
+# --- Utilidades JWT (HS256 nativo con hmac/hashlib) ---
 def _b64url_encode(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
 
@@ -105,6 +106,7 @@ def verificar_token_jwt(token: str) -> Dict[str, Any]:
     return payload
 
 
+# --- Controlador Real y Guardián Proxy de sesión activa + RBAC ---
 class ISecureController(ABC):
     """Subject Interface: Contrato común entre el Controlador Real y el Proxy."""
 

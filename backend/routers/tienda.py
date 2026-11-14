@@ -14,6 +14,7 @@ from ..schemas import CatalogoProductosResponse, CheckoutRequest
 router = APIRouter()
 
 
+# --- Catálogo activo de farmacia e insumos ---
 @router.get("/api/productos", tags=["Tienda y Checkout (Facade)"], response_model=CatalogoProductosResponse)
 def catalogo_productos(request: Request) -> Dict[str, Any]:
     tienda_facade = request.app.state.facade
@@ -26,6 +27,7 @@ def catalogo_productos(request: Request) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
+# --- Checkout unificado (validación de sesión/documento + TiendaFacade) ---
 @router.post("/api/tienda/checkout", tags=["Tienda y Checkout (Facade)"])
 def procesar_compra(
     pedido: CheckoutRequest,
@@ -104,6 +106,7 @@ def procesar_compra(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
+# --- Descarga de boleta PDF con control de pertenencia (IDOR) ---
 @router.get("/api/tienda/boleta/{venta_id}/pdf", tags=["Tienda y Checkout (Facade)"])
 def descargar_boleta_pdf(
     venta_id: int,

@@ -1,3 +1,10 @@
+/**
+ * doctor.js
+ * Controlador de la vista dedicada doctor.astro: valida sesión con rol doctor/admin (/api/auth/sesion),
+ * renderiza agenda de citas y pacientes desde GET /api/doctor/agenda y envía diagnósticos/tratamientos
+ * mediante PATCH /api/doctor/citas/{id}.
+ */
+
 import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion } from "./api-client.js";
 
 (() => {

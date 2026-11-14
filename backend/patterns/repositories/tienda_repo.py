@@ -13,6 +13,7 @@ class TiendaRepositoryMixin:
 
     conn: SQLServerConnection
 
+    # --- Catálogo de productos, stock y consultas de compras ---
     def listar_compras_usuario(self, usuario_id: int) -> List[Dict[str, Any]]:
         owner_id = self._owner_id_for_user(usuario_id, create=False)
         if owner_id is None:

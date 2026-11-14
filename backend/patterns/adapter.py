@@ -40,6 +40,7 @@ if _env_file.is_file():
             os.environ.setdefault(_k.strip(), _v.strip())
 
 
+# --- Contrato abstracto del adaptador de persistencia ---
 class IDatabaseAdapter(ABC):
     """Target Interface para el acceso desacoplado a la persistencia."""
 
@@ -170,6 +171,7 @@ class IDatabaseAdapter(ABC):
         pass
 
 
+# --- Adaptador SQL Server compuesto por mixins de dominio ---
 class SQLServerDatabaseAdapter(
     UsuariosRepositoryMixin,
     MascotasRepositoryMixin,
@@ -264,6 +266,7 @@ class SQLServerDatabaseAdapter(
         return resultado
 
 
+# --- Fábrica del adaptador activo según entorno ---
 def obtener_adaptador_bd() -> IDatabaseAdapter:
     return SQLServerDatabaseAdapter(
         database=os.getenv("SQLSERVER_DATABASE", "PatitasFelices_DB"),

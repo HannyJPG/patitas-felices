@@ -1,4 +1,12 @@
 
+/**
+ * admin-app.js
+ * Controlador de la consola administrativa independiente admin-app/index.astro (/admin-app).
+ * Consume GET /api/admin/crm (respetando modo real por defecto u origen demo si se selecciona),
+ * calcula KPIs y gráficos de barras por rango de fechas, gestiona la tabla tipo Excel con exportación CSV/XLS,
+ * administra usuarios (/api/admin/usuarios/{id}/estado) y alta de personal (/api/admin/personal).
+ */
+
 import { API_BASE_URL, cerrarSesion, obtenerSesion, guardarSesion, peticionApi } from "./api-client.js";
 import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, formatearIsoLocal } from "./ui-utils.js";
 

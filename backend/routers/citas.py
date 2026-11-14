@@ -19,6 +19,7 @@ from .deps import manejar_proxy
 router = APIRouter()
 
 
+# --- Disponibilidad y registro de citas (clientes autenticados o invitados) ---
 @router.get("/api/citas/disponibilidad", tags=["Citas y WhatsApp (Adapter)"], response_model=DisponibilidadHorariosResponse)
 def consultar_disponibilidad_citas(fecha: str, request: Request) -> Dict[str, Any]:
     """
@@ -70,6 +71,7 @@ def registrar_cita(
     }
 
 
+# --- Gestión del portal del cliente (citas, mascotas, documento, compras y solicitudes) ---
 @router.get("/api/cliente/mis-citas", tags=["Citas y WhatsApp (Adapter)"])
 def obtener_mis_citas(
     request: Request,

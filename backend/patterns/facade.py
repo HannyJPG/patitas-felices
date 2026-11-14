@@ -26,6 +26,7 @@ class ErrorProcesoVenta(ValueError):
     """Excepción de negocio cuando el checkout no puede completarse (ej. stock insuficiente)."""
 
 
+# --- Subsistema 1: Inventario y validación de stock ---
 class SubsistemaInventario:
     """Subsistema encargado de verificar disponibilidad y descontar stock en la BD."""
 
@@ -100,6 +101,7 @@ class SubsistemaInventario:
                 )
 
 
+# --- Subsistema 2: Cálculo IGV y persistencia de venta en SQL Server ---
 class SubsistemaCRMTransacciones:
     """
     Subsistema financiero que calcula los importes de la Boleta Electrónica Peruana
@@ -164,6 +166,7 @@ class SubsistemaCRMTransacciones:
                     raise
 
 
+# --- Subsistema 3: Generador de boleta PDF 1.4 en memoria ---
 class SubsistemaGeneradorPDF:
     """
     Subsistema de documentos: Construye un archivo PDF 1.4 estándar en memoria (bytes)
@@ -264,6 +267,7 @@ class SubsistemaGeneradorPDF:
         return bytes(pdf)
 
 
+# --- Fachada unificada de checkout ---
 class TiendaFacade:
     """
     Fachada principal para el Checkout de la Tienda Veterinaria.

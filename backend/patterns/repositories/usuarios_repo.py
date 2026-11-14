@@ -23,6 +23,7 @@ class UsuariosRepositoryMixin:
 
     conn: SQLServerConnection
 
+    # --- Gestión de dueños, autenticación y documentos ---
     def _owner_id_for_user(self, usuario_id: int, create: bool = True) -> Optional[int]:
         row = self.conn.query_one(
             f"SELECT TOP 1 id_dueno FROM dbo.Dueno WHERE usuario_id = {int(usuario_id)}"
@@ -269,6 +270,7 @@ class UsuariosRepositoryMixin:
         )
         return row is not None
 
+    # --- Alta transaccional de médicos veterinarios y personal administrativo ---
     def crear_doctor(self, datos: Dict[str, Any]) -> Dict[str, Any]:
         cmvp = str(datos.get("cmvp") or "").strip()
         if not cmvp:
@@ -522,6 +524,7 @@ class UsuariosRepositoryMixin:
             )
         return usuario_persistido
 
+    # --- Consultas de usuarios, personal activo y cambio de estado ---
     def obtener_usuario_por_id(self, usuario_id: int) -> Optional[Dict[str, Any]]:
         return self._user_row(
             "u.id = @uid",

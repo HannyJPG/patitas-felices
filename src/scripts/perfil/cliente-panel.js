@@ -1,3 +1,10 @@
+/**
+ * perfil/cliente-panel.js
+ * Controlador de las pestañas de cliente en perfil.astro: vinculación de DNI/RUC (/api/cliente/documento),
+ * cambio de contraseña (/api/auth/cambiar-password), alta y solicitudes de mascotas (/api/cliente/mascotas),
+ * historial de citas (/api/cliente/mis-citas) y descargas de boletas (/api/cliente/mis-compras).
+ */
+
 import {
     abrirPdfBoletaAutenticada,
     guardarSesion,

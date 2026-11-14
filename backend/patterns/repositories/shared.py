@@ -17,6 +17,7 @@ _PREFIJOS_HONORIFICOS = {
 }
 
 
+# --- Validación, normalización de nombres y hashing PBKDF2-SHA256 ---
 def es_email_valido(email: str) -> bool:
     """Valida formato estricto de correo electrónico."""
     email_limpio = str(email or "").strip().lower()
@@ -95,6 +96,7 @@ def verificar_password(password_plano: str, hash_almacenado: str) -> bool:
     return hmac.compare_digest(dk, digest_esperado)
 
 
+# --- Adaptador de notificaciones por WhatsApp ---
 class IWhatsAppNotificationAdapter(ABC):
     """Target Interface: Define el contrato que la clínica necesita para notificar."""
 

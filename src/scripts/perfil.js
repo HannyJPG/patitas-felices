@@ -1,3 +1,10 @@
+/**
+ * perfil.js
+ * Orquestador principal de perfil.astro: verifica la sesión activa (/api/auth/sesion),
+ * renderiza el banner superior y los datos personales, filtra pestañas por rol ([data-roles])
+ * y modo demo ([data-demo-only]), y delega la lógica específica a cliente-panel.js y admin-doctor-panel.js.
+ */
+
 import {
     cerrarSesion,
     guardarSesion,

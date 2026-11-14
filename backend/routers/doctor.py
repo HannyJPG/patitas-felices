@@ -8,11 +8,13 @@ from .deps import manejar_proxy
 router = APIRouter()
 
 
+# --- Endpoints clínicos protegidos para médicos veterinarios ---
 @router.get("/api/doctor/agenda", tags=["Agenda e Historial (Doctor)"])
 def ver_agenda_doctor(
     request: Request,
     authorization: Optional[str] = Header(default=None),
 ) -> Dict[str, Any]:
+    """Devuelve citas asignadas y perfil profesional del doctor autenticado."""
     return manejar_proxy(request, authorization, "ver_agenda_doctor")
 
 
@@ -23,6 +25,7 @@ def actualizar_cita_clinica(
     request: Request,
     authorization: Optional[str] = Header(default=None),
 ) -> Dict[str, Any]:
+    """Actualiza estado, diagnóstico y tratamiento clínico en dbo.Cita y dbo.Historial_clinico."""
     return manejar_proxy(
         request,
         authorization,

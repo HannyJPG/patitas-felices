@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+# --- Carga de variables de entorno locales (.env) ---
 env_file = Path(__file__).resolve().parent.parent / ".env"
 if env_file.is_file():
     for line in env_file.read_text(encoding="utf-8").splitlines():
@@ -62,6 +63,7 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
         version="2.0.0",
     )
 
+    # --- Configuración CORS (Astro dev, API local y túnel opcional) ---
     origenes_env = os.getenv("CORS_ORIGINS", "")
     origenes_permitidos = (
         [o.strip() for o in origenes_env.split(",") if o.strip()]
@@ -85,6 +87,7 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
 
     app.add_middleware(CORSMiddleware, **cors_kwargs)
 
+    # --- Instanciación de adaptadores, Proxy RBAC y Fachada de tienda en app.state ---
     adaptador_bd = db_adapter or obtener_adaptador_bd()
     adaptador_whatsapp = WhatsAppAdapter()
     controlador_real = RealClinicController(adaptador_bd)
@@ -96,6 +99,7 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
     app.state.proxy = proxy_seguridad
     app.state.facade = tienda_facade
 
+    # --- Formateo legible de errores de validación Pydantic (HTTP 422) ---
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         errores = []
@@ -121,6 +125,7 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
             content={"detail": mensaje_limpio, "errores": exc.errors()},
         )
 
+    # --- Registro de routers modulares y frontend compilado (dist/) ---
     app.include_router(auth.router)
     app.include_router(tienda.router)
     app.include_router(citas.router)

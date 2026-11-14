@@ -44,6 +44,7 @@ class MascotasRepositoryMixin:
 
     conn: SQLServerConnection
 
+    # --- Resolución de especies/razas y CRUD de pacientes ---
     def _resolve_raza_id(self, especie: str, raza: str, descripcion: str) -> int:
         species = (especie or "Perro").strip() or "Perro"
         breed = (raza or "Mestizo").strip() or "Mestizo"
@@ -142,6 +143,7 @@ class MascotasRepositoryMixin:
             )
         return bool(updated.strip())
 
+    # --- Flujo de solicitudes de edición/eliminación (Cliente -> Admin) ---
     def crear_solicitud_mascota(
         self,
         usuario_id: int,

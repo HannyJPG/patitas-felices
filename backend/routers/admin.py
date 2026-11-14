@@ -12,6 +12,7 @@ from .deps import manejar_proxy
 router = APIRouter()
 
 
+# --- Resumen CRM y métricas financieras ---
 @router.get("/api/admin/crm", tags=["CRM y Administración"])
 def resumen_crm(
     request: Request,
@@ -20,6 +21,7 @@ def resumen_crm(
     demo: Optional[bool] = None,
     authorization: Optional[str] = Header(default=None),
 ) -> Dict[str, Any]:
+    """Consolida KPIs SQL, ventas paginadas y tráfico; oculta datos demo salvo demo=true."""
     params: Dict[str, Any] = {}
     if page is not None:
         params["page"] = page
@@ -30,6 +32,7 @@ def resumen_crm(
     return manejar_proxy(request, authorization, "ver_crm_dashboard", params)
 
 
+# --- Gestión de cuentas, personal médico y solicitudes de mascotas ---
 @router.patch("/api/admin/usuarios/{usuario_id}/estado", tags=["CRM y Administración"])
 def cambiar_estado_usuario_crm(
     usuario_id: int,

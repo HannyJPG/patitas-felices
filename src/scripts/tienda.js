@@ -1,3 +1,10 @@
+/**
+ * tienda.js
+ * Controlador de tienda.astro: administra el carrito en memoria (#grid-productos, #lista-pedido),
+ * sincroniza el catálogo activo desde GET /api/productos, valida DNI/RUC en #formulario-checkout,
+ * procesa el pago vía POST /api/tienda/checkout (TiendaFacade) y habilita la descarga PDF de la boleta.
+ */
+
 import { peticionApi, obtenerSesion, guardarSesion, descargarPdfDesdeBase64 } from "./api-client.js";
 
 (() => {

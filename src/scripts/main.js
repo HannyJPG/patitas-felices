@@ -1,7 +1,19 @@
+/**
+ * main.js
+ * Script global cargado desde Layout.astro: registro del Service Worker (/sw.js),
+ * botón de instalación PWA ([data-instalar-app]) y menú colapsable responsive ([data-main-menu]).
+ */
+
 (() => {
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-            navigator.serviceWorker.register("/sw.js").catch(() => {});
+            navigator.serviceWorker.register("/sw.js").catch/**
+ * main.js
+ * Script global cargado desde Layout.astro: registro del Service Worker (/sw.js),
+ * botón de instalación PWA ([data-instalar-app]) y menú colapsable responsive ([data-main-menu]).
+ */
+
+(() => {});
         });
     }
 
@@ -115,7 +127,13 @@
             function iniciarTemporizador() {
                 detenerTemporizador();
                 if (pausadoPorUsuario || interactuando || movimientoReducido.matches) return;
-                temporizador = window.setInterval(() => {
+                temporizador = window.setInterval/**
+ * main.js
+ * Script global cargado desde Layout.astro: registro del Service Worker (/sw.js),
+ * botón de instalación PWA ([data-instalar-app]) y menú colapsable responsive ([data-main-menu]).
+ */
+
+(() => {
                     if (!pausadoPorUsuario && !interactuando && !document.hidden) {
                         instancia.next();
                     }

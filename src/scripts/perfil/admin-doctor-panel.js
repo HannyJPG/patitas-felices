@@ -1,3 +1,11 @@
+/**
+ * perfil/admin-doctor-panel.js
+ * Controlador de las pestañas operativas de médico veterinario y administrador en perfil.astro:
+ * agenda médica y diagnóstico clínico (/api/doctor/agenda, PATCH /api/doctor/citas/{id}),
+ * catálogo farmacéutico, resumen CRM (/api/admin/crm), personal (/api/admin/personal),
+ * cuentas (/api/admin/usuarios/{id}/estado), solicitudes de mascotas y resumen de las 16 tablas (/api/bd/tablas).
+ */
+
 import { abrirPdfBoletaAutenticada, peticionApi } from "../api-client.js";
 import { esModoDemoActivo, escapeHtml } from "../ui-utils.js";
 

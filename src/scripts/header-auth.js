@@ -1,3 +1,11 @@
+/**
+ * header-auth.js
+ * Controlador global de autenticación conectado a Header.astro y ModalLogin.astro.
+ * Sincroniza la barra de usuario (#btn-header-login, #dropdown-header-perfil) con /api/auth/sesion,
+ * gestiona los formularios de login (/api/auth/login) y registro (/api/auth/register), y dispara
+ * el evento personalizado "patitas:sesion-actualizada" para que otras vistas reaccionen al instante.
+ */
+
 import { peticionApi, guardarSesion, obtenerSesion, cerrarSesion, RUTA_ESPACIO_POR_ROL } from "./api-client.js";
 
 const STORAGE_REMEMBER_EMAIL = "patitas_remember_email";

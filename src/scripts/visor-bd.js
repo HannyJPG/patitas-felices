@@ -1,3 +1,9 @@
+/**
+ * visor-bd.js
+ * Controlador de la página visor-bd.astro: consulta /api/bd/tablas (protegido por rol admin),
+ * mantiene las 16 tablas en caché local y permite filtrar por tabla o ajustar el límite de filas.
+ */
+
 import { obtenerSesion, peticionApi } from "./api-client.js";
 
 let cacheTablas = {};

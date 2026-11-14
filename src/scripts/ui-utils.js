@@ -1,4 +1,10 @@
 
+/**
+ * ui-utils.js
+ * Utilidades puras de presentación (sanitización HTML, alertas Bootstrap, formato de fechas y modo demo).
+ * Consumido por admin-app.js, perfil.js, cliente-panel.js y admin-doctor-panel.js.
+ */
+
 export function escapeHtml(valor) {
     return String(valor ?? "")
         .replace(/&/g, "&amp;")

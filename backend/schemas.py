@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
+# --- Contratos de entrada (request bodies) ---
 class LoginRequest(BaseModel):
     email: str = Field(..., examples=["admin@patitasfelices.pe"])
     password: str = Field(..., examples=["admin123"])
@@ -92,6 +93,7 @@ class ResolverSolicitudMascotaRequest(BaseModel):
     accion: str = Field(..., examples=["aprobar", "rechazar"])
 
 
+# --- Contratos de respuesta (OpenAPI response_model) ---
 class _FlexModel(BaseModel):
     model_config = ConfigDict(extra="allow")
 

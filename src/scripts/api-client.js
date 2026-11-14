@@ -1,4 +1,11 @@
 
+/**
+ * api-client.js
+ * Cliente HTTP compartido y gestión de sesión JWT en localStorage para todas las vistas Astro.
+ * Resuelve automáticamente la URL del backend FastAPI (puerto 8000 en desarrollo o mismo origen en dist/).
+ */
+
+// --- Resolución de origen API y persistencia de sesión ---
 export const API_BASE_URL = (() => {
     if (typeof window === "undefined") return "http://127.0.0.1:8000";
     const host = window.location.hostname;
@@ -43,6 +50,7 @@ export function cerrarSesion() {
     }
 }
 
+// --- Peticiones autenticadas hacia FastAPI y normalización de errores HTTP ---
 export async function peticionApi(ruta, opciones = {}) {
     const sesion = obtenerSesion();
     const cabeceras = {
@@ -96,6 +104,7 @@ export async function peticionApi(ruta, opciones = {}) {
     }
 }
 
+// --- Descarga y visualización de boletas PDF generadas por TiendaFacade ---
 export function descargarPdfDesdeBase64(pdfBase64, nombreArchivo = "Boleta_Patitas_Felices.pdf") {
     const caracteres = atob(pdfBase64);
     const bytes = new Uint8Array(caracteres.length);
