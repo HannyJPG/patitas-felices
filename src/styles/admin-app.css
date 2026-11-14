@@ -1,7 +1,3 @@
-/* ==========================================================================
-   APLICACIÓN ADMINISTRATIVA INDEPENDIENTE — CLÍNICA PATITAS FELICES
-   Paleta: Azul Marino (#0B2545), Verde (#15803D), Fondo Claro (#F4F8F6), Blanco (#FFFFFF)
-   ========================================================================== */
 
 :root {
     --admin-navy: #0B2545;
@@ -28,7 +24,6 @@ body {
     line-height: 1.55;
 }
 
-/* Estructura principal con barra lateral fija en escritorio y barra superior en móvil */
 .admin-shell {
     display: grid;
     grid-template-columns: 265px minmax(0, 1fr);
@@ -118,7 +113,6 @@ body {
 }
 .admin-sidebar-link:hover { background: rgba(255, 255, 255, 0.12); }
 
-/* Área principal de trabajo */
 .admin-main {
     display: flex;
     flex-direction: column;
@@ -180,7 +174,6 @@ body {
     margin-inline: auto;
 }
 
-/* Barra global de filtros por fecha */
 .filter-bar {
     background: var(--admin-surface);
     border: 1px solid var(--admin-line);
@@ -262,7 +255,6 @@ body {
     border-color: var(--admin-navy);
 }
 
-/* Tarjetas KPI */
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -296,7 +288,6 @@ body {
     color: var(--admin-muted);
 }
 
-/* Paneles de gráficos y secciones */
 .charts-grid {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
@@ -325,7 +316,6 @@ body {
     color: var(--admin-navy);
 }
 
-/* Gráfico de barras visual adaptable */
 .bar-chart {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
@@ -365,7 +355,6 @@ body {
     text-align: center;
 }
 
-/* Tabla interactiva tipo Excel */
 .excel-toolbar {
     display: flex;
     flex-wrap: wrap;

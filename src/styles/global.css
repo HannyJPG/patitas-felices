@@ -1,15 +1,6 @@
 @import "./vendor/bootstrap.min.css";
 
-/* =========================================================================
-   PALETA DE COLORES - SPRINT 1
-   Colores asignados:
-   - #BFE7EA (Aqua Pastel / Soft Mint)
-   - #FFEAD3 (Melocotón Cálido / Warm Peach Cream)
-   - #E89B5B (Terracota Cálido / Warm Caramel)
-   - #FFCB56 (Ámbar / Amarillo Dorado Cálido)
-   ========================================================================= */
 :root {
-    /* Paleta Principal Sprint 1 */
     --color-aqua: #BFE7EA;
     --color-aqua-soft: #E8F7F8;
     --color-aqua-dark: #1E666E;
@@ -27,18 +18,17 @@
     --color-gold-hover: #F0BA36;
     --color-gold-dark: #8F6500;
 
-    /* Semántica de la marca y accesibilidad de alto contraste */
     --patitas-primary: var(--color-terracotta);
     --patitas-primary-hover: var(--color-terracotta-hover);
     --patitas-secondary: var(--color-gold);
     --patitas-secondary-hover: var(--color-gold-hover);
     
-    --patitas-navy: #192534;        /* Títulos y textos oscuros (13+:1 de contraste) */
+    --patitas-navy: #192534;
     --patitas-navy-soft: #283C53;
     --patitas-text: #192534;
     --patitas-muted: #54687F;
 
-    --patitas-background: #FCF9F5;  /* Fondo general con sutil calidez */
+    --patitas-background: #FCF9F5;
     --patitas-surface: #FFFFFF;
     --patitas-accent: var(--color-peach-soft);
     --patitas-border: #EADBCE;
@@ -46,7 +36,6 @@
     --patitas-radius: 1.25rem;
     --patitas-font: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-    /* Variables de Bootstrap mapeadas */
     --bs-primary: var(--patitas-primary);
     --bs-primary-rgb: 232, 155, 91;
     --bs-body-font-family: var(--patitas-font);
@@ -94,7 +83,6 @@ img { max-width: 100%; }
 .small-note { color: var(--patitas-muted); font-size: 0.86rem; line-height: 1.65; }
 .lead { color: var(--patitas-muted); font-size: 1.18rem; }
 
-/* Botones con la nueva paleta: Terracota (#9E4911) con alto contraste WCAG y Amarillo Ámbar (#FFCB56). */
 .btn {
     --bs-btn-font-weight: 600;
     --bs-btn-border-radius: 0.75rem;
@@ -160,7 +148,6 @@ img { max-width: 100%; }
     --bs-btn-disabled-border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* Botones específicos de Header y Acciones Rápidas */
 .btn-cita-header {
     background-color: var(--color-gold);
     color: #221603;
@@ -217,7 +204,6 @@ img { max-width: 100%; }
     font-size: 0.8rem;
 }
 
-/* Encabezado fijo siempre visible en la parte superior */
 .site-header.sticky-top {
     position: sticky;
     top: 0;
@@ -333,7 +319,6 @@ img { max-width: 100%; }
 }
 .menu-toggle:focus { box-shadow: none; }
 
-/* Portada Hero con retoque de calidad y adaptación a la paleta */
 .hero {
     position: relative;
     isolation: isolate;
@@ -357,9 +342,6 @@ img { max-width: 100%; }
 .hero :focus-visible { outline-color: #FFFFFF; }
 .hero-video-toggle { margin-top: 1rem; }
 
-/* =========================================================================
-   APARTADO DE SERVICIOS
-   ========================================================================= */
 .badge-servicios-tag {
     background-color: var(--color-aqua);
     color: var(--color-aqua-dark);
@@ -440,7 +422,6 @@ img { max-width: 100%; }
     color: var(--color-terracotta-dark);
 }
 
-/* Modo carrusel interactivo en responsive para Servicios */
 @media (max-width: 767.98px) {
     .services-grid-track {
         display: flex !important;
@@ -511,9 +492,6 @@ img { max-width: 100%; }
     transform: translateY(-1px);
 }
 
-/* =========================================================================
-   SOBRE NOSOTROS: MARCO LIMPIO Y FRASE EN ITALIC
-   ========================================================================= */
 .about-section {
     background-color: var(--patitas-surface);
     border-block: 1px solid var(--patitas-line);
@@ -580,9 +558,6 @@ img { max-width: 100%; }
     color: var(--color-terracotta);
 }
 
-/* =========================================================================
-   TESTIMONIOS: 7 TARJETAS, 4 VISIBLES, ROTACIÓN CADA 5 SEGUNDOS
-   ========================================================================= */
 .testimonial-slider-wrapper {
     overflow: hidden;
     width: 100%;
@@ -675,9 +650,6 @@ img { max-width: 100%; }
     border-radius: 0.4rem;
 }
 
-/* =========================================================================
-   CONTACTO
-   ========================================================================= */
 .contact-section { padding-top: 0; }
 .contact-panel {
     display: grid;
@@ -765,7 +737,6 @@ img { max-width: 100%; }
 .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.74); font-size: 0.82rem; }
 .footer-bottom p { margin: 0; }
 
-/* Formularios, paneles y tablas sobre fondo blanco (#FFFFFF). */
 .interior-main { display: flex; align-items: flex-start; }
 .status-panel {
     width: 100%;
@@ -836,7 +807,6 @@ img { max-width: 100%; }
 .appointment-summary dt { color: var(--patitas-navy); font-size: 0.92rem; font-weight: 600; }
 .appointment-summary dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 
-/* Tarjetas de perfil por rol y listas limpias. */
 .profile-banner {
     display: flex;
     flex-wrap: wrap;
@@ -857,7 +827,6 @@ img { max-width: 100%; }
     background: #FFFFFF;
 }
 
-/* Adaptación a pantallas medianas y móviles. */
 @media (max-width: 991.98px) {
     .brand-logo { width: 9.5rem; }
     .site-navbar .navbar-collapse { width: 100%; padding-top: 0.75rem; }
@@ -899,10 +868,6 @@ img { max-width: 100%; }
     .service-card { transition: none; }
 }
 
-/* =========================================================================
-   ESTILOS DEL MODAL DE INICIO DE SESIÓN - SPRINT 1
-   Integración con paleta #BFE7EA, #FFEAD3, #E89B5B, #FFCB56
-   ========================================================================= */
 .modal-patitas-content {
     border-radius: 1.25rem;
     border: 2px solid var(--color-peach);
@@ -1093,9 +1058,6 @@ img { max-width: 100%; }
     margin-left: 0.5rem;
 }
 
-/* =========================================================================
-   APARTADO DE SEDES Y MAPA DE GOOGLE MAPS
-   ========================================================================= */
 .sedes-section {
     background-color: var(--patitas-background);
 }
@@ -1200,9 +1162,6 @@ img { max-width: 100%; }
     }
 }
 
-/* =========================================================================
-   TIENDA: TARJETAS DE PRODUCTOS CON IMÁGENES DEDICADAS
-   ========================================================================= */
 .product-card {
     background-color: #FFFFFF;
     border: 1px solid var(--patitas-line);
@@ -1341,9 +1300,6 @@ img { max-width: 100%; }
     }
 }
 
-/* ==========================================================================
-   NAVBAR OVERLAY EN MÓVIL (Despliegue flotante sin empujar contenido)
-   ========================================================================== */
 @media (max-width: 991.98px) {
     .site-header {
         position: sticky;
@@ -1380,9 +1336,6 @@ img { max-width: 100%; }
     }
 }
 
-/* ==========================================================================
-   VISTA PERFIL & PANEL (Alto contraste, avatar circular y UX móvil)
-   ========================================================================== */
 .perfil-banner-card {
     background-color: #FFFFFF;
     border: 1px solid rgba(11, 37, 69, 0.12) !important;
@@ -1446,7 +1399,6 @@ img { max-width: 100%; }
     .perfil-title-text {
         font-size: 1.15rem;
     }
-    /* Barra de navegación de pestañas horizontal tipo scroll en móvil */
     #menu-tabs-perfil {
         display: flex;
         flex-direction: row !important;
@@ -1465,7 +1417,6 @@ img { max-width: 100%; }
     .tab-panel-contenido {
         padding: 1.15rem !important;
     }
-    /* Prevenir que tablas o formularios desborden cajas */
     .tab-panel-contenido, .tab-panel-contenido * {
         max-width: 100%;
         word-break: break-word;
@@ -1476,9 +1427,6 @@ img { max-width: 100%; }
     }
 }
 
-/* ==========================================================================
-   BOTÓN FLOTANTE GATITO INTERACTIVO (Se lame la patita cada 3s)
-   ========================================================================== */
 .floating-cat-container {
     position: fixed;
     bottom: 22px;
@@ -1503,7 +1451,6 @@ img { max-width: 100%; }
     box-shadow: 0 10px 24px rgba(232, 155, 91, 0.5);
 }
 
-/* Bocadillo interactivo "¡Contáctanos aquí!" */
 .cat-speech-bubble {
     background: #FFFFFF;
     color: var(--patitas-navy);
@@ -1535,13 +1482,12 @@ img { max-width: 100%; }
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background-color: #25D366; /* WhatsApp green */
+    background-color: #25D366;
     display: inline-block;
     box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
     animation: pulseDot 2s infinite;
 }
 
-/* Contenedor del avatar gatito */
 .cat-avatar-wrap {
     width: 68px;
     height: 68px;
@@ -1561,7 +1507,6 @@ img { max-width: 100%; }
     overflow: visible;
 }
 
-/* Animación del lamido de patita cada 3 segundos */
 .cat-paw-licking-group {
     transform-origin: 58px 75px;
     animation: catPawLick 3s ease-in-out infinite;
@@ -1582,19 +1527,15 @@ img { max-width: 100%; }
         transform: rotate(0deg) translate(0, 0);
     }
     72% {
-        /* Levanta la pata hacia la carita */
         transform: rotate(-38deg) translate(-4px, -14px);
     }
     78% {
-        /* Se lame la pata */
         transform: rotate(-44deg) translate(-5px, -16px);
     }
     84% {
-        /* Segunda pasada suave */
         transform: rotate(-40deg) translate(-4px, -15px);
     }
     92% {
-        /* Baja la pata */
         transform: rotate(-12deg) translate(-1px, -4px);
     }
     100% {
@@ -1659,11 +1600,6 @@ img { max-width: 100%; }
     }
 }
 
-/* ==========================================================================
-   HUELLITAS ANIMADAS DE FONDO (Perro y Gato caminando paso a paso)
-   Secuencia realista: dan cada paso, queda la huella visible en el suelo,
-   luego de un tiempo el rastro se borra y comienza otro patrón diferente.
-   ========================================================================== */
 .paw-tracks-background {
     position: fixed;
     top: 0;
@@ -1689,24 +1625,18 @@ img { max-width: 100%; }
     will-change: opacity, transform;
 }
 
-/* Huellita de Perro (almohadilla grande y dedos caninos) */
 .paw-dog {
     width: 34px;
     height: 34px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230B2545'%3E%3Cpath d='M12 14c-2 0-3.5 1.5-3.5 3.5 0 1.5 1 2.5 2.5 2.5h2c1.5 0 2.5-1 2.5-2.5 0-2-1.5-3.5-3.5-3.5zM6.5 11c-1 0-1.8.8-1.8 1.8s.8 1.8 1.8 1.8 1.8-.8 1.8-1.8S7.5 11 6.5 11zm11 0c-1 0-1.8.8-1.8 1.8s.8 1.8 1.8 1.8 1.8-.8 1.8-1.8-.8-1.8-1.8-1.8zM9 6.5C8.2 6.5 7.5 7.2 7.5 8s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5S9.8 6.5 9 6.5zm6 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5S15.8 6.5 15 6.5z'/%3E%3C/svg%3E");
 }
 
-/* Huellita de Gato (almohadilla redondeada trifoliada y deditos tiernos) */
 .paw-cat {
     width: 28px;
     height: 28px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E89B5B'%3E%3Cpath d='M12 13c-2.2 0-3.8 1.2-3.8 2.8 0 1.2.9 2.2 2.2 2.2h3.2c1.3 0 2.2-1 2.2-2.2C15.8 14.2 14.2 13 12 13zM6 10c-.8 0-1.5.7-1.5 1.5S5.2 13 6 13s1.5-.7 1.5-1.5S6.8 10 6 10zm12 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5S18.8 10 18 10zm-8.5-3.5c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5zm5 0c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5z'/%3E%3C/svg%3E");
 }
 
-/* --------------------------------------------------------------------------
-   PATRÓN 1: Perro caminando en diagonal (abajo-izq hacia centro-der)
-   Paso 1 al 8 aparecen uno a uno, el rastro completo se queda y se borra a los 7s
-   -------------------------------------------------------------------------- */
 .t1-s1 { left: 7vw;  top: 85vh; transform: rotate(38deg);  animation: stepT1_1 24s infinite; }
 .t1-s2 { left: 13vw; top: 78vh; transform: rotate(44deg);  animation: stepT1_2 24s infinite; }
 .t1-s3 { left: 18vw; top: 69vh; transform: rotate(38deg);  animation: stepT1_3 24s infinite; }
@@ -1725,10 +1655,6 @@ img { max-width: 100%; }
 @keyframes stepT1_7 { 0%, 12.8% { opacity: 0; transform: scale(0.6); } 13.5% { opacity: 0.12; transform: scale(1.08); } 14.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
 @keyframes stepT1_8 { 0%, 14.8% { opacity: 0; transform: scale(0.6); } 15.5% { opacity: 0.12; transform: scale(1.08); } 16.5%, 26% { opacity: 0.12; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(0.9); } }
 
-/* --------------------------------------------------------------------------
-   PATRÓN 2: Gato cruzando en curva suave (derecha a izquierda)
-   Comienza a los 8.5s (35%), cada pisada queda marcada, el rastro se borra a los 15s
-   -------------------------------------------------------------------------- */
 .t2-s1 { left: 91vw; top: 22vh; transform: rotate(-95deg);  animation: stepT2_1 24s infinite; }
 .t2-s2 { left: 83vw; top: 26vh; transform: rotate(-105deg); animation: stepT2_2 24s infinite; }
 .t2-s3 { left: 75vw; top: 23vh; transform: rotate(-95deg);  animation: stepT2_3 24s infinite; }
@@ -1747,10 +1673,6 @@ img { max-width: 100%; }
 @keyframes stepT2_7 { 0%, 46.2% { opacity: 0; transform: scale(0.6); } 47.0% { opacity: 0.14; transform: scale(1.08); } 48.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
 @keyframes stepT2_8 { 0%, 48.2% { opacity: 0; transform: scale(0.6); } 49.0% { opacity: 0.14; transform: scale(1.08); } 50.0%, 59% { opacity: 0.14; transform: scale(1); } 63%, 100% { opacity: 0; transform: scale(0.9); } }
 
-/* --------------------------------------------------------------------------
-   PATRÓN 3: Mascota juguetona bajando (arriba-izq hacia abajo-der)
-   Comienza a los 16.5s (69%), cada pisada queda marcada, el rastro se borra a los 23.5s
-   -------------------------------------------------------------------------- */
 .t3-s1 { left: 15vw; top: 12vh; transform: rotate(135deg); animation: stepT3_1 24s infinite; }
 .t3-s2 { left: 22vw; top: 19vh; transform: rotate(145deg); animation: stepT3_2 24s infinite; }
 .t3-s3 { left: 28vw; top: 27vh; transform: rotate(135deg); animation: stepT3_3 24s infinite; }

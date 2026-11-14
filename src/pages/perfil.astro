@@ -4,7 +4,6 @@ import Layout from "../layouts/Layout.astro";
 <Layout title="Mi Perfil y Panel Clínico | Patitas Felices">
   <main class="container section-spacing" id="contenido" tabindex="-1">
     
-    <!-- Banner superior del Usuario -->
     <section class="perfil-banner-card mb-4 p-3 p-md-4 rounded border shadow-sm" aria-labelledby="perfil-usuario-nombre">
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div class="d-flex align-items-center gap-3">
@@ -33,13 +32,10 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </section>
 
-    <!-- Alertas globales del panel -->
     <div id="alerta-perfil-global" class="alert alert-info py-2 px-3 small d-none" role="alert"></div>
 
-    <!-- Estructura SPA: 2 Columnas -->
     <div class="row g-4 align-items-start">
       
-      <!-- Columna Lateral: Navegación por pestañas -->
       <aside class="col-12 col-md-4 col-lg-3" aria-label="Menú del panel">
         <div class="card p-3 rounded border shadow-sm bg-white">
           <p class="small text-muted fw-bold text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">
@@ -47,7 +43,6 @@ import Layout from "../layouts/Layout.astro";
           </p>
           <div class="nav nav-pills flex-column gap-1" id="menu-tabs-perfil" role="tablist">
             
-            <!-- Pestañas de Cliente -->
             <button class="nav-link active text-start py-2 px-3" data-tab-target="tab-perfil" type="button" role="tab">
               Mi perfil
             </button>
@@ -64,7 +59,6 @@ import Layout from "../layouts/Layout.astro";
               Mis citas médicas
             </button>
 
-            <!-- Pestañas de Doctor -->
             <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-agenda" data-role-filter="doctor" type="button" role="tab">
               Agenda de pacientes
             </button>
@@ -72,7 +66,6 @@ import Layout from "../layouts/Layout.astro";
               Catálogo de farmacia
             </button>
 
-            <!-- Pestañas de Administrador -->
             <button class="nav-link text-start py-2 px-3 d-none" data-tab-target="tab-crm" data-role-filter="admin" type="button" role="tab">
               CRM y Finanzas
             </button>
@@ -99,12 +92,8 @@ import Layout from "../layouts/Layout.astro";
         </div>
       </aside>
 
-      <!-- Columna Principal: Paneles de contenido reactivo -->
       <section class="col-12 col-md-8 col-lg-9" aria-live="polite">
         
-        <!-- ===================================================================
-             1. PANEL: MI PERFIL (Datos, DNI/RUC inmutable, Cambiar contraseña)
-             =================================================================== -->
         <article id="panel-perfil" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <div>
@@ -141,7 +130,6 @@ import Layout from "../layouts/Layout.astro";
             </div>
           </div>
 
-          <!-- Documento oficial (DNI / RUC) -->
           <div class="border rounded p-3 bg-light mb-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h3 class="h6 fw-bold mb-0 text-dark">Identificador oficial (DNI / RUC)</h3>
@@ -151,7 +139,6 @@ import Layout from "../layouts/Layout.astro";
               <p class="small text-muted mb-0">Cargando estado de identificación...</p>
             </div>
 
-            <!-- Formulario para vincular documento si aún no tiene -->
             <form id="form-vincular-doc-perfil" class="row g-2 align-items-end mt-2 d-none" novalidate>
               <div class="col-12 col-sm-4">
                 <label class="form-label small mb-1" for="perfil-select-tipo-doc">Tipo</label>
@@ -176,7 +163,6 @@ import Layout from "../layouts/Layout.astro";
             </form>
           </div>
 
-          <!-- Formulario para Cambiar Contraseña -->
           <div class="border rounded p-3 bg-white">
             <h3 class="h6 fw-bold mb-1 text-dark">Seguridad de la Cuenta</h3>
             <p class="small text-muted mb-3">Actualiza tu contraseña de acceso cuando lo necesites.</p>
@@ -205,9 +191,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             2. PANEL: MIS MASCOTAS (Listado, Alta, Solicitudes con justificación)
-             =================================================================== -->
         <article id="panel-mascotas" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
             <div>
@@ -219,7 +202,6 @@ import Layout from "../layouts/Layout.astro";
             </button>
           </div>
 
-          <!-- Formulario desplegable para nueva mascota -->
           <div id="wrap-alta-mascota" class="p-3 mb-4 border rounded bg-light d-none">
             <h3 class="h6 fw-bold mb-2 text-dark">Registrar nueva mascota</h3>
             <div id="alerta-alta-mascota" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
@@ -269,12 +251,10 @@ import Layout from "../layouts/Layout.astro";
             </form>
           </div>
 
-          <!-- Contenedor dinámico de tarjetas de mascotas -->
           <div id="contenedor-lista-mascotas" class="d-grid gap-3 mb-4">
             <p class="small text-muted mb-0">Cargando tus mascotas...</p>
           </div>
 
-          <!-- Estado de la solicitud mas reciente por mascota -->
           <div class="border-top pt-3 mt-3">
             <h3 class="h6 fw-bold mb-1 text-dark">Estado de solicitudes por mascota</h3>
             <p class="small text-muted mb-2">Por seguridad clínica, las modificaciones o bajas requieren la aceptación del administrador.</p>
@@ -284,9 +264,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             3. PANEL: MIS COMPRAS Y BOLETAS (Historial y Descargas)
-             =================================================================== -->
         <article id="panel-compras" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="border-bottom pb-2 mb-3">
             <h2 class="h5 fw-bold mb-0 text-dark">Mis Compras y Boletas Electrónicas</h2>
@@ -298,9 +275,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             4. PANEL: MÉTODOS DE PAGO (Ejemplar visual / Maqueta)
-             =================================================================== -->
         <article id="panel-pagos" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <div>
@@ -317,7 +291,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
 
           <div class="row g-3 mb-4">
-            <!-- Tarjeta 1 (Visa) -->
             <div class="col-12 col-md-6">
               <div class="p-3 rounded border bg-light position-relative">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -332,7 +305,6 @@ import Layout from "../layouts/Layout.astro";
               </div>
             </div>
 
-            <!-- Tarjeta 2 (Mastercard) -->
             <div class="col-12 col-md-6">
               <div class="p-3 rounded border bg-light position-relative">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -347,7 +319,6 @@ import Layout from "../layouts/Layout.astro";
               </div>
             </div>
 
-            <!-- Yape / Plin -->
             <div class="col-12">
               <div class="p-3 rounded border bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
@@ -364,9 +335,6 @@ import Layout from "../layouts/Layout.astro";
           </button>
         </article>
 
-        <!-- ===================================================================
-             5. PANEL: MIS CITAS MÉDICAS (Cliente)
-             =================================================================== -->
         <article id="panel-citas" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <div>
@@ -381,9 +349,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             6. PANEL: AGENDA MÉDICA (Doctor)
-             =================================================================== -->
         <article id="panel-agenda" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <div>
@@ -393,7 +358,6 @@ import Layout from "../layouts/Layout.astro";
             <span class="badge bg-light text-secondary border">Turno activo</span>
           </div>
 
-          <!-- Formulario de atención médica -->
           <div id="wrap-atencion-doctor" class="p-3 mb-4 border rounded bg-light d-none">
             <h3 class="h6 fw-bold mb-2 text-dark">Registrar Evaluación Clínica</h3>
             <div id="alerta-atencion-doctor" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
@@ -423,9 +387,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             7. PANEL: CATÁLOGO CLÍNICO (Doctor)
-             =================================================================== -->
         <article id="panel-farmacia" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="border-bottom pb-2 mb-3">
             <h2 class="h5 fw-bold mb-0 text-dark">Catálogo de Farmacia e Insumos</h2>
@@ -436,9 +397,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             8. PANEL: CRM Y FINANZAS (Admin)
-             =================================================================== -->
         <article id="panel-crm" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
             <div>
@@ -454,9 +412,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             9. PANEL: SOLICITUDES DE MASCOTAS (Admin - Aprobación/Rechazo)
-             =================================================================== -->
         <article id="panel-solicitudes" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="border-bottom pb-2 mb-3">
             <h2 class="h5 fw-bold mb-0 text-dark">Solicitudes mas recientes por mascota</h2>
@@ -467,9 +422,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             10. PANEL: GESTIÓN DE PERSONAL (Admin)
-             =================================================================== -->
         <article id="panel-personal" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="border-bottom pb-2 mb-3">
             <h2 class="h5 fw-bold mb-0 text-dark">Alta de Personal Médico y Administrativo</h2>
@@ -535,9 +487,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             11. PANEL: CONTROL DE CUENTAS (Admin)
-             =================================================================== -->
         <article id="panel-usuarios" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="border-bottom pb-2 mb-3">
             <h2 class="h5 fw-bold mb-0 text-dark">Control de Usuarios</h2>
@@ -548,9 +497,6 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </article>
 
-        <!-- ===================================================================
-             12. PANEL: VISOR DE 16 TABLAS (Admin)
-             =================================================================== -->
         <article id="panel-bd" class="tab-panel-contenido card p-4 rounded border shadow-sm bg-white mb-4 d-none">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <div>
@@ -569,7 +515,6 @@ import Layout from "../layouts/Layout.astro";
       </section>
     </div>
 
-    <!-- Modal para Solicitud de Edición / Baja de Mascota -->
     <div class="modal fade" id="modalSolicitudMascota" tabindex="-1" aria-labelledby="modalSolicitudTitulo" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -588,7 +533,6 @@ import Layout from "../layouts/Layout.astro";
                 Por favor describe detalladamente la razón de la solicitud para que el administrador evalúe su aprobación.
               </p>
 
-              <!-- Campos editables solo si el tipo es 'editar' -->
               <div id="wrap-campos-edicion-mascota" class="d-none mb-3">
                 <div class="row g-2">
                   <div class="col-12 col-sm-6">
@@ -624,7 +568,6 @@ import Layout from "../layouts/Layout.astro";
                 </div>
               </div>
 
-              <!-- Motivo / Justificación obligatoria -->
               <div class="mb-2">
                 <label class="form-label small fw-semibold mb-1" for="solicitud-input-motivo">
                   Motivo descriptivo / Justificación *

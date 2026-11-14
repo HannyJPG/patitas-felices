@@ -11,20 +11,17 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
       </p>
     </div>
 
-    <!-- Rejilla de servicios (carrusel deslizable interactivo en responsive) -->
     <div class="services-carousel-wrapper position-relative mb-4">
       <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 services-grid-track" id="servicios-carrusel-track">
         {servicios.map((servicio, index) => (
           <div class="col service-carousel-col" data-service-index={index}>
             <article class="service-card-renovada h-100 d-flex flex-column">
               
-              <!-- Barra superior: Categoría y Duración -->
               <div class="service-card-top d-flex justify-content-between align-items-center mb-3">
                 <span class="service-category-badge">{servicio.categoria}</span>
                 <span class="service-duration-badge">{servicio.duracion}</span>
               </div>
 
-              <!-- Ícono y Título -->
               <div class="service-icon-box mb-3" aria-hidden="true">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d={servicio.icono} />
@@ -34,7 +31,6 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
               <h3 class="service-card-title h6 fw-bold mb-2">{servicio.titulo}</h3>
               <p class="service-card-desc text-muted small mb-3">{servicio.descripcion}</p>
 
-              <!-- Lista de puntos incluidos -->
               <ul class="service-features-list list-unstyled mb-3 flex-grow-1">
                 {servicio.caracteristicas.map(item => (
                   <li class="d-flex align-items-start gap-2 mb-1 small text-muted">
@@ -44,7 +40,6 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
                 ))}
               </ul>
 
-              <!-- Botón de agendar -->
               <div class="service-card-action pt-2 border-top">
                 <button 
                   type="button"
@@ -63,7 +58,6 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
         ))}
       </div>
 
-      <!-- Indicadores y controles táctiles visibles solo en responsive -->
       <div class="services-carousel-nav d-md-none d-flex align-items-center justify-content-between mt-3 px-1">
         <button type="button" class="btn btn-outline-primary btn-sm services-nav-btn" id="btn-services-prev" aria-label="Ver servicio anterior">
           <span aria-hidden="true">←</span>
@@ -79,7 +73,6 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
       </div>
     </div>
 
-    <!-- Barra de consulta rápida inferior -->
     <div class="services-support-banner d-flex flex-wrap align-items-center justify-content-between p-3 rounded border">
       <div>
         <strong class="d-block text-dark">¿Tienes dudas sobre qué servicio necesitas?</strong>
@@ -108,7 +101,6 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
 
     function updateCarousel() {
       if (window.innerWidth >= 768) {
-        // En desktop/tablet no actúa carrusel
         return;
       }
       if (currentIndex >= items.length) currentIndex = 0;
@@ -148,7 +140,6 @@ import { enlaceWhatsApp } from "../scripts/whatsapp.js";
       });
     });
 
-    // Detectar scroll táctil nativo para actualizar los dots
     track.addEventListener("scroll", () => {
       if (window.innerWidth >= 768) return;
       const scrollPos = track.scrollLeft;

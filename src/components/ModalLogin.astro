@@ -1,18 +1,15 @@
 ---
-// ModalLogin.astro - Modal de autenticación y registro sencillo y sobrio
 ---
 <div class="modal fade modal-patitas" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginTitulo" aria-hidden="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content modal-patitas-content border">
       
-      <!-- Cabecera simple -->
       <div class="modal-header border-bottom pb-2 justify-content-end">
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar ventana" id="btn-cerrar-modal-x"></button>
       </div>
 
       <div class="modal-body px-4 pt-3 pb-4">
         
-        <!-- Pestañas de cambio: Iniciar sesión / Registrarme -->
         <div class="modal-tab-nav mb-3" role="tablist">
           <button type="button" class="btn-modal-tab active" id="tab-modal-login" role="tab" aria-selected="true" aria-controls="vista-login">
             Iniciar sesión
@@ -22,21 +19,15 @@
           </button>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VISTA 1: INICIAR SESIÓN                   -->
-        <!-- ========================================== -->
         <div id="vista-login" role="tabpanel" aria-labelledby="tab-modal-login">
-          <!-- Título -->
           <div class="text-center mb-3">
             <h2 class="modal-title h5 fw-bold mb-1" id="modalLoginTitulo">Ingreso al sistema</h2>
             <p class="small text-muted mb-0">Escribe tus credenciales para acceder a tu panel de usuario.</p>
           </div>
 
-          <!-- Alertas dinámicas de Login -->
           <div id="modal-login-error" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
           <div id="modal-login-success" class="alert alert-success py-2 px-3 small d-none" role="alert"></div>
 
-          <!-- Formulario de Login -->
           <form id="form-modal-login" novalidate autocomplete="on">
             <div class="mb-3">
               <label for="modal-input-email" class="form-label small fw-semibold">Correo electrónico</label>
@@ -69,7 +60,6 @@
               </div>
             </div>
 
-            <!-- Opciones: Recordar mis datos y Recuperar -->
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="modal-check-recordar" checked>
@@ -82,14 +72,12 @@
               </button>
             </div>
 
-            <!-- Panel de información sobre contraseña -->
             <div id="panel-recordar-ayuda" class="card card-body bg-light border py-2 px-3 mb-3 small d-none" role="region" aria-label="Ayuda para recordar contraseña">
               <p class="mb-0 text-muted">
                 Si activas la opción de recordar datos, tu correo se completará automáticamente en este navegador. Para restablecer tu acceso personal o si olvidaste tu clave, comunícate con la administración de la clínica.
               </p>
             </div>
 
-            <!-- Botón de ingreso -->
             <button type="submit" id="btn-modal-submit" class="btn btn-primary w-100 py-2 fw-semibold">
               <span class="spinner-border spinner-border-sm me-2 d-none" id="spinner-modal-login" role="status" aria-hidden="true"></span>
               <span id="texto-modal-submit">Iniciar sesión</span>
@@ -97,21 +85,15 @@
           </form>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VISTA 2: REGISTRO DE NUEVO CLIENTE         -->
-        <!-- ========================================== -->
         <div id="vista-registro" class="d-none" role="tabpanel" aria-labelledby="tab-modal-registro">
-          <!-- Título -->
           <div class="text-center mb-3">
             <h2 class="modal-title h5 fw-bold mb-1">Crear cuenta de cliente</h2>
             <p class="small text-muted mb-0">Registra tus datos para solicitar citas y guardar el historial de tus mascotas.</p>
           </div>
 
-          <!-- Alertas dinámicas de Registro -->
           <div id="modal-registro-error" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
           <div id="modal-registro-success" class="alert alert-success py-2 px-3 small d-none" role="alert"></div>
 
-          <!-- Formulario de Registro -->
           <form id="form-modal-registro" novalidate autocomplete="on">
             <div class="mb-3">
               <label for="registro-input-nombre" class="form-label small fw-semibold">Nombre y Apellidos</label>
@@ -167,7 +149,6 @@
               <div class="form-text" style="font-size: 0.76rem;">Usa al menos 6 caracteres para tu seguridad.</div>
             </div>
 
-            <!-- Botón de Registro -->
             <button type="submit" id="btn-registro-submit" class="btn btn-primary w-100 py-2 fw-semibold">
               <span class="spinner-border spinner-border-sm me-2 d-none" id="spinner-modal-registro" role="status" aria-hidden="true"></span>
               <span id="texto-registro-submit">Crear mi cuenta</span>

@@ -1,14 +1,11 @@
-/* Cliente HTTP fetch() hacia el Backend Python FastAPI (Local y Hosting en la Nube) */
 
 export const API_BASE_URL = (() => {
     if (typeof window === "undefined") return "http://127.0.0.1:8000";
     const host = window.location.hostname;
     const port = window.location.port;
-    // Si estás en desarrollo local con Astro (puerto 4321), apunta a la API en 8000 con el mismo host (localhost o 127.0.0.1)
     if (port === "4321") {
         return `http://${host}:8000`;
     }
-    // Si ya está compilado o alojado en hosting unificado
     if (window.location.origin.startsWith("http")) {
         return window.location.origin;
     }
@@ -27,7 +24,6 @@ export function guardarSesion(datosLogin) {
     try {
         localStorage.setItem(STORAGE_KEY_SESION, JSON.stringify(datosLogin));
     } catch {
-        /* Entornos con almacenamiento restringido */
     }
 }
 
@@ -44,7 +40,6 @@ export function cerrarSesion() {
     try {
         localStorage.removeItem(STORAGE_KEY_SESION);
     } catch {
-        /* Ignorar */
     }
 }
 
@@ -132,7 +127,6 @@ export async function abrirPdfBoletaAutenticada(ventaId) {
             const errJson = await respuesta.json();
             if (typeof errJson?.detail === "string") mensaje = errJson.detail;
         } catch {
-            /* Ignorar si la respuesta no es JSON */
         }
         throw new Error(mensaje);
     }

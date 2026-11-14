@@ -40,9 +40,6 @@ if _env_file.is_file():
             os.environ.setdefault(_k.strip(), _v.strip())
 
 
-# =============================================================================
-# 2. INTERFAZ ADAPTER PARA BASE DE DATOS
-# =============================================================================
 class IDatabaseAdapter(ABC):
     """Target Interface para el acceso desacoplado a la persistencia."""
 
@@ -173,9 +170,6 @@ class IDatabaseAdapter(ABC):
         pass
 
 
-# =============================================================================
-# 3. ADAPTER DE MICROSOFT SQL SERVER (16 TABLAS EN 3FN SIN REDUNDANCIAS)
-# =============================================================================
 class SQLServerDatabaseAdapter(
     UsuariosRepositoryMixin,
     MascotasRepositoryMixin,
@@ -270,9 +264,6 @@ class SQLServerDatabaseAdapter(
         return resultado
 
 
-# =============================================================================
-# 4. FÁBRICA DE ADAPTADORES - FACTORY METHOD (SQL SERVER)
-# =============================================================================
 def obtener_adaptador_bd() -> IDatabaseAdapter:
     return SQLServerDatabaseAdapter(
         database=os.getenv("SQLSERVER_DATABASE", "PatitasFelices_DB"),

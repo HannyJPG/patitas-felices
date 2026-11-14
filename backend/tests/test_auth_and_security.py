@@ -25,7 +25,6 @@ from backend.patterns import (
 
 
 def test_flujo_completo_endpoints_fastapi(client: TestClient) -> None:
-    # 1. Login como Cliente
     res_login = client.post(
         "/api/auth/login",
         json={"email": "cliente@patitasfelices.pe", "password": "cliente123"},
@@ -35,7 +34,6 @@ def test_flujo_completo_endpoints_fastapi(client: TestClient) -> None:
     token_cliente = datos_cliente["token"]
     assert datos_cliente["rbac"]["ruta_principal"] == "/tienda"
 
-    # 2. Compra en tienda y descarga de PDF
     res_compra = client.post(
         "/api/tienda/checkout",
         headers={"Authorization": f"Bearer {token_cliente}"},
@@ -49,7 +47,6 @@ def test_flujo_completo_endpoints_fastapi(client: TestClient) -> None:
     assert res_compra.status_code == 200
     venta_id = res_compra.json()["venta"]["id"]
 
-    # Boleta PDF requiere autenticación y pertenencia
     assert client.get(f"/api/tienda/boleta/{venta_id}/pdf").status_code == 401
     res_pdf = client.get(
         f"/api/tienda/boleta/{venta_id}/pdf",
@@ -59,7 +56,6 @@ def test_flujo_completo_endpoints_fastapi(client: TestClient) -> None:
     assert res_pdf.headers["content-type"] == "application/pdf"
     assert res_pdf.content.startswith(b"%PDF-1.4")
 
-    # 3. Login como Doctor y actualización de diagnóstico
     res_doc = client.post(
         "/api/auth/login",
         json={"email": "doctor@patitasfelices.pe", "password": "doctor123"},
@@ -77,7 +73,6 @@ def test_flujo_completo_endpoints_fastapi(client: TestClient) -> None:
     assert res_diag.status_code == 200
     assert res_diag.json()["cita"]["estado"] == "atendida"
 
-    # 4. Login como Admin y desactivación de usuario para probar el Proxy en vivo
     res_admin = client.post(
         "/api/auth/login",
         json={"email": "admin@patitasfelices.pe", "password": "admin123"},
@@ -91,14 +86,12 @@ def test_flujo_completo_endpoints_fastapi(client: TestClient) -> None:
     assert res_inactivar.status_code == 200
     assert res_inactivar.json()["usuario"]["estado"] == "inactivo"
 
-    # Ahora el token anterior del cliente 3 es bloqueado inmediatamente por AuthSessionProxy
     res_bloqueado = client.get(
         "/api/cliente/mis-citas",
         headers={"Authorization": f"Bearer {token_cliente}"},
     )
     assert res_bloqueado.status_code == 403
 
-    # 5. Visor en vivo de las 16 tablas requiere rol admin (401 sin token, 403 si no es admin)
     assert client.get("/api/bd/tablas").status_code == 401
     res_tablas = client.get(
         "/api/bd/tablas",
@@ -137,7 +130,6 @@ def test_registro_cliente_exitoso_y_bloqueo_duplicados(db_memoria: SQLServerData
     app = crear_app(db_adapter=db_memoria)
     client = TestClient(app)
 
-    # 1. Registro exitoso de nuevo cliente
     payload_nuevo = {
         "nombre": "Renato Castillo",
         "email": "renato@ejemplo.com",
@@ -153,13 +145,11 @@ def test_registro_cliente_exitoso_y_bloqueo_duplicados(db_memoria: SQLServerData
     assert data["usuario"]["estado"] == "activo"
     assert data["rbac"]["rol"] == "cliente"
 
-    # Verificar que puede consultar su sesión con el token recibido
     token = data["token"]
     res_sesion = client.get("/api/auth/sesion", headers={"Authorization": f"Bearer {token}"})
     assert res_sesion.status_code == 200
     assert res_sesion.json()["usuario"]["email"] == "renato@ejemplo.com"
 
-    # 2. Intento de registro duplicado con el mismo correo -> 400 Bad Request
     res_duplicado = client.post("/api/auth/register", json=payload_nuevo)
     assert res_duplicado.status_code == 400
     assert "Ya existe una cuenta" in res_duplicado.json()["detail"]
@@ -168,7 +158,6 @@ def test_admin_alta_personal_doctor_y_admin(db_memoria: SQLServerDatabaseAdapter
     app = crear_app(db_adapter=db_memoria)
     client = TestClient(app)
 
-    # Login como admin existente
     res_login_admin = client.post(
         "/api/auth/login",
         json={"email": "admin@patitasfelices.pe", "password": "admin123"},
@@ -176,7 +165,6 @@ def test_admin_alta_personal_doctor_y_admin(db_memoria: SQLServerDatabaseAdapter
     assert res_login_admin.status_code == 200
     token_admin = res_login_admin.json()["token"]
 
-    # 1. Alta interna de un nuevo Doctor por el Admin
     payload_doctor = {
         "nombre": "Dra. Sofía Alarcón",
         "email": "sofia.alarcon@patitasfelices.pe",
@@ -196,7 +184,6 @@ def test_admin_alta_personal_doctor_y_admin(db_memoria: SQLServerDatabaseAdapter
     assert usuario_doc["rol"] == "doctor"
     assert usuario_doc["email"] == "sofia.alarcon@patitasfelices.pe"
 
-    # El nuevo doctor puede iniciar sesión con sus credenciales creadas
     res_login_doc = client.post(
         "/api/auth/login",
         json={"email": "sofia.alarcon@patitasfelices.pe", "password": "doctoraClave2026"},
@@ -205,7 +192,6 @@ def test_admin_alta_personal_doctor_y_admin(db_memoria: SQLServerDatabaseAdapter
     assert res_login_doc.json()["rbac"]["rol"] == "doctor"
     assert res_login_doc.json()["rbac"]["ruta_espacio"] == "/doctor"
 
-    # 1.b Intento de registrar otro doctor con la MISMA colegiatura CMVP -> Debe ser rechazado (400)
     res_doc_duplicado = client.post(
         "/api/admin/usuarios",
         headers={"Authorization": f"Bearer {token_admin}"},
@@ -223,7 +209,6 @@ def test_admin_alta_personal_doctor_y_admin(db_memoria: SQLServerDatabaseAdapter
     assert "colegiatura" in res_doc_duplicado.json()["detail"].lower()
     assert db_memoria.obtener_usuario_por_email("otro.medico@patitasfelices.pe") is None
 
-    # 1.c Alta de un Administrador sin colegiatura -> Debe crearse sin pedir CMVP
     res_nuevo_admin = client.post(
         "/api/admin/usuarios",
         headers={"Authorization": f"Bearer {token_admin}"},
@@ -240,7 +225,6 @@ def test_admin_alta_personal_doctor_y_admin(db_memoria: SQLServerDatabaseAdapter
     assert res_nuevo_admin.status_code == 200
     assert res_nuevo_admin.json()["usuario"]["rol"] == "admin"
 
-    # 2. Intento de crear personal sin token o con rol de cliente -> 401 o 403
     res_sin_auth = client.post("/api/admin/usuarios", json=payload_doctor)
     assert res_sin_auth.status_code in (401, 403)
 
@@ -248,7 +232,6 @@ def test_checkout_bloquea_nombre_y_registra_documento_unico(db_memoria: SQLServe
     app = crear_app(db_adapter=db_memoria)
     client = TestClient(app)
 
-    # 1. Registrar un nuevo usuario "Pepe Loco" sin documento previo
     res_reg = client.post(
         "/api/auth/register",
         json={"nombre": "Pepe Loco", "email": "pepe@ejemplo.com", "password": "claveSegura123", "telefono": "987654321"},
@@ -256,7 +239,6 @@ def test_checkout_bloquea_nombre_y_registra_documento_unico(db_memoria: SQLServe
     assert res_reg.status_code == 200
     token_pepe = res_reg.json()["token"]
 
-    # 2. Pepe compra en la tienda enviando un nombre diferente ("Nombre Falso") y su DNI "88776655"
     payload_compra = {
         "cliente_nombre": "Nombre Falso",
         "tipo_documento": "DNI",
@@ -272,11 +254,9 @@ def test_checkout_bloquea_nombre_y_registra_documento_unico(db_memoria: SQLServe
     assert res_compra.status_code == 200, res_compra.text
     datos_compra = res_compra.json()
 
-    # El sistema fuerza el nombre real de la cuenta ("Pepe Loco") y no permite el nombre falso
     assert datos_compra["venta"]["cliente_nombre"] == "Pepe Loco"
     assert datos_compra["venta"]["cliente_documento"] == "88776655"
 
-    # 3. Pepe intenta comprar nuevamente pero intentando cambiar su DNI a otro número
     payload_cambio = {
         "cliente_nombre": "Pepe Loco",
         "tipo_documento": "DNI",
@@ -290,21 +270,18 @@ def test_checkout_bloquea_nombre_y_registra_documento_unico(db_memoria: SQLServe
         json=payload_cambio,
     )
     assert res_compra_2.status_code == 200
-    # Como el documento es un identificador único verificado, prevalece el original "88776655"
     assert res_compra_2.json()["venta"]["cliente_documento"] == "88776655"
 
 def test_cliente_registra_documento_en_perfil(db_memoria: SQLServerDatabaseAdapter) -> None:
     app = crear_app(db_adapter=db_memoria)
     client = TestClient(app)
 
-    # Registro de nuevo usuario
     res_reg = client.post(
         "/api/auth/register",
         json={"nombre": "Carlos Rivas", "email": "carlos.rivas@ejemplo.com", "password": "claveSegura123", "telefono": "981234567"},
     )
     token = res_reg.json()["token"]
 
-    # 1. Registrar RUC (11 dígitos)
     res_doc = client.post(
         "/api/cliente/documento",
         headers={"Authorization": f"Bearer {token}"},
@@ -312,7 +289,6 @@ def test_cliente_registra_documento_en_perfil(db_memoria: SQLServerDatabaseAdapt
     )
     assert res_doc.status_code == 200, res_doc.text
 
-    # 2. Consultar mis citas y perfil para verificar que aparezca el RUC registrado
     res_citas = client.get(
         "/api/cliente/mis-citas",
         headers={"Authorization": f"Bearer {token}"},
@@ -322,7 +298,6 @@ def test_cliente_registra_documento_en_perfil(db_memoria: SQLServerDatabaseAdapt
     assert perfil["documento"] == "20123456789"
     assert perfil["tipo_documento"] == "RUC"
 
-    # 3. Intentar modificarlo nuevamente debe ser rechazado
     res_reintento = client.post(
         "/api/cliente/documento",
         headers={"Authorization": f"Bearer {token}"},
@@ -335,12 +310,10 @@ def test_cambio_password_cliente_y_bloqueo_clave_invalida(db_memoria: SQLServerD
     app = crear_app(db_adapter=db_memoria)
     client = TestClient(app)
 
-    # 1. Login con cliente predeterminado (cliente@patitasfelices.pe / cliente123)
     res_login = client.post("/api/auth/login", json={"email": "cliente@patitasfelices.pe", "password": "cliente123"})
     assert res_login.status_code == 200
     token = res_login.json()["token"]
 
-    # 2. Intento de cambio con contraseña actual incorrecta
     res_fallo = client.post(
         "/api/auth/cambiar-password",
         headers={"Authorization": f"Bearer {token}"},
@@ -349,7 +322,6 @@ def test_cambio_password_cliente_y_bloqueo_clave_invalida(db_memoria: SQLServerD
     assert res_fallo.status_code == 400
     assert "no es correcta" in res_fallo.json()["detail"]
 
-    # 3. Cambio exitoso
     res_ok = client.post(
         "/api/auth/cambiar-password",
         headers={"Authorization": f"Bearer {token}"},
@@ -357,7 +329,6 @@ def test_cambio_password_cliente_y_bloqueo_clave_invalida(db_memoria: SQLServerD
     )
     assert res_ok.status_code == 200
 
-    # 4. Verificar login con la nueva contraseña
     res_relogin = client.post("/api/auth/login", json={"email": "cliente@patitasfelices.pe", "password": "nuevaClave123"})
     assert res_relogin.status_code == 200
 
@@ -382,14 +353,12 @@ def test_usuarios_eliminados_no_inician_sesion_en_bd_sincronizada() -> None:
     app = crear_app(db_adapter=db_real)
     client_real = TestClient(app)
 
-    # Admin existente sí puede iniciar sesión
     res_admin = client_real.post(
         "/api/auth/login",
         json={"email": "admin@patitasfelices.pe", "password": "admin123"},
     )
     assert res_admin.status_code == 200
 
-    # Doctor y Cliente demo no incluidos en producción deben recibir 401 Unauthorized
     for email_eliminado, pass_eliminado in (
         ("doctor@patitasfelices.pe", "doctor123"),
         ("cliente@patitasfelices.pe", "cliente123"),
@@ -467,7 +436,6 @@ def test_guest_checkout_no_secuestra_dueno_de_usuario_registrado():
     client = TestClient(app)
 
     prod = db.listar_productos()[0]
-    # Lucía (usuario_id=3 en demo seed) o registremos un cliente con DNI propio
     res_reg = client.post(
         "/api/auth/register",
         json={
@@ -481,7 +449,6 @@ def test_guest_checkout_no_secuestra_dueno_de_usuario_registrado():
     uid_carlos = res_reg.json()["usuario"]["id"]
     db.actualizar_documento_usuario(uid_carlos, "DNI", "71234567")
 
-    # Invitado sin token intenta comprar con ese mismo DNI
     res_guest = client.post(
         "/api/tienda/checkout",
         json={

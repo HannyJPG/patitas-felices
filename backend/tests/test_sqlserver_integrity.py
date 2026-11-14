@@ -41,7 +41,6 @@ def test_sqlserver_adapter_conexion_activa() -> None:
 
 def test_catalogo_productos_y_crm_finanzas_estructurados(client: TestClient) -> None:
     """Verifica que /api/productos no lance HTTP 500 y que /api/admin/crm incluya balance_financiero y ultimas_ventas."""
-    # 1. Catálogo de Farmacia e Insumos (/api/productos)
     res_prod = client.get("/api/productos")
     assert res_prod.status_code == 200
     datos_prod = res_prod.json()
@@ -49,7 +48,6 @@ def test_catalogo_productos_y_crm_finanzas_estructurados(client: TestClient) -> 
     assert len(datos_prod["productos"]) == datos_prod["total"]
     assert all(p.get("activo", 1) == 1 for p in datos_prod["productos"])
 
-    # 2. CRM y Finanzas (/api/admin/crm)
     res_login = client.post(
         "/api/auth/login",
         json={"email": "admin@patitasfelices.pe", "password": "admin123"},
@@ -83,7 +81,6 @@ def test_concordancia_estricta_16_tablas_sqlserver_y_erd() -> None:
     assert not (root_dir / "database" / "schema_mysql.sql").exists()
     assert not (root_dir / "database" / "schema_supabase_postgres.sql").exists()
 
-    # 1. Verificar tablas físicas reales en SQL Server (sys.tables)
     rows_tablas = db.conn.query_json(
         "SELECT t.name AS table_name, c.name AS col_name FROM sys.tables t JOIN sys.columns c ON c.object_id = t.object_id WHERE t.is_ms_shipped = 0"
     )
@@ -97,7 +94,6 @@ def test_concordancia_estricta_16_tablas_sqlserver_y_erd() -> None:
     for tabla_obsoleta in ("mascotas", "citas", "ventas", "solicitudes_mascota"):
         assert tabla_obsoleta not in tablas_sqlserver
 
-    # 2. Verificar eliminación estricta de columnas redundantes (3FN pura)
     columnas_prohibidas = {
         "usuarios": {"tipo_documento", "documento"},
         "Dueno": {"correo"},
@@ -111,7 +107,6 @@ def test_concordancia_estricta_16_tablas_sqlserver_y_erd() -> None:
         cols_actuales = mapa_columnas.get(tabla, set())
         assert cols_actuales.isdisjoint(cols_redundantes), f"La tabla {tabla} aún tiene columnas redundantes: {cols_actuales & cols_redundantes}"
 
-    # 3. Verificar concordancia exacta de tablas y columnas con prueba_1.erd.json
     erd_data = json.loads(erd_path.read_text(encoding="utf-8"))
     erd_tables = erd_data["collections"]["tableEntities"]
     erd_cols = erd_data["collections"]["tableColumnEntities"]
@@ -126,7 +121,6 @@ def test_concordancia_estricta_16_tablas_sqlserver_y_erd() -> None:
         cols_sql = mapa_columnas.get(t_name, set())
         assert cols_erd == cols_sql, f"Diferencia de columnas en {t_name}: ERD={cols_erd} vs SQL={cols_sql}"
 
-    # 4. Verificar que las 16 tablas tengan datos reales (>= 1 fila)
     datos_16 = db.obtener_todas_las_16_tablas()
     assert len(datos_16) == 16
     for nombre_tabla, filas in datos_16.items():
@@ -140,7 +134,6 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     """
     from backend.patterns.sqlserver_schema import SQLServerConnection
 
-    # Inicializar primera instancia de la aplicación (Sesión 1 del servidor)
     db_sesion1 = SQLServerDatabaseAdapter(
         "PatitasFelices_Test_DB", reset_tables=True, include_demo_users=False
     )
@@ -150,9 +143,6 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     email_prueba = "valeria.auditoria@patitasfelices.pe"
     password_prueba = "ClaveSegura#2026"
 
-    # =========================================================================
-    # PRUEBA 1: REGISTRO DESDE EL ENDPOINT DEL FORMULARIO DE REGISTRO
-    # =========================================================================
     res_reg = client_sesion1.post(
         "/api/auth/register",
         json={
@@ -170,9 +160,6 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     assert datos_reg["usuario"]["estado"] == "activo"
     assert "password_hash" not in datos_reg["usuario"]
 
-    # =========================================================================
-    # PRUEBA 2: CONSULTA SELECT DIRECTA EN SQL SERVER
-    # =========================================================================
     fila_sql = db_sesion1.conn.query_one(
         "SELECT id, nombre, email, password_hash, rol, estado, telefono FROM dbo.usuarios WHERE email = @email",
         params={"email": email_prueba},
@@ -194,9 +181,6 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     assert fila_dueno["nombres"] == "Valeria"
     assert fila_dueno["apellidos"] == "Quispe"
 
-    # =========================================================================
-    # PRUEBA 3: AUTENTICACIÓN (CERRAR SESIÓN E INICIAR SESIÓN)
-    # =========================================================================
     res_login = client_sesion1.post(
         "/api/auth/login",
         json={"email": email_prueba, "password": password_prueba},
@@ -211,15 +195,11 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     assert res_sesion.json()["usuario"]["email"] == email_prueba
     assert "password_hash" not in res_sesion.json()["usuario"]
 
-    # =========================================================================
-    # PRUEBA 4: PERSISTENCIA DESPUÉS DE CERRAR Y REINICIAR LA APLICACIÓN
-    # =========================================================================
     db_sesion1.conn.close()
     del client_sesion1
     del app_sesion1
     del db_sesion1
 
-    # Nueva instancia del servidor conectándose a SQL Server sin reiniciar tablas
     db_sesion2 = SQLServerDatabaseAdapter(
         "PatitasFelices_Test_DB", reset_tables=False, include_demo_users=False
     )
@@ -234,9 +214,6 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     assert res_login_post_reinicio.json()["usuario"]["nombre"] == "Valeria Quispe"
     assert res_login_post_reinicio.json()["usuario"]["rol"] == "cliente"
 
-    # =========================================================================
-    # PRUEBA 5: DUPLICADOS (MISMO CORREO ELECTRÓNICO)
-    # =========================================================================
     res_dup = client_sesion2.post(
         "/api/auth/register",
         json={
@@ -255,9 +232,6 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     )
     assert int(total_filas) == 1
 
-    # =========================================================================
-    # PRUEBA 6: CONTRASEÑA INCORRECTA
-    # =========================================================================
     res_bad_pass = client_sesion2.post(
         "/api/auth/login",
         json={"email": email_prueba, "password": "PasswordIncorrecta999"},
@@ -265,10 +239,6 @@ def test_auditoria_7_pruebas_obligatorias_persistencia_sqlserver() -> None:
     assert res_bad_pass.status_code == 401
     assert "incorrectos" in res_bad_pass.json()["detail"].lower()
 
-    # =========================================================================
-    # PRUEBA 7: CONEXIÓN CAÍDA / SQL SERVER NO DISPONIBLE
-    # =========================================================================
-    # Apuntar la conexión del adaptador a un puerto local sin SQL Server activo
     db_sesion2.conn = SQLServerConnection(server="localhost,65432", database="PatitasFelices_Test_DB")
     res_sin_sql = client_sesion2.post(
         "/api/auth/register",

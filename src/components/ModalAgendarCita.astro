@@ -1,11 +1,9 @@
 ---
-// ModalAgendarCita.astro - Modal global para agendar citas médicas veterinarias
 ---
 <div class="modal fade modal-patitas" id="modalAgendarCita" tabindex="-1" aria-labelledby="modalCitaTitulo" aria-hidden="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
     <div class="modal-content modal-patitas-content border shadow-sm">
       
-      <!-- Cabecera del modal -->
       <div class="modal-header border-bottom pb-2">
         <div>
           <h2 class="modal-title h5 fw-bold mb-0" id="modalCitaTitulo">Agendar Cita</h2>
@@ -18,12 +16,10 @@
           Completa los datos para separar tu turno con uno de nuestros 3 médicos veterinarios de guardia. Rango máximo permitido: 7 días calendario.
         </p>
 
-        <!-- Alertas dinámicas -->
         <div id="modal-cita-alerta-error" class="alert alert-danger py-2 px-3 small d-none" role="alert"></div>
         <div id="modal-cita-alerta-success" class="alert alert-success py-2 px-3 small d-none" role="alert"></div>
 
         <form id="form-modal-cita" novalidate>
-          <!-- Fila 1: Datos de Usuario Bloqueados (Nombre y DNI/RUC) -->
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <label for="modal-cita-propietario" class="form-label small fw-semibold">Propietario / Titular</label>
@@ -52,7 +48,6 @@
             </div>
           </div>
 
-          <!-- Fila 2: Mascota y Servicio -->
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -75,7 +70,6 @@
             </div>
           </div>
 
-          <!-- Fila 3: Fecha (Máx 7 días) y Hora (7 turnos fijos con control de 3 doctores) -->
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <label for="modal-cita-fecha" class="form-label small fw-semibold">Fecha de atención</label>
@@ -105,7 +99,6 @@
             </div>
           </div>
 
-          <!-- Fila 4: Teléfono y Motivo -->
           <div class="row g-3 mb-3">
             <div class="col-md-4">
               <label for="modal-cita-telefono" class="form-label small fw-semibold">Teléfono de contacto</label>
@@ -133,7 +126,6 @@
             </div>
           </div>
 
-          <!-- Botones de Acción -->
           <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top">
             <button 
               type="button" 

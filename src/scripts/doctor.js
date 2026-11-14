@@ -93,11 +93,9 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion } from "./api-c
                 card.append(cabecera, info, motivo);
             }
 
-            // Barra de acciones con 1 clic directo en la tarjeta
             const acciones = document.createElement("div");
             acciones.className = "d-flex flex-wrap gap-2 pt-2 border-top";
 
-            // Botón 1: Confirmar cita (si está pendiente)
             if (estadoTexto === "pendiente") {
                 const btnConfirmar = document.createElement("button");
                 btnConfirmar.type = "button";
@@ -123,7 +121,6 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion } from "./api-c
                 acciones.append(btnConfirmar);
             }
 
-            // Botón 2: Atender paciente y abrir ficha de evaluación médica
             const btnAtender = document.createElement("button");
             btnAtender.type = "button";
             btnAtender.className = "btn btn-primary btn-sm";
@@ -142,7 +139,6 @@ import { peticionApi, obtenerSesion, guardarSesion, cerrarSesion } from "./api-c
             });
             acciones.append(btnAtender);
 
-            // Botón 3: Cancelar cita
             if (estadoTexto !== "cancelada" && estadoTexto !== "atendida") {
                 const btnCancelar = document.createElement("button");
                 btnCancelar.type = "button";

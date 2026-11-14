@@ -5,7 +5,6 @@ export function enlaceWhatsApp(mensaje = "Hola, Patitas Felices. Quisiera consul
     return "https://wa.me/" + clinica.whatsapp + "?text=" + encodeURIComponent(mensaje);
 }
 
-/* Solo prepara el texto. La persona revisa y envía el mensaje desde WhatsApp. */
 export function mensajeSolicitudCita(valores) {
     const [anio, mes, dia] = valores.fecha.split("-");
     return [

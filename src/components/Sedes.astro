@@ -1,5 +1,4 @@
 ---
-// Sedes.astro - Selector de sedes con mapa y datos de ubicación
 const sedes = [
   {
     id: "miraflores",
@@ -49,7 +48,6 @@ const sedeInicial = sedes[0];
 <section id="sedes" class="section-spacing sedes-section" aria-labelledby="sedes-titulo">
   <div class="container">
     
-    <!-- Encabezado del apartado -->
     <div class="section-heading text-center">
       <h2 id="sedes-titulo" class="mt-1">Ubicación y horarios de atención</h2>
       <p class="text-muted">
@@ -57,7 +55,6 @@ const sedeInicial = sedes[0];
       </p>
     </div>
 
-    <!-- Selector de sedes sin emojis -->
     <div class="sedes-selector-nav d-flex flex-wrap justify-content-center gap-2 mb-4" role="tablist" aria-label="Seleccionar sede">
       {sedes.map((sede, idx) => (
         <button
@@ -83,10 +80,8 @@ const sedeInicial = sedes[0];
       ))}
     </div>
 
-    <!-- Contenido: Detalle de Dirección + Mapa -->
     <div class="row g-4 align-items-stretch">
       
-      <!-- Detalle de Dirección -->
       <div class="col-12 col-lg-5">
         <div class="sede-info-card h-100 p-4 rounded border d-flex flex-column justify-content-between">
           <div>
@@ -124,7 +119,6 @@ const sedeInicial = sedes[0];
             </div>
           </div>
 
-          <!-- Acciones -->
           <div class="d-flex flex-wrap gap-2 pt-2 border-top">
             <a 
               id="sede-enlace-maps" 
@@ -148,7 +142,6 @@ const sedeInicial = sedes[0];
         </div>
       </div>
 
-      <!-- Mapa de Google Maps -->
       <div class="col-12 col-lg-7">
         <div class="sede-map-container h-100 rounded border overflow-hidden position-relative">
           <iframe
@@ -170,7 +163,6 @@ const sedeInicial = sedes[0];
   </div>
 </section>
 
-<!-- Script para el selector de sedes -->
 <script>
   (() => {
     const botones = document.querySelectorAll(".btn-sede-tab");

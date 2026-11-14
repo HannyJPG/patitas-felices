@@ -26,10 +26,6 @@ class ErrorProcesoVenta(ValueError):
     """Excepción de negocio cuando el checkout no puede completarse (ej. stock insuficiente)."""
 
 
-# =============================================================================
-# SUBSISTEMA 1: GESTIÓN DE INVENTARIO Y STOCK
-# =============================================================================
-
 class SubsistemaInventario:
     """Subsistema encargado de verificar disponibilidad y descontar stock en la BD."""
 
@@ -104,10 +100,6 @@ class SubsistemaInventario:
                 )
 
 
-# =============================================================================
-# SUBSISTEMA 2: CÁLCULO TRIBUTARIO Y REGISTRO EN CRM (VENTAS / DETALLE_VENTAS)
-# =============================================================================
-
 class SubsistemaCRMTransacciones:
     """
     Subsistema financiero que calcula los importes de la Boleta Electrónica Peruana
@@ -171,10 +163,6 @@ class SubsistemaCRMTransacciones:
                 if intento == 2:
                     raise
 
-
-# =============================================================================
-# SUBSISTEMA 3: GENERADOR DE BOLETA PDF EN MEMORIA (PDF 1.4 NATIVO)
-# =============================================================================
 
 class SubsistemaGeneradorPDF:
     """
@@ -276,10 +264,6 @@ class SubsistemaGeneradorPDF:
         return bytes(pdf)
 
 
-# =============================================================================
-# FACHADA PRINCIPAL: TIENDAFACADE
-# =============================================================================
-
 class TiendaFacade:
     """
     Fachada principal para el Checkout de la Tienda Veterinaria.
@@ -308,13 +292,11 @@ class TiendaFacade:
         items: List[Dict[str, Any]],
         metodo_pago: str = "Tarjeta / Yape",
     ) -> Dict[str, Any]:
-        # 1. Subsistema de Inventario: validar disponibilidad y preparar ítems
         items_validados = self.inventario.validar_y_preparar_items(items)
         soporta_tx = bool(getattr(self.inventario.db, "soporta_stock_en_tx", False))
         if not soporta_tx:
             self.inventario.descontar_stock(items_validados)
 
-        # 2. Subsistema CRM: calcular subtotal/IGV/total y guardar venta + detalles (+ stock si es atómico)
         try:
             venta_registrada = self.crm.registrar_transaccion(
                 usuario_id=usuario_id,
@@ -329,11 +311,9 @@ class TiendaFacade:
                 self.inventario.restaurar_stock(items_validados)
             raise
 
-        # 3. Subsistema Generador PDF: crear la boleta PDF en memoria
         pdf_bytes = self.pdf_generator.construir_pdf_en_memoria(venta_registrada)
         pdf_base64 = base64.b64encode(pdf_bytes).decode("ascii")
 
-        # Integración adicional con WhatsAppAdapter para enviar constancia
         whatsapp_url = self.whatsapp.generar_enlace_boleta(
             numero_boleta=venta_registrada["numero_boleta"],
             cliente=venta_registrada["cliente_nombre"],

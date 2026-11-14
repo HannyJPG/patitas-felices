@@ -17,7 +17,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-# Cargar automáticamente variables de entorno desde .env si existe
 env_file = Path(__file__).resolve().parent.parent / ".env"
 if env_file.is_file():
     for line in env_file.read_text(encoding="utf-8").splitlines():
@@ -129,7 +128,6 @@ def crear_app(db_adapter: Optional[IDatabaseAdapter] = None) -> FastAPI:
     app.include_router(admin.router)
     app.include_router(bd.router)
 
-    # Servir el Frontend compilado de Astro (dist/) en el mismo puerto para Hosting Unificado y Modo App
     dist_dir = Path(__file__).resolve().parent.parent / "dist"
     if dist_dir.is_dir():
         app.mount("/", StaticFiles(directory=str(dist_dir), html=True), name="astro_frontend")

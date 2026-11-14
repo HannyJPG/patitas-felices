@@ -47,18 +47,15 @@ def test_tienda_facade_procesa_venta_descuenta_stock_y_genera_pdf(db_memoria: SQ
         metodo_pago="Yape",
     )
 
-    # 1. Verifica registro CRM y numeración de boleta
     venta = resultado["venta"]
     assert venta["numero_boleta"] == "B001-000001"
-    assert venta["total"] == 290.00  # 2 * 145.00
+    assert venta["total"] == 290.00
     assert round(venta["subtotal"] + venta["igv"], 2) == 290.00
 
-    # 2. Verifica descuento de stock en la BD
     producto_despues = db_memoria.obtener_producto(1)
     assert producto_despues is not None
     assert producto_despues["stock"] == stock_antes - 2
 
-    # 3. Verifica construcción del archivo PDF real en memoria
     pdf_bytes = base64.b64decode(resultado["pdf_base64"])
     assert pdf_bytes.startswith(b"%PDF-1.4")
     assert b"CLINICA VETERINARIA PATITAS FELICES" in pdf_bytes
@@ -82,14 +79,12 @@ def test_rbac_strategies_permisos_y_vistas() -> None:
     assert contexto.autorizar("actualizar_diagnostico") is False
     assert contexto.obtener_vista_y_permisos()["ruta_principal"] == "/tienda"
 
-    # Cambio dinámico de estrategia a Doctor
     contexto.cambiar_estrategia(DoctorRoleStrategy())
     assert contexto.autorizar("ver_agenda_doctor") is True
     assert contexto.autorizar("actualizar_diagnostico") is True
     assert contexto.autorizar("cambiar_estado_usuario") is False
     assert contexto.obtener_vista_y_permisos()["ruta_principal"] == "/doctor"
 
-    # Cambio dinámico de estrategia a Admin
     contexto.cambiar_estrategia(AdminRoleStrategy())
     assert contexto.autorizar("ver_crm_dashboard") is True
     assert contexto.autorizar("cambiar_estado_usuario") is True
@@ -99,24 +94,20 @@ def test_proxy_bloquea_token_ausente_y_usuario_inactivo(db_memoria: SQLServerDat
     controlador = RealClinicController(db_memoria)
     proxy = AuthSessionProxy(controlador, db_memoria)
 
-    # Sin token -> 401
     with pytest.raises(ErrorSeguridadProxy) as exc_sin_token:
         proxy.ejecutar_accion(None, "ver_crm_dashboard")
     assert exc_sin_token.value.codigo_http == 401
 
-    # Usuario 4 está 'inactivo' en el seed -> 403 aunque tenga JWT válido
     token_inactivo = generar_token_jwt({"sub": 4, "rol": "cliente"})
     with pytest.raises(ErrorSeguridadProxy, match="inactiva") as exc_inactivo:
         proxy.ejecutar_accion(token_inactivo, "ver_mis_citas")
     assert exc_inactivo.value.codigo_http == 403
 
-    # Cliente activo intentando entrar al CRM de Admin -> 403 por RBAC
     token_cliente = generar_token_jwt({"sub": 3, "rol": "cliente"})
     with pytest.raises(ErrorSeguridadProxy, match="Acceso denegado por RBAC") as exc_rbac:
         proxy.ejecutar_accion(token_cliente, "ver_crm_dashboard")
     assert exc_rbac.value.codigo_http == 403
 
-    # Admin activo accediendo al CRM -> permitido
     token_admin = generar_token_jwt({"sub": 1, "rol": "admin"})
     respuesta = proxy.ejecutar_accion(token_admin, "ver_crm_dashboard")
     assert "resumen" in respuesta

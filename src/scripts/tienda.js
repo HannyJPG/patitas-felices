@@ -17,7 +17,6 @@ import { peticionApi, obtenerSesion, guardarSesion, descargarPdfDesdeBase64 } fr
     const enlaceWhatsappBoleta = document.getElementById("enlace-whatsapp-boleta");
     const estadoCatalogo = document.getElementById("estado-catalogo");
 
-    // Elementos de identificación del cliente
     const inputNombre = document.getElementById("cliente-nombre");
     const selectTipoDoc = document.getElementById("tipo-documento");
     const inputDocumento = document.getElementById("cliente-documento");
@@ -66,7 +65,6 @@ import { peticionApi, obtenerSesion, guardarSesion, descargarPdfDesdeBase64 } fr
         if (avisoRequiereLogin) avisoRequiereLogin.classList.add("d-none");
         if (btnProcesarVenta) btnProcesarVenta.disabled = false;
 
-        // 1. Nombre bloqueado: siempre el nombre real de la cuenta
         if (inputNombre) {
             inputNombre.value = u.nombre || "Cliente Patitas Felices";
             inputNombre.readOnly = true;
@@ -74,7 +72,6 @@ import { peticionApi, obtenerSesion, guardarSesion, descargarPdfDesdeBase64 } fr
             inputNombre.style.cursor = "not-allowed";
         }
 
-        // 2. DNI o RUC
         const tieneDoc = Boolean(u.documento && String(u.documento).trim());
         if (tieneDoc) {
             const docVal = String(u.documento).trim();
@@ -273,7 +270,6 @@ import { peticionApi, obtenerSesion, guardarSesion, descargarPdfDesdeBase64 } fr
                 })
             });
 
-            // Si el usuario no tenía documento en su sesión, plasmarlo y bloquearlo
             if (respuesta.usuario_actualizado) {
                 const sActual = obtenerSesion();
                 if (sActual && sActual.usuario) {

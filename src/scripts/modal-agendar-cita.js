@@ -1,4 +1,3 @@
-/* modal-agendar-cita.js - Controlador global del Modal de Agendamiento de Citas */
 
 import { API_BASE_URL, obtenerSesion, peticionApi } from "./api-client.js";
 
@@ -78,7 +77,6 @@ export async function abrirModalAgendarCita(servicioId = null) {
   }
   const sesion = obtenerSesion();
 
-  // Si no ha iniciado sesión, abrir de inmediato el modal de login
   if (!sesion || !sesion.token) {
     sessionStorage.setItem("patitas_abrir_modal_cita", "true");
     if (servicioId) {
@@ -92,11 +90,9 @@ export async function abrirModalAgendarCita(servicioId = null) {
     return;
   }
 
-  // Si ya tiene sesión activa:
   const modalCitaEl = document.getElementById("modalAgendarCita");
   if (!modalCitaEl || !window.bootstrap?.Modal) return;
 
-  // Limpiar caché de mascotas previas para que siempre refleje la cuenta actual en SQL Server
   mascotasCargadas = [];
 
   const inputPropietario = document.getElementById("modal-cita-propietario");
@@ -113,7 +109,6 @@ export async function abrirModalAgendarCita(servicioId = null) {
   if (alertSuccess) alertSuccess.classList.add("d-none");
   if (btnSubmit) btnSubmit.disabled = false;
 
-  // Llenar campos no modificables del usuario de inmediato
   const usuario = sesion.usuario || {};
   if (inputPropietario) {
     inputPropietario.value = usuario.nombre || "Cliente Patitas Felices";
@@ -127,12 +122,10 @@ export async function abrirModalAgendarCita(servicioId = null) {
     inputTelefono.value = usuario.telefono || "";
   }
 
-  // Preseleccionar servicio si fue enviado
   if (selectServicio && servicioId) {
     selectServicio.value = servicioId;
   }
 
-  // Configurar restricciones de fecha (hoy hasta hoy + 7 días)
   const { hoy, maximo } = obtenerFechasPermitidas();
   if (inputFecha) {
     inputFecha.min = hoy;
@@ -142,11 +135,9 @@ export async function abrirModalAgendarCita(servicioId = null) {
     }
   }
 
-  // Mostrar el modal DE INMEDIATO (0ms de retardo visual)
   const modalCitaInstance = window.bootstrap.Modal.getOrCreateInstance(modalCitaEl);
   modalCitaInstance.show();
 
-  // Cargar mascotas y disponibilidad en paralelo sin bloquear la apertura del modal
   await Promise.all([
     cargarMascotasCliente(selectMascota),
     inputFecha?.value ? actualizarDisponibilidadHorarios(inputFecha.value) : Promise.resolve()
@@ -156,7 +147,6 @@ export async function abrirModalAgendarCita(servicioId = null) {
 async function cargarMascotasCliente(selectEl) {
   if (!selectEl) return;
 
-  // Si ya hay mascotas en caché, mostrarlas al instante mientras se sincroniza en segundo plano
   if (mascotasCargadas.length > 0) {
     renderizarOpcionesMascotas(selectEl, mascotasCargadas);
   } else {
@@ -216,7 +206,6 @@ async function actualizarDisponibilidadHorarios(fecha) {
   const ayudaCupos = document.getElementById("ayuda-cupos");
   if (!selectHora) return;
 
-  // Si existe en caché para esta fecha, mostrar de inmediato sin deshabilitar el control
   if (disponibilidadCache.has(fecha)) {
     renderizarHorariosEnSelect(selectHora, ayudaCupos, fecha, disponibilidadCache.get(fecha));
   } else {
@@ -240,7 +229,6 @@ async function actualizarDisponibilidadHorarios(fecha) {
 }
 
 function inicializarEventosModalCita() {
-  // 1. Interceptar clics en botones con data-abrir-modal-cita o enlaces a /agendar-cita
   document.addEventListener("click", e => {
     const btn = e.target.closest("[data-abrir-modal-cita], a[href^='/agendar-cita'], a[href='/agendar-cita']");
     if (!btn) return;
@@ -252,13 +240,11 @@ function inicializarEventosModalCita() {
         const urlObj = new URL(btn.getAttribute("href"), window.location.origin);
         servicio = urlObj.searchParams.get("servicio");
       } catch {
-        /* Ignorar error de parsing */
       }
     }
     abrirModalAgendarCita(servicio);
   });
 
-  // 2. Cambio en la fecha -> recargar disponibilidad de horarios
   const inputFecha = document.getElementById("modal-cita-fecha");
   if (inputFecha) {
     inputFecha.addEventListener("change", () => {
@@ -272,7 +258,6 @@ function inicializarEventosModalCita() {
     });
   }
 
-  // 3. Envío del formulario de agendar cita
   const formCita = document.getElementById("form-modal-cita");
   if (formCita) {
     formCita.addEventListener("submit", async e => {
@@ -350,7 +335,6 @@ function inicializarEventosModalCita() {
           alertSuccess.classList.remove("d-none");
         }
 
-        // Disparar evento global para que el perfil actualice la lista de citas si está abierto
         window.dispatchEvent(new CustomEvent("patitas:cita-creada", { detail: respuesta.cita }));
 
         setTimeout(() => {
@@ -369,7 +353,6 @@ function inicializarEventosModalCita() {
           alertError.textContent = msg;
           alertError.classList.remove("d-none");
         }
-        // Actualizar disponibilidad por si el cupo fue ganado
         if (fecha) {
           disponibilidadCache.delete(fecha);
           actualizarDisponibilidadHorarios(fecha);
@@ -383,7 +366,6 @@ function inicializarEventosModalCita() {
     });
   }
 
-  // 4. Botón de Consultar por WhatsApp
   const btnWhatsapp = document.getElementById("btn-cita-whatsapp");
   if (btnWhatsapp) {
     btnWhatsapp.addEventListener("click", () => {
@@ -413,7 +395,6 @@ function inicializarEventosModalCita() {
     });
   }
 
-  // 5. Soporte para abrir el modal si el usuario venía de un login pendiente y precarga en segundo plano
   const sesion = obtenerSesion();
   if (sesion?.token) {
     if (sessionStorage.getItem("patitas_abrir_modal_cita") === "true") {
@@ -424,7 +405,6 @@ function inicializarEventosModalCita() {
         abrirModalAgendarCita(servicioPendiente);
       }, 150);
     } else {
-      // Precargar mascotas y disponibilidad del día actual en segundo plano para apertura instantánea
       const { hoy } = obtenerFechasPermitidas();
       peticionApi("/api/cliente/mis-mascotas")
         .then(res => { mascotasCargadas = res.mascotas || []; })
@@ -437,7 +417,6 @@ function inicializarEventosModalCita() {
   }
 }
 
-// Inicializar al cargar el DOM
 if (typeof document !== "undefined") {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", inicializarEventosModalCita);
@@ -446,7 +425,6 @@ if (typeof document !== "undefined") {
   }
 }
 
-// Exponer en window para llamadas manuales si es necesario
 if (typeof window !== "undefined") {
   window.abrirModalAgendarCita = abrirModalAgendarCita;
 }

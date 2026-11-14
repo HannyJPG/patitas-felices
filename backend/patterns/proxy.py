@@ -32,10 +32,6 @@ class ErrorSeguridadProxy(PermissionError):
         self.codigo_http = codigo_http
 
 
-# =============================================================================
-# UTILIDADES JWT NATIVAS (HS256 ESTÁNDAR RFC 7519 SIN DEPENDENCIAS FRÁGILES)
-# =============================================================================
-
 def _b64url_encode(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
 
@@ -108,10 +104,6 @@ def verificar_token_jwt(token: str) -> Dict[str, Any]:
 
     return payload
 
-
-# =============================================================================
-# SUJETO E IMPLEMENTACIÓN DEL PATRÓN PROXY
-# =============================================================================
 
 class ISecureController(ABC):
     """Subject Interface: Contrato común entre el Controlador Real y el Proxy."""
@@ -617,10 +609,8 @@ class AuthSessionProxy(ISecureController):
     def ejecutar_accion(
         self, token: Optional[str], accion: str, parametros: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        # Paso 1 y 2: Verificar JWT y estado activo en base de datos
         usuario_bd = self.validar_sesion(token)
 
-        # Paso 3: Delegar en Strategy + RBAC la verificación del permiso según rol
         contexto_rbac = RBACContext(usuario_bd["rol"])
         if not contexto_rbac.autorizar(accion):
             raise ErrorSeguridadProxy(
@@ -628,7 +618,6 @@ class AuthSessionProxy(ISecureController):
                 403,
             )
 
-        # Paso 4: Pasar la solicitud al Controlador Real enriquecida con el usuario verificado
         parametros_seguros = dict(parametros or {})
         parametros_seguros["_usuario_autenticado"] = usuario_bd
         return self._real_controller.ejecutar_accion(token, accion, parametros_seguros)

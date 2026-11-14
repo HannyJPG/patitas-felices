@@ -92,9 +92,6 @@ class ResolverSolicitudMascotaRequest(BaseModel):
     accion: str = Field(..., examples=["aprobar", "rechazar"])
 
 
-# -----------------------------------------------------------------------------
-# MODELOS DE RESPUESTA (OPENAPI response_model)
-# -----------------------------------------------------------------------------
 class _FlexModel(BaseModel):
     model_config = ConfigDict(extra="allow")
 

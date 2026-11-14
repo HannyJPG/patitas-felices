@@ -21,7 +21,6 @@ function obtenerEtiquetaRol(datos) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Referencias en el Header
     const btnHeaderLogin = document.getElementById("btn-header-login");
     const contenedorPerfil = document.getElementById("dropdown-header-perfil");
     const avatarInicial = document.getElementById("header-avatar-inicial");
@@ -31,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const enlaceMiEspacio = document.getElementById("header-enlace-espacio");
     const btnCerrarSesion = document.getElementById("header-btn-cerrar-sesion");
 
-    // Referencias del Modal de Login y Registro
     const modalEl = document.getElementById("modalLogin");
     const tabLogin = document.getElementById("tab-modal-login");
     const tabRegistro = document.getElementById("tab-modal-registro");
@@ -51,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const spinnerSubmit = document.getElementById("spinner-modal-login");
     const textoSubmit = document.getElementById("texto-modal-submit");
 
-    // Referencias de Registro
     const formRegistro = document.getElementById("form-modal-registro");
     const inputRegNombre = document.getElementById("registro-input-nombre");
     const inputRegTelefono = document.getElementById("registro-input-telefono");
@@ -63,7 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const spinnerReg = document.getElementById("spinner-modal-registro");
     const textoReg = document.getElementById("texto-registro-submit");
 
-    // Conmutación de pestañas: Iniciar sesión / Registrarme
     function activarTab(tab) {
         if (tab === "registro") {
             tabRegistro?.classList.add("active");
@@ -97,14 +93,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function abrirModal() {
         if (!modalEl) return;
         
-        // Cargar email recordado si existe
         const emailRecordado = localStorage.getItem(STORAGE_REMEMBER_EMAIL);
         if (emailRecordado && inputEmail) {
             inputEmail.value = emailRecordado;
             if (checkRecordar) checkRecordar.checked = true;
         }
 
-        // Limpiar alertas previas
         if (alertError) alertError.classList.add("d-none");
         if (alertSuccess) alertSuccess.classList.add("d-none");
 
@@ -137,7 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const sesion = obtenerSesion();
 
         if (sesion && sesion.usuario) {
-            // Usuario con sesión activa: Mostrar "Ver perfil"
             if (btnHeaderLogin) btnHeaderLogin.classList.add("d-none");
             if (contenedorPerfil) contenedorPerfil.classList.remove("d-none");
 
@@ -152,13 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (menuRol) menuRol.textContent = etiquetaRol;
             if (enlaceMiEspacio) enlaceMiEspacio.setAttribute("href", rutaEspacio);
         } else {
-            // Sin sesión activa: Mostrar "Iniciar sesión"
             if (btnHeaderLogin) btnHeaderLogin.classList.remove("d-none");
             if (contenedorPerfil) contenedorPerfil.classList.add("d-none");
         }
     }
 
-    // Inicializar estado del Header y sincronizar sesión real con SQL Server
     actualizarEstadoHeader();
     const sesionInicial = obtenerSesion();
     if (sesionInicial?.token) {
@@ -181,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
-    // Eventos para abrir el modal desde cualquier botón con data-abrir-login
     document.querySelectorAll("[data-abrir-login]").forEach(elem => {
         elem.addEventListener("click", evento => {
             evento.preventDefault();
@@ -196,12 +186,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Cerrar sesión desde el menú de perfil del Header
     if (btnCerrarSesion) {
         btnCerrarSesion.addEventListener("click", () => {
             cerrarSesion();
             actualizarEstadoHeader();
-            // Si está en una vista privada (perfil, cliente, doctor o admin), redirigir al inicio
             const path = window.location.pathname;
             if (path.includes("/perfil") || path.includes("/cliente") || path.includes("/doctor") || path.includes("/admin")) {
                 window.location.assign("/");
@@ -209,7 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Alternar visibilidad de contraseña
     if (btnTogglePass && inputPassword) {
         btnTogglePass.addEventListener("click", () => {
             const esPassword = inputPassword.getAttribute("type") === "password";
@@ -218,14 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Botón de ayuda para "¿Recordar contraseña?"
     if (btnRecordarContrasena && panelRecordarAyuda) {
         btnRecordarContrasena.addEventListener("click", () => {
             panelRecordarAyuda.classList.toggle("d-none");
         });
     }
 
-    // Envío del formulario de autenticación
     if (formLogin) {
         formLogin.addEventListener("submit", async evento => {
             evento.preventDefault();
@@ -243,7 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Estado de carga
             if (btnSubmit) btnSubmit.disabled = true;
             if (spinnerSubmit) spinnerSubmit.classList.remove("d-none");
             if (textoSubmit) textoSubmit.textContent = "Comprobando credenciales...";
@@ -254,26 +238,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({ email, password })
                 });
 
-                // Guardar sesión activa
                 guardarSesion(respuesta);
 
-                // Manejo de opción "Recordar mis datos"
                 if (checkRecordar && checkRecordar.checked) {
                     localStorage.setItem(STORAGE_REMEMBER_EMAIL, email);
                 } else {
                     localStorage.removeItem(STORAGE_REMEMBER_EMAIL);
                 }
 
-                // Mostrar éxito
                 if (alertSuccess) {
                     alertSuccess.textContent = `¡Bienvenido(a), ${respuesta.usuario.nombre}! Redirigiendo a tu espacio...`;
                     alertSuccess.classList.remove("d-none");
                 }
 
-                // Actualizar Header en tiempo real
                 actualizarEstadoHeader();
 
-                // Si el usuario intentaba agendar una cita antes del login
                 if (sessionStorage.getItem("patitas_abrir_modal_cita") === "true") {
                     const rawServicio = sessionStorage.getItem("patitas_servicio_pendiente");
                     const servicioPendiente = (typeof rawServicio === "string" && !rawServicio.startsWith("[object") && rawServicio !== "null" && rawServicio !== "undefined") ? rawServicio : null;
@@ -290,7 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // Redirigir al espacio correspondiente al perfil
                 const rutaDestino = obtenerRutaEspacio(respuesta);
                 setTimeout(() => {
                     cerrarModal();
@@ -310,7 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Envío del formulario de registro de nuevo cliente
     if (formRegistro) {
         formRegistro.addEventListener("submit", async evento => {
             evento.preventDefault();
@@ -354,7 +331,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Estado de carga
             if (btnRegSubmit) btnRegSubmit.disabled = true;
             if (spinnerReg) spinnerReg.classList.remove("d-none");
             if (textoReg) textoReg.textContent = "Creando tu cuenta...";
@@ -369,20 +345,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error("No se pudo confirmar el registro de la cuenta en SQL Server.");
                 }
 
-                // Guardar sesión activa verificada desde SQL Server
                 guardarSesion(respuesta);
                 window.dispatchEvent(new CustomEvent("sesion_actualizada"));
 
-                // Actualizar Header en tiempo real en la página actual
                 actualizarEstadoHeader();
 
-                // Mensaje de éxito
                 if (alertRegSuccess) {
                     alertRegSuccess.textContent = `¡Cuenta creada exitosamente! Bienvenido(a), ${respuesta.usuario.nombre}.`;
                     alertRegSuccess.classList.remove("d-none");
                 }
 
-                // Si el usuario intentaba agendar una cita antes de registrarse
                 if (sessionStorage.getItem("patitas_abrir_modal_cita") === "true") {
                     const rawServicio = sessionStorage.getItem("patitas_servicio_pendiente");
                     const servicioPendiente = (typeof rawServicio === "string" && !rawServicio.startsWith("[object") && rawServicio !== "null" && rawServicio !== "undefined") ? rawServicio : null;
@@ -401,7 +373,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // El usuario permanece en la página actual; solo se cierra el modal
                 setTimeout(() => {
                     cerrarModal();
                     formRegistro.reset();
@@ -421,7 +392,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Soporte para abrir el modal si la URL contiene ?abrir_login=1
     const params = new URLSearchParams(window.location.search);
     if (params.get("abrir_login") === "1" && !obtenerSesion()) {
         abrirModal();

@@ -1,4 +1,3 @@
-/* Utilidades compartidas de UI para el frontend Astro */
 
 export function escapeHtml(valor) {
     return String(valor ?? "")

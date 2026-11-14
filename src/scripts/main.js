@@ -1,4 +1,3 @@
-/* Navegación, carrusel con avance automático suave cada 6s y registro de PWA. */
 (() => {
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {

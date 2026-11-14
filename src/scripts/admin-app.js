@@ -1,7 +1,3 @@
-/* ==========================================================================
-   LÓGICA DE LA APLICACIÓN ADMINISTRATIVA INDEPENDIENTE
-   Comparte autenticación y servicios con el backend existente sin duplicar usuarios.
-   ========================================================================== */
 
 import { API_BASE_URL, cerrarSesion, obtenerSesion, guardarSesion, peticionApi } from "./api-client.js";
 import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, formatearIsoLocal } from "./ui-utils.js";
@@ -169,7 +165,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         kpiStockSub.textContent = `${stockTotal} unidades en farmacia`;
         etiquetaTotalGrafico.textContent = `S/ ${sumaIngresos.toFixed(2)}`;
 
-        // Gráfico 1: Evolución de ventas por fecha
         const mapaPorFecha = new Map();
         for (const v of ventasPeriodo) {
             mapaPorFecha.set(v.fecha_iso, (mapaPorFecha.get(v.fecha_iso) || 0) + v.total);
@@ -201,7 +196,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
             }
         }
 
-        // Gráfico 2: Tráfico de visitas y consultas por fecha
         const traficoFiltrado = (datosBrutos.trafico || []).filter(t => estaEnRangoFechas(t.fecha));
         graficoTrafico.replaceChildren();
         const maxVisitas = Math.max(...traficoFiltrado.map(t => Number(t.visitas || 0)), 1);
@@ -221,7 +215,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
             graficoTrafico.append(col);
         }
 
-        // Actividad reciente
         listaActividad.replaceChildren();
         for (const c of citasPeriodo.slice(0, 5)) {
             const li = document.createElement("li");
@@ -340,7 +333,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         const inicio = (paginaActual - 1) * filasPorPagina;
         const filasPagina = filasOrdenadas.slice(inicio, inicio + filasPorPagina);
 
-        // Encabezados con ordenamiento interactivo
         theadExcel.replaceChildren();
         const trHead = document.createElement("tr");
         for (const col of columnas) {
@@ -361,7 +353,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         }
         theadExcel.append(trHead);
 
-        // Cuerpo de la tabla
         tbodyExcel.replaceChildren();
         if (!filasPagina.length) {
             const trVacio = document.createElement("tr");
@@ -397,7 +388,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
             }
         }
 
-        // Pie de tabla con totales calculados en vivo
         const sumaSubtotal = filasOrdenadas.reduce((acc, f) => acc + Number(f.subtotal || 0), 0);
         const sumaIgv = filasOrdenadas.reduce((acc, f) => acc + Number(f.igv || 0), 0);
         const sumaTotal = filasOrdenadas.reduce((acc, f) => acc + Number(f.total || 0), 0);
@@ -425,7 +415,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         }
         tfootExcel.append(trFoot);
 
-        // Controles de paginación
         const desdeReg = filasOrdenadas.length ? inicio + 1 : 0;
         const hastaReg = Math.min(inicio + filasPorPagina, filasOrdenadas.length);
         infoPaginacion.textContent = `Mostrando ${desdeReg}–${hastaReg} de ${filasOrdenadas.length} registro(s)`;
@@ -594,7 +583,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         }
     }
 
-    // Eventos de filtros y controles
     btnAplicarFechas.addEventListener("click", () => {
         paginaActual = 1;
         actualizarIndicadoresYGraficos();
@@ -660,7 +648,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
     btnExportarExcel.addEventListener("click", exportarAExcel);
     btnRecargar.addEventListener("click", cargarDatosPanel);
 
-    // Gestión de Alta de Personal (Doctor / Admin)
     const btnToggleAlta = document.getElementById("btn-toggle-alta-personal");
     const panelAlta = document.getElementById("panel-alta-personal");
     const formAlta = document.getElementById("form-alta-personal");
@@ -798,7 +785,6 @@ import { esModoDemoActivo, escapeHtml, extraerFechaIso, formatearFechaLatam, for
         });
     }
 
-    // Navegación lateral entre secciones
     document.querySelectorAll("[data-nav-target]").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll("[data-nav-target]").forEach(b => b.classList.remove("active"));

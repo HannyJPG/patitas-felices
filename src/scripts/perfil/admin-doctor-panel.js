@@ -367,7 +367,6 @@ export function crearControladorDoctorYAdmin({ mostrarAlertaGlobal, badgeContado
                 }
             }
         } catch {
-            // Ignorar
         }
     }
 

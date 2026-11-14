@@ -28,7 +28,6 @@ def test_cliente_crea_y_elimina_mascota(db_memoria: SQLServerDatabaseAdapter) ->
     app = crear_app(db_adapter=db_memoria)
     client = TestClient(app)
 
-    # Login como cliente existente
     res_login = client.post(
         "/api/auth/login",
         json={"email": "cliente@patitasfelices.pe", "password": "cliente123"},
@@ -36,7 +35,6 @@ def test_cliente_crea_y_elimina_mascota(db_memoria: SQLServerDatabaseAdapter) ->
     assert res_login.status_code == 200
     token_cliente = res_login.json()["token"]
 
-    # 1. Registrar una nueva mascota
     payload_mascota = {
         "nombre": "Boby",
         "especie": "Perro",
@@ -57,7 +55,6 @@ def test_cliente_crea_y_elimina_mascota(db_memoria: SQLServerDatabaseAdapter) ->
     assert mascota_creada["raza"] == "Beagle"
     mascota_id = mascota_creada["id"]
 
-    # 2. Consultar lista de mis mascotas
     res_listar = client.get(
         "/api/cliente/mis-mascotas",
         headers={"Authorization": f"Bearer {token_cliente}"},
@@ -66,7 +63,6 @@ def test_cliente_crea_y_elimina_mascota(db_memoria: SQLServerDatabaseAdapter) ->
     mascotas = res_listar.json()["mascotas"]
     assert any(m["id"] == mascota_id for m in mascotas)
 
-    # 3. Eliminar la mascota creada
     res_eliminar = client.delete(
         f"/api/cliente/mascotas/{mascota_id}",
         headers={"Authorization": f"Bearer {token_cliente}"},
@@ -78,7 +74,6 @@ def test_flujo_solicitud_mascota_cliente_y_aprobacion_admin(db_memoria: SQLServe
     app = crear_app(db_adapter=db_memoria)
     client = TestClient(app)
 
-    # Cliente crea mascota
     res_login_c = client.post("/api/auth/login", json={"email": "cliente@patitasfelices.pe", "password": "cliente123"})
     token_cliente = res_login_c.json()["token"]
 
@@ -90,7 +85,6 @@ def test_flujo_solicitud_mascota_cliente_y_aprobacion_admin(db_memoria: SQLServe
     assert res_m.status_code == 200
     mascota_id = res_m.json()["mascota"]["id"]
 
-    # Cliente solicita edición con justificación descriptiva
     payload_sol = {
         "tipo": "editar",
         "motivo": "Aumento de peso post-esterilización y cambio de dieta",
@@ -111,12 +105,10 @@ def test_flujo_solicitud_mascota_cliente_y_aprobacion_admin(db_memoria: SQLServe
     assert res_sol.status_code == 200
     solicitud_id = res_sol.json()["solicitud"]["id"]
 
-    # Cliente consulta sus solicitudes
     res_mis_sol = client.get("/api/cliente/solicitudes", headers={"Authorization": f"Bearer {token_cliente}"})
     assert res_mis_sol.status_code == 200
     assert any(s["id"] == solicitud_id for s in res_mis_sol.json()["solicitudes"])
 
-    # Admin consulta la bandeja de solicitudes y la aprueba
     res_login_a = client.post("/api/auth/login", json={"email": "admin@patitasfelices.pe", "password": "admin123"})
     token_admin = res_login_a.json()["token"]
 
@@ -131,7 +123,6 @@ def test_flujo_solicitud_mascota_cliente_y_aprobacion_admin(db_memoria: SQLServe
     assert res_aprobar.status_code == 200
     assert res_aprobar.json()["solicitud"]["estado"] == "aprobada"
 
-    # Verificar que los datos de Pelusa se actualizaron en la base de datos
     res_mascotas = client.get("/api/cliente/mis-mascotas", headers={"Authorization": f"Bearer {token_cliente}"})
     pelusa_actualizada = next(m for m in res_mascotas.json()["mascotas"] if m["id"] == mascota_id)
     assert pelusa_actualizada["peso_kg"] == 4.2
@@ -144,7 +135,6 @@ def test_cliente_consulta_sus_compras(db_memoria: SQLServerDatabaseAdapter) -> N
     res_login_c = client.post("/api/auth/login", json={"email": "cliente@patitasfelices.pe", "password": "cliente123"})
     token_cliente = res_login_c.json()["token"]
 
-    # Realizar compra
     client.post(
         "/api/tienda/checkout",
         headers={"Authorization": f"Bearer {token_cliente}"},
@@ -157,7 +147,6 @@ def test_cliente_consulta_sus_compras(db_memoria: SQLServerDatabaseAdapter) -> N
         },
     )
 
-    # Consultar mis compras
     res_compras = client.get("/api/cliente/mis-compras", headers={"Authorization": f"Bearer {token_cliente}"})
     assert res_compras.status_code == 200
     compras = res_compras.json()["compras"]
@@ -171,7 +160,6 @@ def test_disponibilidad_horarios_y_limite_tres_doctores(db_memoria: SQLServerDat
     fecha_test = "2026-11-01"
     hora_test = "08:30"
 
-    # 1. Consultar disponibilidad inicial (todos los cupos libres)
     res_disp = client.get(f"/api/citas/disponibilidad?fecha={fecha_test}")
     assert res_disp.status_code == 200
     horarios = res_disp.json()["horarios"]
@@ -179,7 +167,6 @@ def test_disponibilidad_horarios_y_limite_tres_doctores(db_memoria: SQLServerDat
     assert horarios[hora_test]["ocupados"] == 0
     assert horarios[hora_test]["disponible"] is True
 
-    # 2. Registrar 3 citas para llenar los 3 doctores de ese turno
     for i in range(1, 4):
         res_cita = client.post(
             "/api/citas",
@@ -195,14 +182,12 @@ def test_disponibilidad_horarios_y_limite_tres_doctores(db_memoria: SQLServerDat
         )
         assert res_cita.status_code == 200, res_cita.text
 
-    # 3. Verificar que la disponibilidad ahora marca 3 ocupados y no disponible
     res_disp_lleno = client.get(f"/api/citas/disponibilidad?fecha={fecha_test}")
     assert res_disp_lleno.status_code == 200
     horario_lleno = res_disp_lleno.json()["horarios"][hora_test]
     assert horario_lleno["ocupados"] == 3
     assert horario_lleno["disponible"] is False
 
-    # 4. Intentar registrar una 4ta cita en el mismo turno debe fallar con 400
     res_cita_cuarta = client.post(
         "/api/citas",
         json={
@@ -236,7 +221,6 @@ def test_registro_doctor_nombres_apellidos_sin_prefijo_y_persistencia_reinicio()
     token_admin = res_admin.json()["token"]
     headers_admin = {"Authorization": f"Bearer {token_admin}"}
 
-    # 1. Alta enviando solo nombre con prefijo honorífico 'Dr. Mario Ruiz'
     res_mario = client1.post(
         "/api/admin/personal",
         headers=headers_admin,
@@ -260,7 +244,6 @@ def test_registro_doctor_nombres_apellidos_sin_prefijo_y_persistencia_reinicio()
     assert vet_mario["nombres"] == "Mario"
     assert vet_mario["Apellidos"] == "Ruiz"
 
-    # 2. Alta con nombres y apellidos explícitos
     res_andrea = client1.post(
         "/api/admin/personal",
         headers=headers_admin,
@@ -284,20 +267,17 @@ def test_registro_doctor_nombres_apellidos_sin_prefijo_y_persistencia_reinicio()
     assert vet_andrea["nombres"] == "Andrea Sofía"
     assert vet_andrea["Apellidos"] == "Morales Vega"
 
-    # 3. Correo mal formado debe ser rechazado (400)
     res_bad_email = client1.post(
         "/api/auth/register",
         json={"nombre": "Test Invalido", "email": "@patitasfelices.pe", "password": "Clave123!"},
     )
     assert res_bad_email.status_code == 400
 
-    # 4. Doctor seed sin cuenta web no debe mostrar correo falso en listar_personal()
     personal = db1.listar_personal()
     carlos = next((p for p in personal if p.get("cmvp") == "CMVP-10452"), None)
     assert carlos is not None
     assert carlos["email"] == ""
 
-    # 5. Simular reinicio de aplicación sin borrar datos y verificar login + perfil propio
     db1.conn.close()
     db2 = SQLServerDatabaseAdapter("PatitasFelices_Test_DB", reset_tables=False)
     app2 = crear_app(db_adapter=db2)
@@ -348,7 +328,6 @@ def test_cita_confirmar_no_sobrescribe_diagnostico_existente(
     assert r1.status_code == 200
     assert r1.json()["cita"]["diagnostico"] == "Otitis externa leve"
 
-    # Ahora simular cambio de estado sin reenviar diagnóstico ni tratamiento
     r2 = client.patch(
         f"/api/doctor/citas/{cita_id}",
         headers=headers_doc,

@@ -212,7 +212,6 @@ export function crearControladorCliente({ mostrarAlertaGlobal, recargarPerfil })
             }
             contenedorMisSolicitudes.replaceChildren(ul);
         } catch {
-            // Silenciar si no aplica
         }
     }
 
